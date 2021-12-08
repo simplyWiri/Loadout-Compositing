@@ -33,9 +33,15 @@ namespace Inventory
         {
             apparelDefs ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsApparel).ToList();
             meleeWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsMeleeWeapon).ToList();
-            rangedWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsRangedWeapon).ToList();
+            rangedWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsRangedWeapon && def.PlayerAcquirable && def.category != ThingCategory.Building).ToList();
             medicinalDefs ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsMedicine || def.IsDrug).ToList();
-            items ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.category == ThingCategory.Item).ToList();
+            items ??= DefDatabase<ThingDef>.AllDefs
+                .Where(def => def.category == ThingCategory.Item)
+                .Except(apparelDefs)
+                .Except(meleeWeapons)
+                .Except(rangedWeapons)
+                .Except(medicinalDefs)
+                .ToList();
 
             closeOnClickedOutside = true;
             absorbInputAroundWindow = true;
@@ -45,10 +51,16 @@ namespace Inventory
         {
             apparelDefs ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsApparel).ToList();
             meleeWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsMeleeWeapon).ToList();
-            rangedWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsRangedWeapon).ToList();
+            rangedWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsRangedWeapon && def.PlayerAcquirable && def.category != ThingCategory.Building).ToList();
             medicinalDefs ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsMedicine || def.IsDrug).ToList();
-            items ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.category == ThingCategory.Item).ToList();
-
+            items ??= DefDatabase<ThingDef>.AllDefs
+                .Where(def => def.category == ThingCategory.Item)
+                .Except(apparelDefs)
+                .Except(meleeWeapons)
+                .Except(rangedWeapons)
+                .Except(medicinalDefs)
+                .ToList();
+            
             curTag = tag;
             closeOnClickedOutside = true;
             absorbInputAroundWindow = true;
@@ -194,7 +206,7 @@ namespace Inventory
                     break;
                 case State.Medicinal: DrawDefList(r, medicinalDefs);
                     break;
-                case State.Items: DrawDefList(r, medicinalDefs);
+                case State.Items: DrawDefList(r, items);
                     break;
             }
         }

@@ -163,7 +163,7 @@ namespace Inventory
             Widgets.DrawTextureFitted(pasteRect, TexButton.Paste, 1f);
             GUI.color = Color.white;
 
-            if ( Mouse.IsOver(pasteRect) && Input.GetMouseButton(0) )
+            if ( DraggableHelper<T>.curState != null && Mouse.IsOver(pasteRect) && Input.GetMouseButton(0) )
             {
                 currentItem = modifier(DraggableHelper<T>.curState, currentItem);
             }
