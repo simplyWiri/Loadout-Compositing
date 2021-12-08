@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	
+    <BillRepeatModeDef>
+		<defName>W_PerTag</defName>
+		<label>X per Tag</label>
+		<listOrder>30</listOrder>
+	</BillRepeatModeDef>
+
+</Defs>
