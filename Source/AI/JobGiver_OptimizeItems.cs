@@ -40,7 +40,7 @@ namespace Inventory {
                     var job = JobMaker.MakeJob(JobDefOf.TakeInventory, thing);
                     if (thing.def.category == ThingCategory.Item)
                     {
-                        var currentlyHeldAmount = items.Where(th => th.def == item.Def).Sum(t => t.stackCount);
+                        var currentlyHeldAmount = items.Where(th => th.def == item.Def && item.Filter.Allows(th)).Sum(t => t.stackCount);
                         job.count = Mathf.Min(item.Quantity - currentlyHeldAmount, MassUtility.CountToPickUpUntilOverEncumbered(pawn, thing));
                     }
                     job.checkEncumbrance = true;
