@@ -219,14 +219,14 @@ namespace Inventory
             widgetRow.Label("Preview Quality");
             GUI.color = Color.white;
 
-            if (widgetRow.ButtonIcon(Widgets.FillArrowTexLeft))
+            if (widgetRow.ButtonIcon(Textures.PlaceholderTex))
                 qualityPreview = qualityPreview.Previous();
 
             Text.Anchor = TextAnchor.MiddleCenter;
             widgetRow.Label(qualityPreview.GetLabel());
             Text.Anchor = TextAnchor.UpperLeft;
 
-            if (widgetRow.ButtonIcon(Widgets.FillArrowTexRight))
+            if (widgetRow.ButtonIcon(Textures.PlaceholderTex))
                 qualityPreview = qualityPreview.Next();
         }
 

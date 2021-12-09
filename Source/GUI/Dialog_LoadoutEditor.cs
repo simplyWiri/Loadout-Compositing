@@ -114,14 +114,14 @@ namespace Inventory
 
             var lhs = topPartRect.PopLeftPartPixels(GUIUtility.SPACED_HEIGHT);
             var rhs = topPartRect.PopRightPartPixels(GUIUtility.SPACED_HEIGHT);
-            if (Widgets.ButtonImageFitted(lhs, TexButton.IconBook) || Input.GetKeyDown(KeyCode.LeftArrow)) {
+            if (Widgets.ButtonImageFitted(lhs, Textures.PlaceholderTex) || Input.GetKeyDown(KeyCode.LeftArrow)) {
                 ThingSelectionUtility.SelectPreviousColonist();
                 this.Close();
                 Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), drawShowCoverage, drawPawnStats ));
                 return true;
             }
             TooltipHandler.TipRegion(lhs, Strings.SelectPrevious);
-            if (Widgets.ButtonImageFitted(rhs, TexButton.IconBook) || Input.GetKeyDown(KeyCode.RightArrow)) {
+            if (Widgets.ButtonImageFitted(rhs, Textures.PlaceholderTex) || Input.GetKeyDown(KeyCode.RightArrow)) {
                 ThingSelectionUtility.SelectNextColonist();
                 this.Close();
                 Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), drawShowCoverage, drawPawnStats));
@@ -332,7 +332,7 @@ namespace Inventory
                 var tagRect = viewRect.PopTopPartPixels(tagHeight );
                 height += tagHeight;
 
-                if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(GenUI.ListSpacing).TopPartPixels(GenUI.ListSpacing), TexButton.IconBook)) {
+                if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(GenUI.ListSpacing).TopPartPixels(GenUI.ListSpacing), Textures.PlaceholderTex)) {
                     Find.WindowStack.Add(new Dialog_TagEditor(tag));
                 }
                 
@@ -403,7 +403,7 @@ namespace Inventory
                 drawPawnStats = !drawPawnStats;
             }
             
-            if (Widgets.ButtonText(buttonRect.LeftHalf(), "Add Tag"))
+            if (Widgets.ButtonText(buttonRect.LeftHalf(), Strings.CreateNewTag))
             {
                 var opts = LoadoutManager.Tags.Except(tags).Select(tag =>
                     new FloatMenuOption(tag.name, () =>

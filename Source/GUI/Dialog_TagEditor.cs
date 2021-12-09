@@ -126,7 +126,7 @@ namespace Inventory
 
                 // Edit 
                 var constrainButton = itemRect.PopRightPartPixels(GUIUtility.SPACED_HEIGHT * 1.5f);
-                if (Widgets.ButtonImageFitted(constrainButton.ContractedBy(1f), TexButton.OpenStatsReport))
+                if (Widgets.ButtonImageFitted(constrainButton.ContractedBy(1f), Textures.PlaceholderTex))
                     Find.WindowStack.Add(new Dialog_ItemSpecifier(item.Filter));
                 TooltipHandler.TipRegion(constrainButton, Strings.SpecifyElementsToolTip);
 
@@ -180,11 +180,11 @@ namespace Inventory
 
             r.AdjVertBy(GUIUtility.DEFAULT_HEIGHT);
 
-            DrawOptionButton(Widgets.PlaceholderIconTex, "Apparel", State.Apparel);
-            DrawOptionButton(Widgets.PlaceholderIconTex, "Melee", State.Melee);
-            DrawOptionButton(Widgets.PlaceholderIconTex, "Ranged", State.Ranged);
-            DrawOptionButton(Widgets.PlaceholderIconTex, "Medicine", State.Medicinal);
-            DrawOptionButton(Widgets.PlaceholderIconTex, "Items", State.Items);
+            DrawOptionButton(Textures.PlaceholderTex, "Apparel", State.Apparel);
+            DrawOptionButton(Textures.PlaceholderTex, "Melee", State.Melee);
+            DrawOptionButton(Textures.PlaceholderTex, "Ranged", State.Ranged);
+            DrawOptionButton(Textures.PlaceholderTex, "Medicine", State.Medicinal);
+            DrawOptionButton(Textures.PlaceholderTex, "Items", State.Items);
 
             switch (curState)
             {
