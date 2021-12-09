@@ -5,6 +5,7 @@ using Verse;
 
 namespace Inventory
 {
+    // triggers code to run after defs have been loaded.
     [HarmonyPatch(typeof(Verse.Messages), nameof(Verse.Messages.Notify_LoadedLevelChanged))]
     public class Notify_LoadedLevelChanged
     {
@@ -21,6 +22,8 @@ namespace Inventory
 
                 race.comps.Add(new CompProperties(typeof(LoadoutComponent)));
             }
+
+            Utility.CalculateDefLists();
 
             patchedDefs = true;
         }

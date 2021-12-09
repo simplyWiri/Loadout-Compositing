@@ -1,11 +1,35 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
+using UnityEngine;
 using Verse;
 
 namespace Inventory
 {
     public static class Utility
     {
+        public static List<ThingDef> apparelDefs = null;
+        public static List<ThingDef> meleeWeapons = null;
+        public static List<ThingDef> rangedWeapons = null;
+        public static List<ThingDef> medicinalDefs = null;
+        public static List<ThingDef> items = null;
+
+        public static void CalculateDefLists()
+        {
+            apparelDefs ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsApparel).ToList();
+            meleeWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsMeleeWeapon).ToList();
+            rangedWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsRangedWeapon && def.PlayerAcquirable && def.category != ThingCategory.Building).ToList();
+            medicinalDefs ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsMedicine || def.IsDrug).ToList();
+            items ??= DefDatabase<ThingDef>.AllDefs
+                .Where(def => def.category == ThingCategory.Item)
+                .Except(apparelDefs)
+                .Except(meleeWeapons)
+                .Except(rangedWeapons)
+                .Except(medicinalDefs)
+                .ToList();
+        }
+        
         public static QualityCategory Next(this QualityCategory qc)
         {
             switch (qc)
@@ -49,5 +73,26 @@ namespace Inventory
             
             return thing;
         }
+
+        public static float HypotheticalEncumberancePercent(Pawn p, List<Item> items)
+        {
+            return Mathf.Clamp01(HypotheticalUnboundedEncumberancePercent(p, items));
+        }
+
+        public static float HypotheticalUnboundedEncumberancePercent(Pawn p, List<Item> items)
+        {
+            return HypotheticalGearAndInventoryMass(p, items) / MassUtility.Capacity(p);
+        }
+        
+        public static float HypotheticalGearAndInventoryMass(Pawn p, List<Item> items)
+        {
+            float mass = 0f;
+            foreach (var item in items) {
+                var thing = item.MakeDummyThingNoId();
+                mass += (thing.GetStatValue(StatDefOf.Mass) * item.Quantity);
+            }
+            return mass;
+        }
+        
     }
 }

@@ -16,6 +16,7 @@ namespace Inventory
         }
 
         public bool Satisfied => satisfied;
+        public IEnumerable<Item> AllItems => tags.SelectMany(t => t.requiredItems);
 
         public IEnumerable<Tag> TagsMatching(Predicate<Item> predicate)
         {
@@ -33,7 +34,7 @@ namespace Inventory
 
         public IEnumerable<Item> DesiredItems(List<Thing> heldThings)
         {
-            var desiredThings = tags.SelectMany(t => t.requiredItems.Where(t => !t.Def.IsApparel));
+            var desiredThings = AllItems.Where(t => !t.Def.IsApparel);
             foreach (var thing in desiredThings)
             {
                 if (heldThings.Any(t => t.def == thing.Def && thing.Filter.Allows(t) && t.stackCount >= thing.Quantity))

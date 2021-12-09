@@ -159,7 +159,7 @@ namespace Inventory
         public static IEnumerable<ThingDef> ApparelCanFitOnBody(BodyDef body, List<ThingDef> wornApparel)
         {
             var slotsUsed = new ApparelSlots(body, wornApparel);
-            foreach (var def in DefDatabase<ThingDef>.AllDefs.Where(t => t.IsApparel && !slotsUsed.Intersects(new ApparelSlots(body, t))))
+            foreach (var def in Utility.apparelDefs.Where(t => t.IsApparel && !slotsUsed.Intersects(new ApparelSlots(body, t))))
                 yield return def;
         }
 
@@ -232,7 +232,7 @@ namespace Inventory
             // exists in the def dictionary (not every combination of BodyPartGroupDef
             // and ApparelLayerDef will be exhausted by the apparels in the dictionary)
             
-            var apparelDefs = DefDatabase<ThingDef>.AllDefs.Where(d => d.IsApparel);
+            var apparelDefs = Utility.apparelDefs;
             var bodyPartToLayersCovered = new Dictionary<BodyPartGroupDef, HashSet<ApparelLayerDef>>();
 
             foreach (var apparel in apparelDefs)

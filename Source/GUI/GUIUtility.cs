@@ -8,6 +8,8 @@ namespace Inventory
     [HotSwappable]
     public static class GUIUtility
     {
+        public static readonly Texture ValvetTex = SolidColorMaterials.NewSolidColorTexture(GenColor.FromHex("cc1a00"));
+        public static readonly Texture RWPrimaryTex = SolidColorMaterials.NewSolidColorTexture(GenColor.FromHex("6a512e"));
         public const float DEFAULT_HEIGHT = 22f;
         public const float SPACED_HEIGHT = 28f;
 
@@ -167,6 +169,27 @@ namespace Inventory
             {
                 currentItem = modifier(DraggableHelper<T>.curState, currentItem);
             }
+        }
+        
+        public static void BarWithOverlay(Rect rect, float fillPercent, Texture2D fillTex, string label, string overlayText, string tooltip)
+        {
+            Text.Anchor = TextAnchor.MiddleLeft;
+
+            Rect labelRect = new Rect(rect)
+            {
+                width = Text.CalcSize(label).x,
+            };
+            Widgets.Label(labelRect, label);
+
+            rect.xMin += labelRect.width + 12f;
+            Widgets.FillableBar(rect, fillPercent, fillTex, BaseContent.BlackTex, false);
+
+            if (Mouse.IsOver(rect) && !tooltip.NullOrEmpty())
+                TooltipHandler.TipRegion(rect, tooltip);
+
+            Text.Anchor = TextAnchor.MiddleCenter;
+            Widgets.Label(rect, overlayText);
+            Text.Anchor = TextAnchor.UpperLeft;
         }
     }
 

@@ -10,7 +10,6 @@ namespace Inventory
     // the base type, contains a `ThingDef`
     public class Item : IExposable
     {
-        
         private ThingDef def;
         // should only be directly accessed in `Dialog_TagEditor.cs`
         internal Filter filter;
@@ -53,6 +52,11 @@ namespace Inventory
             }
 
             return stringBuilder.ToString();
+        }
+
+        public Thing MakeDummyThingNoId()
+        {
+            return Utility.MakeThingWithoutID(Def, RandomStuff, RandomQuality);
         }
 
         public Item()

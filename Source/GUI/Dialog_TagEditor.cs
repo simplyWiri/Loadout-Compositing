@@ -16,11 +16,7 @@ namespace Inventory
             Apparel, Melee, Ranged, Medicinal, Items
         }
         
-        private static List<ThingDef> apparelDefs = null;
-        private static List<ThingDef> meleeWeapons = null;
-        private static List<ThingDef> rangedWeapons = null;
-        private static List<ThingDef> medicinalDefs = null;
-        private static List<ThingDef> items = null;
+
         private Vector2 curScroll = Vector2.zero;
         private Vector2 curItemScroll = Vector2.zero;
 
@@ -33,36 +29,12 @@ namespace Inventory
 
         public Dialog_TagEditor()
         {
-            apparelDefs ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsApparel).ToList();
-            meleeWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsMeleeWeapon).ToList();
-            rangedWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsRangedWeapon && def.PlayerAcquirable && def.category != ThingCategory.Building).ToList();
-            medicinalDefs ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsMedicine || def.IsDrug).ToList();
-            items ??= DefDatabase<ThingDef>.AllDefs
-                .Where(def => def.category == ThingCategory.Item)
-                .Except(apparelDefs)
-                .Except(meleeWeapons)
-                .Except(rangedWeapons)
-                .Except(medicinalDefs)
-                .ToList();
-
             closeOnClickedOutside = true;
             absorbInputAroundWindow = true;
             doCloseX = true;
         }   
         public Dialog_TagEditor(Tag tag)
         {
-            apparelDefs ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsApparel).ToList();
-            meleeWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsMeleeWeapon).ToList();
-            rangedWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsRangedWeapon && def.PlayerAcquirable && def.category != ThingCategory.Building).ToList();
-            medicinalDefs ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsMedicine || def.IsDrug).ToList();
-            items ??= DefDatabase<ThingDef>.AllDefs
-                .Where(def => def.category == ThingCategory.Item)
-                .Except(apparelDefs)
-                .Except(meleeWeapons)
-                .Except(rangedWeapons)
-                .Except(medicinalDefs)
-                .ToList();
-            
             curTag = tag;
             closeOnClickedOutside = true;
             absorbInputAroundWindow = true;
@@ -213,21 +185,22 @@ namespace Inventory
             {
                 case State.Apparel: DrawDefList(r, ApparelUtility.ApparelCanFitOnBody(BodyDefOf.Human, curTag.requiredItems.Select(s => s.Def).Where(def => def.IsApparel).ToList()).ToList());
                     break;
-                case State.Melee: DrawDefList(r, meleeWeapons.ToList());
+                case State.Melee: DrawDefList(r, Utility.meleeWeapons);
                     break;
-                case State.Ranged: DrawDefList(r, rangedWeapons.ToList());
+                case State.Ranged: DrawDefList(r, Utility.rangedWeapons);
                     break;
-                case State.Medicinal: DrawDefList(r, medicinalDefs.ToList());
+                case State.Medicinal: DrawDefList(r, Utility.medicinalDefs);
                     break;
-                case State.Items: DrawDefList(r, items.ToList());
+                case State.Items: DrawDefList(r, Utility.items);
                     break;
             }
         }
 
-        private void DrawDefList(Rect r, List<ThingDef> defs)
+        private void DrawDefList(Rect r, IReadOnlyList<ThingDef> defList)
         {
             var itms = curTag.requiredItems.Select(it => it.Def).ToHashSet();
-            defs.RemoveAll(t => itms.Contains(t));
+            List<ThingDef> defs = defList.Where(t => !itms.Contains(t)).ToList();
+
             if (defFilter != string.Empty) {
                 var filter = defFilter.ToLower();
                 defs.RemoveAll(td => !td.LabelCap.ToString().ToLowerInvariant().Contains(filter));
@@ -257,14 +230,17 @@ namespace Inventory
 
                 Widgets.DefIcon(descRect.LeftPart(.15f), def);
                 Widgets.Label(descRect.RightPart(.85f), def.LabelCap);
+                
                 if (Widgets.ButtonInvisible(descRect)) {
+                    AddDefToTag(def);
+                }
+
+                if (Widgets.ButtonImageFitted(rect.RightPart(0.15f).ContractedBy(2f), TexButton.Info))
+                {
                     var stuff = def.MadeFromStuff ? GenStuff.AllowedStuffsFor(def).First() : null;
                     Thing thing = Utility.MakeThingWithoutID(def, stuff, QualityCategory.Normal);
                     Find.WindowStack.Add(new Dialog_InfoCard(thing));
                 }
-
-                if (Widgets.ButtonImageFitted(rect.RightPart(0.15f), Widgets.CheckboxOnTex))
-                    AddDefToTag(def);
 
                 if (i % 2 == 0)
                     Widgets.DrawLightHighlight(rect);

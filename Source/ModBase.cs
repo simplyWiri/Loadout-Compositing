@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using HarmonyLib;
+using UnityEngine;
 using Verse;
 
 namespace Inventory
@@ -26,11 +27,22 @@ namespace Inventory
     
     public class ModBase : Mod
     {
+        public static Settings settings;
+        
         public ModBase(ModContentPack content) : base(content)
         {
             new Harmony("wiri.is.stupid").PatchAll();
-            
-            
+            settings = GetSettings<Settings>();
         }
+
+        // public override void DoSettingsWindowContents(Rect inRect)
+        // {
+        //     settings.DoSettingsWindow(inRect);
+        // }
+        //
+        // public override string SettingsCategory()
+        // {
+        //     return "Compositable Loadouts";
+        // }
     }
 }

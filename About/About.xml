@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
-	<name>Inventory (wip)</name>
+	<name>Compositable Loadouts</name>
 	<author>Wiri</author>
-	<packageId>Wiri.inv</packageId>
+	<packageId>Wiri.compositableloadouts</packageId>
 	<supportedVersions>
 		<li>1.3</li>
 	</supportedVersions>
-	<description>Inventory management, bill handling, etc...</description>
+	<description>Mix and match multiple 'tags' on a single pawn, allowing for composition of loadouts. Ever wondered why you couldn't just call your Planter/Melee pawn just that, and instead had to make one loadout with items from both in it? - No longer.</description>
 	
 	<modDependencies>
 		<li>
