@@ -17,7 +17,6 @@ namespace Inventory
         private static MethodInfo drawConfig = AccessTools.Method(typeof(BillConfig), nameof(BillConfig.DrawConfig));
         private static FieldInfo repeatMode = AccessTools.Field(typeof(Bill_Production), nameof(Bill_Production.repeatMode));
         private static FieldInfo w_PerTag = AccessTools.Field(typeof(Inventory.BillRepeatModeDefOf), nameof(BillRepeatModeDefOf.W_PerTag));
-        private static string targetCountEditBuffer = string.Empty;
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
@@ -32,6 +31,7 @@ namespace Inventory
                     yield return new CodeInstruction(OpCodes.Ldfld, repeatMode);
                     yield return new CodeInstruction(OpCodes.Ldsfld, w_PerTag);
                     yield return new CodeInstruction(OpCodes.Bne_Un, label);
+                    yield return new CodeInstruction(OpCodes.Ldarg_0);
                     yield return insts[i + 1];
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
                     yield return new CodeInstruction(OpCodes.Ldfld, bill);
@@ -45,11 +45,11 @@ namespace Inventory
         }
 
         // todo: move to GUI/ and clean up
-        public static void DrawConfig(Listing_Standard standard, Bill_Production bill)
+        public static void DrawConfig(Dialog_BillConfig window, Listing_Standard standard, Bill_Production bill)
         {
 	        Widgets.Dropdown(standard.GetRect(30f), bill, 
 		        LoadoutManager.TagFor, GenerateTagOptions, LoadoutManager.TagFor(bill) == null ? "Pick tag to Target" : $"Change tag from: {LoadoutManager.TagFor(bill).name}");
-	        var text = $"{"CurrentlyHave".Translate()}: {bill.recipe.WorkerCounter.CountProducts(bill)} / {bill.targetCount.ToString()}";
+	        var text = $"{"CurrentlyHave".Translate()}: {bill.recipe.WorkerCounter.CountProducts(bill)} / {bill.targetCount * LoadoutManager.ColonistCountFor(bill)}";
 	        var str = bill.recipe.WorkerCounter.ProductsDescription(bill);
 	        if (!str.NullOrEmpty())
 	        {
@@ -58,7 +58,7 @@ namespace Inventory
 
 	        standard.Label(text);
 	        int targetCount = bill.targetCount;
-	        standard.IntEntry(ref bill.targetCount, ref targetCountEditBuffer, bill.recipe.targetCountAdjustment);
+	        standard.IntEntry(ref bill.targetCount, ref window.targetCountEditBuffer, bill.recipe.targetCountAdjustment);
 	        bill.unpauseWhenYouHave = Mathf.Max(0, bill.unpauseWhenYouHave + (bill.targetCount - targetCount));
 	        var producedThingDef = bill.recipe.ProducedThingDef;
 	        if (producedThingDef == null) return;
