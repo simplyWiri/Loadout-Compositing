@@ -155,7 +155,6 @@ namespace Inventory
     public static class ApparelUtility
     {
         private static Dictionary<BodyDef, BodyPartGroup> bodyPartGroups = new Dictionary<BodyDef, BodyPartGroup>();
-        private static BodyPartGroup humanlike = null;
 
         public static IEnumerable<ThingDef> ApparelCanFitOnBody(BodyDef body, List<ThingDef> wornApparel)
         {

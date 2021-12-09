@@ -48,7 +48,6 @@ namespace Inventory
 
         public static Filter CopyFrom(Filter from, Filter to)
         {
-            Log.Message($"{from.Thing.defName} {to.Thing.defName}" );
             var newFilter = new Filter(to.Thing);
             if (newFilter.Thing.MadeFromStuff && from.Thing.MadeFromStuff)
             {

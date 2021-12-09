@@ -22,6 +22,8 @@ namespace Inventory
         private static List<ThingDef> medicinalDefs = null;
         private static List<ThingDef> items = null;
         private Vector2 curScroll = Vector2.zero;
+        private Vector2 curItemScroll = Vector2.zero;
+
         private State curState = State.Apparel;
         private string defFilter = string.Empty;
 
@@ -69,7 +71,7 @@ namespace Inventory
 
         public void Draw(Rect rect)
         {
-            DrawTagEditor(rect.LeftPart(.65f));
+            DrawTagEditor(rect.LeftPart(.65f).TopPart(0.95f));
             if(curTag != null)
                 DrawItemColumns(rect.RightPart(.35f));
         }
@@ -98,12 +100,17 @@ namespace Inventory
             Widgets.ListSeparator(ref r.m_YMin, r.width, $"Modify {curTag.name}");
             
             // [ Tag Name ] [ Edit Name ] 
-            var rect = r.TopPartPixels(GUIUtility.DEFAULT_HEIGHT);
+            var rect = r.PopTopPartPixels(GUIUtility.DEFAULT_HEIGHT);
 
             GUIUtility.InputField(rect, "Change Tag Name", ref curTag.name);
             curTag.name ??= " ";
             
-            rect.AdjVertBy(GUIUtility.DEFAULT_HEIGHT);
+            var viewRect = new Rect(r.x, r.y, rect.width - 16f, (curTag.requiredItems.Count * GUIUtility.SPACED_HEIGHT * 2));
+            Widgets.BeginScrollView(r, ref curItemScroll, viewRect);
+
+            var visibilityRect = r;
+            visibilityRect.y += curItemScroll.y;
+            var baseRect = viewRect;
             
             List<Item> toRemove = new List<Item>();
             // List each item in the currently required items
@@ -111,8 +118,11 @@ namespace Inventory
             foreach (var item in curTag.requiredItems)
             {
                 var def = item.Def;
-                var itemRect = new Rect(rect.x, rect.y, rect.width, GUIUtility.SPACED_HEIGHT * 2);
-                rect.AdjVertBy(GUIUtility.SPACED_HEIGHT * 2);
+                var itemRect = baseRect.PopTopPartPixels(GUIUtility.SPACED_HEIGHT * 2);
+
+                if (!itemRect.Overlaps(visibilityRect)) {
+                    continue;
+                }
 
                 // Info
                 Rect infoRect = itemRect.PopLeftPartPixels(GenUI.SmallIconSize);
@@ -164,6 +174,9 @@ namespace Inventory
                 Widgets.Label(itemRect, item.Label);
                 Text.Anchor = TextAnchor.UpperLeft;
             }
+            
+            Widgets.EndScrollView();
+
 
             foreach (var item in toRemove)
             {
@@ -216,7 +229,8 @@ namespace Inventory
             var itms = curTag.requiredItems.Select(it => it.Def).ToHashSet();
             defs.RemoveAll(t => itms.Contains(t));
             if (defFilter != string.Empty) {
-                defs.RemoveAll(td => !td.defName.Contains(defFilter));
+                var filter = defFilter.ToLower();
+                defs.RemoveAll(td => !td.LabelCap.ToString().ToLowerInvariant().Contains(filter));
             }
             
             GUIUtility.InputField(r.PopTopPartPixels(GUIUtility.SPACED_HEIGHT).ContractedBy(2f), "Def List Filter", ref defFilter);
