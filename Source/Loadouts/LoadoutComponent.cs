@@ -13,6 +13,9 @@ namespace Inventory
         public override void PostExposeData()
         {
             Scribe_Deep.Look(ref loadout, nameof(loadout));
+
+            // for adding to an existing save
+            loadout ??= new Loadout();
         }
     }
 }

@@ -200,13 +200,13 @@ namespace Inventory
             {
                 case State.Apparel: DrawDefList(r, ApparelUtility.ApparelCanFitOnBody(BodyDefOf.Human, curTag.requiredItems.Select(s => s.Def).Where(def => def.IsApparel).ToList()).ToList());
                     break;
-                case State.Melee: DrawDefList(r, meleeWeapons);
+                case State.Melee: DrawDefList(r, meleeWeapons.ToList());
                     break;
-                case State.Ranged: DrawDefList(r, rangedWeapons);
+                case State.Ranged: DrawDefList(r, rangedWeapons.ToList());
                     break;
-                case State.Medicinal: DrawDefList(r, medicinalDefs);
+                case State.Medicinal: DrawDefList(r, medicinalDefs.ToList());
                     break;
-                case State.Items: DrawDefList(r, items);
+                case State.Items: DrawDefList(r, items.ToList());
                     break;
             }
         }

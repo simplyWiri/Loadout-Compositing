@@ -47,8 +47,7 @@ namespace Inventory
         // todo: move to GUI/ and clean up
         public static void DrawConfig(Dialog_BillConfig window, Listing_Standard standard, Bill_Production bill)
         {
-	        Widgets.Dropdown(standard.GetRect(30f), bill, 
-		        LoadoutManager.TagFor, GenerateTagOptions, LoadoutManager.TagFor(bill) == null ? "Pick tag to Target" : $"Change tag from: {LoadoutManager.TagFor(bill).name}");
+	        Widgets.Dropdown(standard.GetRect(30f), bill, LoadoutManager.TagFor, GenerateTagOptions, LoadoutManager.TagFor(bill) == null ? "Pick tag to Target" : $"Change tag from: {LoadoutManager.TagFor(bill).name}");
 	        var text = $"{"CurrentlyHave".Translate()}: {bill.recipe.WorkerCounter.CountProducts(bill)} / {bill.targetCount * LoadoutManager.ColonistCountFor(bill)}";
 	        var str = bill.recipe.WorkerCounter.ProductsDescription(bill);
 	        if (!str.NullOrEmpty())
