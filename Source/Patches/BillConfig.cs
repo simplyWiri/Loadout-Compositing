@@ -47,7 +47,7 @@ namespace Inventory
         // todo: move to GUI/ and clean up
         public static void DrawConfig(Dialog_BillConfig window, Listing_Standard standard, Bill_Production bill)
         {
-	        Widgets.Dropdown(standard.GetRect(30f), bill, LoadoutManager.TagFor, GenerateTagOptions, LoadoutManager.TagFor(bill) == null ? "Pick tag to Target" : $"Change tag from: {LoadoutManager.TagFor(bill).name}");
+	        Widgets.Dropdown(standard.GetRect(30f), bill, LoadoutManager.TagFor, GenerateTagOptions, LoadoutManager.TagFor(bill) == null ? Strings.PickTargetTag : Strings.SwitchTargetTag(LoadoutManager.TagFor(bill).name));
 	        var text = $"{"CurrentlyHave".Translate()}: {bill.recipe.WorkerCounter.CountProducts(bill)} / {bill.targetCount * LoadoutManager.ColonistCountFor(bill)}";
 	        var str = bill.recipe.WorkerCounter.ProductsDescription(bill);
 	        if (!str.NullOrEmpty())
@@ -65,7 +65,7 @@ namespace Inventory
 	        var tag = LoadoutManager.TagFor(bill);
 	        if (tag.HasThingDef(producedThingDef, out var item))
 	        {
-		        if (standard.ButtonText("Copy Settings from Tag Item"))
+		        if (standard.ButtonText(Strings.CopyFromTag(tag.name, item.Def.LabelCap)))
 		        {
 			        item.Filter.CopyTo(bill.ingredientFilter);
 
@@ -89,7 +89,7 @@ namespace Inventory
 		        standard.CheckboxLabeled("IncludeTainted".Translate(), ref bill.includeTainted);
 	        }
 
-	        if (bill.recipe.products.Any((ThingDefCountClass prod) => prod.thingDef.useHitPoints))
+	        if (bill.recipe.products.Any((prod) => prod.thingDef.useHitPoints))
 	        {
 		        Widgets.FloatRange(standard.GetRect(28f), 975643279, ref bill.hpRange, 0f, 1f, "HitPoints", ToStringStyle.PercentZero);
 		        bill.hpRange.min = Mathf.Round(bill.hpRange.min * 100f) / 100f;

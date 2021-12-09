@@ -136,13 +136,12 @@ namespace Inventory
             float rollingY = 0;
 
             // Draw Title
-            Rect titleRec = DrawTitle(canvas.position, "Customize" + " " + filter.Thing.LabelCap, ref rollingY);
+            Rect titleRec = DrawTitle(canvas.position,Strings.Customize + " " + filter.Thing.LabelCap, ref rollingY);
 
             GUI.color = Color.grey;
             Text.Anchor = TextAnchor.LowerLeft;
             Text.WordWrap = false;
-            Widgets.Label(new Rect(titleRec.x, titleRec.yMax, canvas.width, GenUI.ListSpacing),
-                "(" + "Mouse Over Numbers for Details" + ")");
+            Widgets.Label(new Rect(titleRec.x, titleRec.yMax, canvas.width, GenUI.ListSpacing), Strings.MouseOverDetails);
             Text.Anchor = TextAnchor.UpperLeft;
             Text.WordWrap = true;
             GUI.color = Color.white;
@@ -162,7 +161,7 @@ namespace Inventory
             Rect rect = canvas.RightPart(0.65f);
             rect.yMax -= GenUI.ListSpacing * 2;
             rect.x += GenUI.GapSmall;
-            GUIUtility.ListSeperator(ref rect, "Statistics");
+            GUIUtility.ListSeperator(ref rect, Strings.Statistics);
             DrawStats(rect.TopPart(0.8f));
 
             // Draw sliders
@@ -209,7 +208,7 @@ namespace Inventory
          protected virtual void DrawHitPointsSlider(Rect hitpointRect, int dragID)
          {
              FloatRange hitpointRange = filter.HpRange;
-             Widgets.FloatRange(hitpointRect, dragID, ref hitpointRange, 0f, 1f, "Hit points {0}", ToStringStyle.PercentZero);
+             Widgets.FloatRange(hitpointRect, dragID, ref hitpointRange, 0f, 1f, Strings.HitPointsAmount, ToStringStyle.PercentZero);
              filter.SetHpRange(hitpointRange);
          }
          
@@ -249,7 +248,7 @@ namespace Inventory
             ref Vector2 scrollPosition, ref float scrollViewHeight)
         {
             // Draw a search bar
-            GUIUtility.InputField(outRect.PopTopPartPixels(GenUI.ListSpacing).ContractedBy(2f), "Stuff Filter",
+            GUIUtility.InputField(outRect.PopTopPartPixels(GenUI.ListSpacing).ContractedBy(2f), Strings.StuffFilter,
                 ref stuffScrollViewFilter);
 
             // filter stuff list by search bar
@@ -264,7 +263,7 @@ namespace Inventory
             {
                 Rect rect = outRect.TopPart(0.6f);
                 Text.Font = GameFont.Medium;
-                Widgets.NoneLabelCenteredVertically(rect, "No Material");
+                Widgets.NoneLabelCenteredVertically(rect, Strings.NoMaterial);
                 Text.Font = GameFont.Small;
             }
 

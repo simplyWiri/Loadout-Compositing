@@ -52,11 +52,11 @@ namespace Inventory
         {
             var topRect = r.TopPartPixels(22f);
             
-            if (Widgets.ButtonText(topRect.LeftPart(0.33f), "Select Tag"))
+            if (Widgets.ButtonText(topRect.LeftPart(0.33f), Strings.SelectTag))
             {
                 var floatOpts = LoadoutManager.OptionPerTag(tag => $"{tag.name}", tag => curTag = tag);
                 if (floatOpts.Count == 0) {
-                    Messages.Message(new Message("You have not created any tags yet", MessageTypeDefOf.RejectInput));
+                    Messages.Message(new Message(Strings.NoTagsYetWarning, MessageTypeDefOf.RejectInput));
                 }
                 else {
                     Find.WindowStack.Add(new FloatMenu(floatOpts));
@@ -64,7 +64,7 @@ namespace Inventory
             }
             
             topRect.AdjHorzBy(topRect.width * 0.33f);
-            if (Widgets.ButtonText(topRect.LeftHalf(), "Create New Tag"))
+            if (Widgets.ButtonText(topRect.LeftHalf(), Strings.CreateNewTag))
             {
                 curTag = new Tag("Placeholder");
                 LoadoutManager.AddTag(curTag);
@@ -74,12 +74,12 @@ namespace Inventory
             
             if( curTag == null) return;
 
-            Widgets.ListSeparator(ref r.m_YMin, r.width, $"Modify {curTag.name}");
+            Widgets.ListSeparator(ref r.m_YMin, r.width, Strings.Modify + " " + curTag.name);
             
             // [ Tag Name ] [ Edit Name ] 
             var rect = r.PopTopPartPixels(GUIUtility.DEFAULT_HEIGHT);
 
-            GUIUtility.InputField(rect, "Change Tag Name", ref curTag.name);
+            GUIUtility.InputField(rect, Strings.ChangeTagName, ref curTag.name);
             curTag.name ??= " ";
             
             var viewRect = new Rect(r.x, r.y, rect.width - 16f, (curTag.requiredItems.Count * GUIUtility.SPACED_HEIGHT * 2));
@@ -117,18 +117,18 @@ namespace Inventory
                 var removeButton = itemRect.PopRightPartPixels(GUIUtility.SPACED_HEIGHT * 1.5f);
                 if (Widgets.ButtonImageFitted(removeButton.ContractedBy(1f), TexButton.DeleteX))
                     toRemove.Add(item);
-                TooltipHandler.TipRegion(removeButton, "Remove item from Tag");
+                TooltipHandler.TipRegion(removeButton, Strings.RemoveItemFromTag);
 
                 // Copy, Paste
                 var copyPasteButton = itemRect.PopRightPartPixels(GUIUtility.SPACED_HEIGHT * 3);
                 GUIUtility.DraggableCopyPaste(copyPasteButton, ref item.filter, Filter.CopyFrom);
-                TooltipHandler.TipRegion(copyPasteButton, "Copy and paste shared attributes in filters between items in Tags");
+                TooltipHandler.TipRegion(copyPasteButton, Strings.CopyPasteExplain);
 
                 // Edit 
                 var constrainButton = itemRect.PopRightPartPixels(GUIUtility.SPACED_HEIGHT * 1.5f);
                 if (Widgets.ButtonImageFitted(constrainButton.ContractedBy(1f), TexButton.OpenStatsReport))
                     Find.WindowStack.Add(new Dialog_ItemSpecifier(item.Filter));
-                TooltipHandler.TipRegion(constrainButton, "Edit the range of values which this item accepts");
+                TooltipHandler.TipRegion(constrainButton, Strings.SpecifyElementsToolTip);
 
                 var quantityFieldRect = itemRect.PopRightPartPixels(GUIUtility.SPACED_HEIGHT * 2f);
                 item.quantityStr ??= item.Quantity.ToString();
@@ -144,7 +144,7 @@ namespace Inventory
                     {
                         Log.ErrorOnce($"Invalid numeric string {item.quantityStr}: " + e.Message, item.quantityStr.GetHashCode());
                     }
-                TooltipHandler.TipRegion(quantityFieldRect, "Edit the quantity of items which should be held");
+                TooltipHandler.TipRegion(quantityFieldRect, Strings.EditQuantity);
 
                 // Name
                 Text.Anchor = TextAnchor.MiddleCenter;

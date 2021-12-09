@@ -13,7 +13,7 @@ namespace Inventory
         {
             if (!p.IsColonist || p.IsQuestLodger() || p.apparel.AnyApparelLocked ) return;
 
-            Widgets.ListSeparator(ref curY, width, "Tags and Loadout Composition");
+            Widgets.ListSeparator(ref curY, width, Strings.TagLoadoutComposition);
             var rect = new Rect(0, curY, width, GUIUtility.DEFAULT_HEIGHT);
             curY += GUIUtility.DEFAULT_HEIGHT;
             
@@ -44,16 +44,12 @@ namespace Inventory
         // [ Add Tag ] [ Edit Tags ] [ Create Tag from Pawn ] 
         public static void DrawButtons(Rect rect, Pawn p)
         {
-            if (Widgets.ButtonText(rect.LeftHalf(), $"Edit {p.LabelShort}'s Loadout"))
+            if (Widgets.ButtonText(rect.LeftHalf(), Strings.EditXLoadout(p.LabelShort)))
             {
                 Find.WindowStack.Add(new Dialog_LoadoutEditor(p));
-                // var loadoutComp = p.GetComp<LoadoutComponent>();
-                // var tags = LoadoutManager.Tags.Except(loadoutComp.Loadout.tags);
-                // var floatOpts = tags.Select(tag => new FloatMenuOption($"{tag.name}", () => loadoutComp.Loadout.tags.Add(tag)));
-                // Find.WindowStack.Add(new FloatMenu(floatOpts.ToList()));
             }
 
-            if (Widgets.ButtonText(rect.RightHalf(), "Create / Edit Tags"))
+            if (Widgets.ButtonText(rect.RightHalf(), Strings.EditOrCreateTags))
             {
                 Find.WindowStack.Add(new Dialog_TagEditor());
             }

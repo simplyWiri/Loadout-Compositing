@@ -20,7 +20,6 @@ namespace Inventory
 
         public static void Postfix(Bill_Production sourceBill, Bill_Production destinationBill)
         {
-            Log.Message("hi");
             if (sourceBill.repeatMode == InvBillRepeatModeDefOf.W_PerTag)
             {
                 var tag = LoadoutManager.TagFor(sourceBill);    

@@ -120,14 +120,14 @@ namespace Inventory
                 Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), drawShowCoverage, drawPawnStats ));
                 return true;
             }
-            TooltipHandler.TipRegion(lhs, "Select Previous Pawn ( or press LArrow )");
+            TooltipHandler.TipRegion(lhs, Strings.SelectPrevious);
             if (Widgets.ButtonImageFitted(rhs, TexButton.IconBook) || Input.GetKeyDown(KeyCode.RightArrow)) {
                 ThingSelectionUtility.SelectNextColonist();
                 this.Close();
                 Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), drawShowCoverage, drawPawnStats));
                 return true;
             }
-            TooltipHandler.TipRegion(rhs, "Select Next Pawn ( or press RArrow )");
+            TooltipHandler.TipRegion(rhs, Strings.SelectNext);
             Text.Anchor = TextAnchor.MiddleCenter;
             Widgets.Label(topPartRect, $"{pawn.LabelShort}");
             Text.Anchor = TextAnchor.UpperLeft;
@@ -135,7 +135,7 @@ namespace Inventory
             rect.PopRightPartPixels(GenUI.GapTiny);
             rect.PopTopPartPixels(GenUI.GapTiny);
 
-            GUIUtility.ListSeperator(ref rect, "Top 4 Skills");
+            GUIUtility.ListSeperator(ref rect, Strings.TopFourSkills);
             
             var skillList = pawn.skills.skills.OrderByDescending(skill => skill.Level).ToList();
             for (int i = 0; i < 4; i++)
@@ -161,7 +161,7 @@ namespace Inventory
                 TooltipHandler.TipRegion(skillRect, new TipSignal(SkillUI.GetSkillDescription(skill), skill.def.GetHashCode() * 397945));
             }
             
-            GUIUtility.ListSeperator(ref rect, $"Apparel which can be worn");
+            GUIUtility.ListSeperator(ref rect, Strings.ApparelWhichCanBeWorn);
             var apparels = ApparelUtility.ApparelCanFitOnBody(pawn.RaceProps.body, component.Loadout.ThingsMatching(td => td.Def.IsApparel).Select(item => item.Def).ToList()).ToList();
             var allocatedHeight = apparels.Count * GUIUtility.DEFAULT_HEIGHT;
 
@@ -321,7 +321,7 @@ namespace Inventory
             
             Widgets.BeginScrollView(rect, ref tagScroll, viewRect);
             
-            GUIUtility.ListSeperator(ref viewRect, "Applied Tags (priority high to low)");
+            GUIUtility.ListSeperator(ref viewRect, Strings.AppliedTags);
             height += 35;
 
             
@@ -397,7 +397,7 @@ namespace Inventory
         {
             var buttonRect = rect.PopTopPartPixels(GenUI.ListSpacing);
 
-            if (Widgets.ButtonText(buttonRect.PopLeftPartPixels(rect.width / 3f), "Pawn Stats"))
+            if (Widgets.ButtonText(buttonRect.PopLeftPartPixels(rect.width / 3f), Strings.PawnStats))
             {
                 this.windowRect.width = windowRect.width + (drawPawnStats ? -210f : 210f);
                 drawPawnStats = !drawPawnStats;
@@ -418,7 +418,7 @@ namespace Inventory
                     })).ToList();
                 if(opts.Count == 0)
                 {
-                    Messages.Message(new Message("You have not created any tags yet", MessageTypeDefOf.RejectInput));
+                    Messages.Message(new Message(Strings.NoTagsYetWarning, MessageTypeDefOf.RejectInput));
                 }
                 else
                 {
@@ -426,7 +426,7 @@ namespace Inventory
                 }
             }
 
-            if (Widgets.ButtonText(buttonRect.RightHalf(), "Show Coverage"))
+            if (Widgets.ButtonText(buttonRect.RightHalf(), Strings.ShowCoverage))
             {
                 this.windowRect.width = windowRect.width + (drawShowCoverage ? -420f : 420f);
                 drawShowCoverage = !drawShowCoverage;
@@ -442,7 +442,7 @@ namespace Inventory
             var height = 0f;
             Widgets.BeginScrollView(rect, ref tagScroll, viewRect);
             
-            GUIUtility.ListSeperator(ref viewRect, "Loadout Statistics (when fully satisfied)");
+            GUIUtility.ListSeperator(ref viewRect, Strings.LoadoutStatistics);
 
             viewRect.AdjVertBy(GenUI.GapTiny);
 
@@ -452,9 +452,9 @@ namespace Inventory
                 viewRect.TopPartPixels(GUIUtility.SPACED_HEIGHT),
                 Utility.HypotheticalEncumberancePercent(pawn, loadoutItems),
                 Utility.HypotheticalUnboundedEncumberancePercent(pawn, loadoutItems) > 1f ? GUIUtility.ValvetTex as Texture2D : GUIUtility.RWPrimaryTex as Texture2D,
-                "Weight",
+                Strings.Weight,
                 Utility.HypotheticalGearAndInventoryMass(pawn, loadoutItems).ToString("0.#") + "/" + MassUtility.Capacity(pawn).ToStringMass(),
-                "The weight of gear carried by the pawn, vs the carry capacity of the pawn");
+                Strings.WeightOverCapacity);
 
             height += GenUI.GapTiny + GUIUtility.SPACED_HEIGHT;
             

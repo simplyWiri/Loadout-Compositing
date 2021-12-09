@@ -40,7 +40,7 @@ namespace Inventory
                 
                 count = Math.Min(count, item.stackCount);
 
-                var displayText = "Pickup " + (item.LabelNoCount + " x" + count);
+                var displayText = Strings.PickUpItems(item.LabelNoCount, count.ToString());
                 var option = FloatMenuUtility.DecoratePrioritizedTask(
                     new FloatMenuOption(
                         displayText, () =>

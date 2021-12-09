@@ -25,16 +25,16 @@ namespace Inventory
         public QualityCategory RandomQuality => (QualityCategory)Mathf.FloorToInt(((int)filter.QualityRange.max + (int)filter.QualityRange.min)/2.0f);
         public string Label => Print();
         
-        // Stuff? Def.LabelCap Quality-Range
+        // Stuff? Def.LabelCap Quality-Range?
         public string Print() {
             var stringBuilder = new StringBuilder();
 
             if (Def.MadeFromStuff)
             {
                 var count = filter.AllowedStuffs.Count;
-                if (count == 0) stringBuilder.Append("Generic");
+                if (count == 0) stringBuilder.Append(Strings.Generic);
                 else if (count == 1) stringBuilder.Append(filter.AllowedStuffs.First().LabelCap);
-                else stringBuilder.Append("Generic*");
+                else stringBuilder.Append(Strings.Generic + "*");
                 stringBuilder.Append(" ");
             }
 
