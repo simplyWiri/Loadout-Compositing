@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+	<CompositableLoadouts.Modify>Modify</CompositableLoadouts.Modify>
+	<CompositableLoadouts.Generic>Generic</CompositableLoadouts.Generic>
+
+	<CompositableLoadouts.TagLoadoutComposition>Tags and Loadout Composition</CompositableLoadouts.TagLoadoutComposition>
+	<CompositableLoadouts.EditXLoadout>Edit {0}'s Loadout</CompositableLoadouts.EditXLoadout>
+	<CompositableLoadouts.EditOrCreateTags>Create / Edit Tags</CompositableLoadouts.EditOrCreateTags>
+	<CompositableLoadouts.PickTargetTag>Pick tag to Target</CompositableLoadouts.PickTargetTag>
+	<CompositableLoadouts.SwitchTargetTag>Change tag from: {0}</CompositableLoadouts.SwitchTargetTag>
+	<CompositableLoadouts.CopyFromTag>Copy {1}'s filter settings in {0}</CompositableLoadouts.CopyFromTag>
+	<!-- Pickup Steel x32 -->
+	<CompositableLoadouts.PickUpItems>Pickup {0} x{1}</CompositableLoadouts.PickUpItems>
+	<CompositableLoadouts.SelectTag>Select Tag</CompositableLoadouts.SelectTag>
+	<CompositableLoadouts.NoTagsYetWarning>You have not created any tags yet</CompositableLoadouts.NoTagsYetWarning>
+	<CompositableLoadouts.CreateNewTag>Create New Tag</CompositableLoadouts.CreateNewTag>
+	<CompositableLoadouts.ChangeTagName>Change Tag Name</CompositableLoadouts.ChangeTagName>
+
+	<CompositableLoadouts.RemoveItemFromTag>Remove item from Tag</CompositableLoadouts.RemoveItemFromTag>
+
+	<CompositableLoadouts.CopyPasteExplain>Copy and paste shared attributes in filters between items in Tags</CompositableLoadouts.CopyPasteExplain>
+	
+	<CompositableLoadouts.SpecifyElementsToolTip>Specify aspects (stuff, quality, hp) for the thing(s) that this tag-item accepts</CompositableLoadouts.SpecifyElementsToolTip>
+	<CompositableLoadouts.EditQuantity>Edit the quantity of items which should be held</CompositableLoadouts.EditQuantity>
+	<CompositableLoadouts.SelectPrevious>Select Previous Pawn ( or press LArrow )</CompositableLoadouts.SelectPrevious>
+	<CompositableLoadouts.SelectNext>Select Next Pawn ( or press RArrow )</CompositableLoadouts.SelectNext>
+	<CompositableLoadouts.TopFourSkills>Top 4 Skills</CompositableLoadouts.TopFourSkills>
+	<CompositableLoadouts.ApparelWhichCanBeWorn>Apparel which can be worn</CompositableLoadouts.ApparelWhichCanBeWorn>
+	<CompositableLoadouts.AppliedTags>Applied Tags (priority high to low)</CompositableLoadouts.AppliedTags>
+	<CompositableLoadouts.PawnStats>Pawn Stats</CompositableLoadouts.PawnStats>
+	<CompositableLoadouts.ShowCoverage>Show Coverage</CompositableLoadouts.ShowCoverage>
+	<CompositableLoadouts.LoadoutStatistics>Loadout Statistics (when fully satisfied)</CompositableLoadouts.LoadoutStatistics>
+	<CompositableLoadouts.Weight>Weight</CompositableLoadouts.Weight>
+	<CompositableLoadouts.WeightOverCapacity>The weight of gear carried by the pawn, vs the carry capacity of the pawn</CompositableLoadouts.WeightOverCapacity>
+	<CompositableLoadouts.HitPointsAmount>Hit points {0}</CompositableLoadouts.HitPointsAmount>
+
+	<CompositableLoadouts.Customize>Customize</CompositableLoadouts.Customize>
+	<CompositableLoadouts.MouseOverDetails>(Mouse Over Numbers for Details)</CompositableLoadouts.MouseOverDetails>
+	<CompositableLoadouts.Statistics>Statistics</CompositableLoadouts.Statistics>
+	<CompositableLoadouts.StuffFilter>Stuff Filter</CompositableLoadouts.StuffFilter>
+	<CompositableLoadouts.NoMaterial>No Material</CompositableLoadouts.NoMaterial>
+
+</LanguageData>

@@ -37,7 +37,7 @@ namespace Inventory
         {
             settings = GetSettings<Settings>();
 
-            harmony = new Harmony("wiri.is.stupid");
+            harmony = new Harmony("Wiri.compositableloadouts");
             harmony.PatchAll();
         }
 
