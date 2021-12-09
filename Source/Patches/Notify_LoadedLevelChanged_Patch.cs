@@ -7,7 +7,7 @@ namespace Inventory
 {
     // triggers code to run after defs have been loaded.
     [HarmonyPatch(typeof(Verse.Messages), nameof(Verse.Messages.Notify_LoadedLevelChanged))]
-    public class Notify_LoadedLevelChanged
+    public class Notify_LoadedLevelChanged_Patch
     {
         private static bool patchedDefs = false;
 

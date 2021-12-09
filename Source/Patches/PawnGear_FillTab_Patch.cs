@@ -12,12 +12,12 @@ namespace Inventory
 {
     // Add a new section which details the tags being applied to a pawn
     [HarmonyPatch(typeof(ITab_Pawn_Gear), nameof(ITab_Pawn_Gear.FillTab))]
-    class PawnGear_FillTab
+    class PawnGear_FillTab_Patch
     {
         private static MethodInfo showOverallArmour = AccessTools.Method(typeof(ITab_Pawn_Gear), nameof(ITab_Pawn_Gear.TryDrawOverallArmor));
         private static MethodInfo getPawn = AccessTools.PropertyGetter(typeof(ITab_Pawn_Gear), nameof(ITab_Pawn_Gear.SelPawnForGear));
         private static MethodInfo rectWidth = AccessTools.PropertyGetter(typeof(Rect), nameof(Rect.width));
-        private static MethodInfo drawTags = AccessTools.Method(typeof(PawnGear_FillTab), nameof(DrawTags));
+        private static MethodInfo drawTags = AccessTools.Method(typeof(PawnGear_FillTab_Patch), nameof(DrawTags));
         
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGen)
         {

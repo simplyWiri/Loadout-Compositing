@@ -6,7 +6,7 @@ using Verse;
 namespace Inventory
 {
     [HarmonyPatch]
-    public class ExtendedBillDataStorage
+    public class ExtendedBillDataStorage_Patch
     {
         public static bool Prepare()
         {

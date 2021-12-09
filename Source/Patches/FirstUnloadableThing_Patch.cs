@@ -10,9 +10,9 @@ using Verse;
 namespace Inventory
 {
     [HarmonyPatch]
-    public static class FirstUnloadableThing
+    public static class FirstUnloadableThing_Patch
     {
-        private static MethodInfo InLoadout = AccessTools.Method(typeof(FirstUnloadableThing), nameof(FirstUnloadableThing.ThingInLoadout));
+        private static MethodInfo InLoadout = AccessTools.Method(typeof(FirstUnloadableThing_Patch), nameof(FirstUnloadableThing_Patch.ThingInLoadout));
         public static MethodInfo TargetMethod()
         {
             return typeof(Pawn_InventoryTracker).GetMethod("get_FirstUnloadableThing");

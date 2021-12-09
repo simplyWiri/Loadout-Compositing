@@ -11,10 +11,10 @@ namespace Inventory
 {
     // Adds the 'W_PerTag' def option to float menu dropdowns.
     [HarmonyPatch(typeof(BillRepeatModeUtility), nameof(BillRepeatModeUtility.MakeConfigFloatMenu))]
-    public class MakeConfigFloatMenu
+    public class MakeConfigFloatMenu_Patch
     {
         private static ConstructorInfo ctor = AccessTools.Constructor(typeof(List<>).MakeGenericType(typeof(FloatMenuOption)));
-        private static MethodInfo getOptions = AccessTools.Method(typeof(MakeConfigFloatMenu), nameof(MakeConfigFloatMenu.GetOptions));
+        private static MethodInfo getOptions = AccessTools.Method(typeof(MakeConfigFloatMenu_Patch), nameof(MakeConfigFloatMenu_Patch.GetOptions));
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {

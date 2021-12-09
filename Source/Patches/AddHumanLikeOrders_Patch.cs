@@ -11,7 +11,7 @@ namespace Inventory
 {
     // add 'Pick up' option to add things to inventory (like pick up and haul);
     [HarmonyPatch]
-    public class AddHumanLikeOrders
+    public class AddHumanLikeOrders_Patch
     {
         public static bool Prepare()
         {

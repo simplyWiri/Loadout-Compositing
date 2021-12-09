@@ -6,7 +6,7 @@ namespace Inventory
 {
     // fills a description string which displays a string with the current progress of the bill
     [HarmonyPatch]
-    public class RepeatInfoText
+    public class RepeatInfoText_Patch
     {
         public static MethodInfo TargetMethod()
         {

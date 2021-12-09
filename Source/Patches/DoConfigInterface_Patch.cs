@@ -12,7 +12,7 @@ namespace Inventory
 {
     // Add functionality to the +/- buttons in the bill menu
     [HarmonyPatch(typeof(Bill_Production), nameof(Bill_Production.DoConfigInterface))]
-    public class DoConfigInterface
+    public class DoConfigInterface_Patch
     {
         private static FieldInfo dragSlider = AccessTools.Field(typeof(SoundDefOf), nameof(SoundDefOf.DragSlider));
         private static MethodInfo playOneShotOnCamera = AccessTools.Method(typeof(SoundStarter), nameof(SoundStarter.PlayOneShotOnCamera));
@@ -20,8 +20,8 @@ namespace Inventory
         private static FieldInfo repeatMode = AccessTools.Field(typeof(Bill_Production), nameof(Bill_Production.repeatMode));
 
         private static FieldInfo w_PerTag = AccessTools.Field(typeof(Inventory.InvBillRepeatModeDefOf), nameof(InvBillRepeatModeDefOf.W_PerTag));
-        private static MethodInfo plusButton = AccessTools.Method(typeof(DoConfigInterface), nameof(DoConfigInterface.PlusButton));
-        private static MethodInfo minusButton = AccessTools.Method(typeof(DoConfigInterface), nameof(DoConfigInterface.MinusButton));
+        private static MethodInfo plusButton = AccessTools.Method(typeof(DoConfigInterface_Patch), nameof(DoConfigInterface_Patch.PlusButton));
+        private static MethodInfo minusButton = AccessTools.Method(typeof(DoConfigInterface_Patch), nameof(DoConfigInterface_Patch.MinusButton));
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {

@@ -11,10 +11,10 @@ namespace Inventory
 {
 	// Add bill options under 'X per Tag' in the bill config
     [HarmonyPatch(typeof(Dialog_BillConfig), nameof(Dialog_BillConfig.DoWindowContents))]
-    public static class BillConfig
+    public static class BillConfig_Patch
     {
         private static FieldInfo bill = AccessTools.Field(typeof(Dialog_BillConfig), nameof(Dialog_BillConfig.bill));
-        private static MethodInfo drawConfig = AccessTools.Method(typeof(BillConfig), nameof(BillConfig.DrawConfig));
+        private static MethodInfo drawConfig = AccessTools.Method(typeof(BillConfig_Patch), nameof(BillConfig_Patch.DrawConfig));
         private static FieldInfo repeatMode = AccessTools.Field(typeof(Bill_Production), nameof(Bill_Production.repeatMode));
         private static FieldInfo w_PerTag = AccessTools.Field(typeof(Inventory.InvBillRepeatModeDefOf), nameof(InvBillRepeatModeDefOf.W_PerTag));
 
