@@ -55,7 +55,12 @@ namespace Inventory
             if (Widgets.ButtonText(topRect.LeftPart(0.33f), "Select Tag"))
             {
                 var floatOpts = LoadoutManager.OptionPerTag(tag => $"{tag.name}", tag => curTag = tag);
-                Find.WindowStack.Add(new FloatMenu(floatOpts));
+                if (floatOpts.Count == 0) {
+                    Messages.Message(new Message("You have not created any tags yet", MessageTypeDefOf.RejectInput));
+                }
+                else {
+                    Find.WindowStack.Add(new FloatMenu(floatOpts));
+                }
             }
             
             topRect.AdjHorzBy(topRect.width * 0.33f);

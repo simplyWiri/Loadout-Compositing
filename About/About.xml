@@ -10,8 +10,15 @@
 Mod Integrations:
 - Better Workbench Management: When copying a bill which targets a tag to another bill, copy the tag with it.
 - Pick up and Haul: Disable pick up patch from our side when PUAH is loaded (duplicate functionality).
-	</description>
-	
+Incompatibilies:
+- Awesome Inventory: Both mods work in the same space, and will never be compatible. Sorry.
+- Combat Extended: This mod will be integrated into Combat Extended replacing their existing loadout system in the near (ish) future
+
+Credits:
+- DrowsyCorgi ( NotooShabby ) for their incredible work on Awesome Inventory. I hope that it is visible the influence their mod has had; with regards to both the functionality of the mod, and the aesthetics of the GUI.  
+	</description> 
+	<url>https://github.com/simplyWiri/Loadout-Compositing</url>
+
 	<modDependencies>
 		<li>
 			<packageId>brrainz.harmony</packageId>
@@ -19,4 +26,14 @@ Mod Integrations:
 			<steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
 		</li>
 	</modDependencies>
+
+	<loadAfter>
+		<li>brrainz.harmony</li>
+	</loadAfter>
+
+	<incompatibleWith>
+		<li>CETeam.CombatExtended</li>
+		<li>NotooShabby.AwesomeInventoryForked</li>		
+	</incompatibleWith>
+
 </ModMetaData>

@@ -81,6 +81,11 @@ namespace Inventory
             Scribe_Collections.Look(ref stuffs, nameof(stuffs));
             Scribe_Values.Look(ref allowedHpRange, nameof(allowedHpRange));
             Scribe_Values.Look(ref allowedQualities, nameof(allowedQualities));
+            
+            var count = stuffs.RemoveWhere(thing => thing is null);
+            if (count != 0) {
+                Log.Error($"Attempted to load a null stuff from a filter, have you removed a mod?");
+            }
         }
 
         private static QualityCategory GetQuality(Thing thing)

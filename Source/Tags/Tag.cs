@@ -60,6 +60,11 @@ namespace Inventory
             Scribe_Collections.Look(ref requiredItems, nameof(requiredItems));
             Scribe_Values.Look(ref name, nameof(name));
             Scribe_Values.Look(ref uniqueId, nameof(uniqueId));
+
+            var count = requiredItems.RemoveAll(item => item.Def == null);
+            if (count != 0) {
+                Log.Error($"Attempting to load a null def, have you removed a mod? - Removing item from {name} - ({GetUniqueLoadID()})");
+            }
         }
 
         public string GetUniqueLoadID()

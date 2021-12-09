@@ -72,14 +72,10 @@ namespace Inventory
 			        bill.limitToAllowedStuff = !item.Filter.Generic;
 
 			        if (item.Filter.SpecificQualityRange)
-			        {
 				        bill.qualityRange = item.Filter.QualityRange;
-			        }
 
 			        if (item.Filter.SpecificHitpointRange)
-			        {
 				        bill.hpRange = item.Filter.HpRange;
-			        }
 		        }
 	        }
 

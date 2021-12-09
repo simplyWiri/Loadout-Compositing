@@ -2,7 +2,9 @@
 using System.Linq;
 using RimWorld;
 using UnityEngine;
+using UnityEngine.UI;
 using Verse;
+using Text = Verse.Text;
 
 namespace Inventory
 {
@@ -15,6 +17,9 @@ namespace Inventory
         private float tagsHeight = 9999f;
         
         private Vector2 wearableApparelScroll;
+
+        private Vector2 apparelSlotsScroll;
+        private float apparelSlotsHeight = 9999f;
 
         private Vector2 statsScroll;
         private float statsHeight = 9999f;
@@ -55,9 +60,9 @@ namespace Inventory
         {
             this.pawn = pawn;
             this.component = pawn.GetComp<LoadoutComponent>();
-            closeOnClickedOutside = true;
             absorbInputAroundWindow = true;
             doCloseX = true;
+            draggable = true;
         }
         
         public Dialog_LoadoutEditor(Pawn pawn, bool drawShowCoverage, bool drawPawnStats)
@@ -66,9 +71,9 @@ namespace Inventory
             this.component = pawn.GetComp<LoadoutComponent>();
             this.drawShowCoverage = drawShowCoverage;
             this.drawPawnStats = drawPawnStats;
-            closeOnClickedOutside = true;
             absorbInputAroundWindow = true;
             doCloseX = true;
+            draggable = true;
         }
         
         /* | Pawn Stats |  Apparel Slots | Add Tag     |
@@ -109,22 +114,22 @@ namespace Inventory
 
             var lhs = topPartRect.PopLeftPartPixels(GUIUtility.SPACED_HEIGHT);
             var rhs = topPartRect.PopRightPartPixels(GUIUtility.SPACED_HEIGHT);
-            if (Widgets.ButtonImageFitted(lhs, TexButton.IconBook)) {
+            if (Widgets.ButtonImageFitted(lhs, TexButton.IconBook) || Input.GetKeyDown(KeyCode.LeftArrow)) {
                 ThingSelectionUtility.SelectPreviousColonist();
                 this.Close();
                 Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), drawShowCoverage, drawPawnStats ));
                 return true;
             }
-            TooltipHandler.TipRegion(lhs, "Select Previous Pawn");
-            if (Widgets.ButtonImageFitted(rhs, TexButton.IconBook)) {
+            TooltipHandler.TipRegion(lhs, "Select Previous Pawn ( or press LArrow )");
+            if (Widgets.ButtonImageFitted(rhs, TexButton.IconBook) || Input.GetKeyDown(KeyCode.RightArrow)) {
                 ThingSelectionUtility.SelectNextColonist();
                 this.Close();
                 Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), drawShowCoverage, drawPawnStats));
                 return true;
             }
-            TooltipHandler.TipRegion(rhs, "Select Next Pawn");
+            TooltipHandler.TipRegion(rhs, "Select Next Pawn ( or press RArrow )");
             Text.Anchor = TextAnchor.MiddleCenter;
-            Widgets.Label(topPartRect, $"{pawn.LabelCap}");
+            Widgets.Label(topPartRect, $"{pawn.LabelShort}");
             Text.Anchor = TextAnchor.UpperLeft;
             
             rect.PopRightPartPixels(GenUI.GapTiny);
@@ -163,10 +168,12 @@ namespace Inventory
             var viewRect = new Rect(rect.x, rect.y, rect.width - 16f, allocatedHeight);
             
             Widgets.BeginScrollView(rect, ref wearableApparelScroll, viewRect);
-            
+            int aIdx = 0;
             foreach (var apparel in apparels)
             {
                 var apparelRect = viewRect.PopTopPartPixels(GUIUtility.DEFAULT_HEIGHT);
+                if ( aIdx++ % 2 == 0 )
+                    Widgets.DrawLightHighlight(apparelRect);
                 Widgets.DefIcon(apparelRect.LeftPart(.15f), apparel);
                 Widgets.Label(apparelRect.RightPart(.85f), apparel.LabelCap);
             }
@@ -178,12 +185,16 @@ namespace Inventory
 
         public void DrawApparelSlots(Rect rect, BodyDef def)
         {
+            var viewRect = new Rect(rect.x, rect.y, rect.width - 16f, apparelSlotsHeight);
+            Widgets.BeginScrollView(rect, ref apparelSlotsScroll, viewRect);
+            
             float curY = GUIUtility.SPACED_HEIGHT;
+            float beginY = curY;
 
             foreach (var category in ApparelUtility.GetBodyPartGroupFor(def).GetCategories().OrderByDescending(t => t.First().def.listOrder))
             {
                 var layers = category.SelectMany(c => c.GetLayers()).Distinct().OrderByDescending(d => d.drawOrder).ToList();
-                var cols = DrawHeader(new Rect(rect.x, curY, rect.width, GUIUtility.SPACED_HEIGHT), layers, curY).ToList();
+                var cols = DrawHeader(new Rect(viewRect.x, curY, viewRect.width, GUIUtility.SPACED_HEIGHT), layers, curY).ToList();
 
                 curY += GUIUtility.SPACED_HEIGHT + GUIUtility.DEFAULT_HEIGHT;
 
@@ -194,6 +205,10 @@ namespace Inventory
                 
                 curY += GUIUtility.DEFAULT_HEIGHT;
             }
+
+            apparelSlotsHeight = curY - beginY;
+            
+            Widgets.EndScrollView();
         }
         public static IEnumerable<Rect> DrawHeader(Rect rect, List<ApparelLayerDef> layers, float curY)
         {
@@ -401,8 +416,14 @@ namespace Inventory
                         pList.pawns.Add(pawn);
                         component.Loadout.tags.Add(tag);
                     })).ToList();
-                if(!opts.NullOrEmpty())
+                if(opts.Count == 0)
+                {
+                    Messages.Message(new Message("You have not created any tags yet", MessageTypeDefOf.RejectInput));
+                }
+                else
+                {
                     Find.WindowStack.Add(new FloatMenu(opts));
+                }
             }
 
             if (Widgets.ButtonText(buttonRect.RightHalf(), "Show Coverage"))
