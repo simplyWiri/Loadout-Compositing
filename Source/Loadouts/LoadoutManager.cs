@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using RimWorld;
+using RimWorld.IO;
 using RimWorld.Planet;
 using Verse;
 
@@ -26,9 +27,27 @@ namespace Inventory
         public static Dictionary<Tag, SerializablePawnList> PawnsWithTags => instance.pawnTags;
 
         public static int GetNextTagId() => UniqueIDsManager.GetNextID(ref instance.nextTagId);
-        
-        public static Tag TagFor(Bill_Production billProduction) => instance.billToTag[billProduction];
-        public static int ColonistCountFor(Bill_Production bill) => instance.pawnTags[TagFor(bill)].Pawns.Count;
+
+        public static Tag TagFor(Bill_Production billProduction)
+        {
+            if (instance.billToTag.TryGetValue(billProduction, out var tag)) return tag;
+            return null;
+        }
+
+        public static void SetTagForBill(Bill_Production bill, Tag tag)
+        {
+            instance.billToTag.SetOrAdd(bill, tag);
+        }
+
+        public static int ColonistCountFor(Bill_Production bill)
+        {
+            // if the extra data has not been set (just switched to the bill, this is a valid
+            // state to be in).
+            var tag = TagFor(bill);
+            if (tag == null) return 0;
+            
+            return instance.pawnTags[tag].Pawns.Count;
+        }
         
         public LoadoutManager(Game game)
         {
@@ -38,6 +57,7 @@ namespace Inventory
         public static void AddTag(Tag tag)
         {
             Tags.Add(tag);
+            PawnsWithTags.Add(tag, new SerializablePawnList(new List<Pawn>()));
         }
 
         public static List<FloatMenuOption> OptionPerTag(Func<Tag, string> labelGen, Action<Tag> onClick)
@@ -59,6 +79,7 @@ namespace Inventory
             
             tags ??= new List<Tag>();
             pawnTags ??= new Dictionary<Tag, SerializablePawnList>();
+            billToTag ??= new Dictionary<Bill_Production, Tag>();
         }
     }
 }
