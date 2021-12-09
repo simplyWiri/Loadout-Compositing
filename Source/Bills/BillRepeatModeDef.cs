@@ -3,7 +3,7 @@
 namespace Inventory
 {
     [DefOf]
-    class BillRepeatModeDefOf
+    class InvBillRepeatModeDefOf
     {
         public static BillRepeatModeDef W_PerTag;
     }

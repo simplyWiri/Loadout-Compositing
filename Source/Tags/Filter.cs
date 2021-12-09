@@ -19,6 +19,10 @@ namespace Inventory
         public QualityRange QualityRange => allowedQualities;
         public FloatRange HpRange => allowedHpRange;
 
+        public bool Generic => AllowedStuffs.Count == 0;
+        public bool SpecificQualityRange => QualityRange != QualityRange.All;
+        public bool SpecificHitpointRange => HpRange != FloatRange.ZeroToOne;
+
         public Filter()
         {
             this.forThing = null;
@@ -46,6 +50,10 @@ namespace Inventory
             this.allowedHpRange = range;
         }
 
+        public void CopyTo(ThingFilter thingFilter)
+        {
+            thingFilter.allowedDefs = stuffs.ToHashSet();
+        }
         public static Filter CopyFrom(Filter from, Filter to)
         {
             var newFilter = new Filter(to.Thing);

@@ -72,6 +72,10 @@ namespace Inventory
 
         public override void ExposeData()
         {
+            if (Scribe.mode == LoadSaveMode.Saving) {
+                billToTag.RemoveAll(kv => kv.Key.repeatMode != InvBillRepeatModeDefOf.W_PerTag);
+            }
+            
             Scribe_Collections.Look(ref tags, nameof(tags), LookMode.Deep);
             Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Deep, ref pTagsLoading, ref pPawnLoading);
             Scribe_Collections.Look(ref billToTag, nameof(billToTag), LookMode.Reference, LookMode.Reference);

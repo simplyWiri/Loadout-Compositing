@@ -33,6 +33,19 @@ namespace Inventory
         {
             requiredItems.Add(new Item(thing));
         }
+
+        public bool HasThingDef(ThingDef def, out Item item) {
+            item = null;
+            foreach (var i in requiredItems) {
+                if (i.Def == def)
+                {
+                    item = i;
+                    return true;
+                }
+            }
+
+            return false;
+        }
         
         public int CompareTo(Tag other)
         {

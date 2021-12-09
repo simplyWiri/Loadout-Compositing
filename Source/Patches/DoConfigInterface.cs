@@ -19,7 +19,7 @@ namespace Inventory
 
         private static FieldInfo repeatMode = AccessTools.Field(typeof(Bill_Production), nameof(Bill_Production.repeatMode));
 
-        private static FieldInfo w_PerTag = AccessTools.Field(typeof(Inventory.BillRepeatModeDefOf), nameof(BillRepeatModeDefOf.W_PerTag));
+        private static FieldInfo w_PerTag = AccessTools.Field(typeof(Inventory.InvBillRepeatModeDefOf), nameof(InvBillRepeatModeDefOf.W_PerTag));
         private static MethodInfo plusButton = AccessTools.Method(typeof(DoConfigInterface), nameof(DoConfigInterface.PlusButton));
         private static MethodInfo minusButton = AccessTools.Method(typeof(DoConfigInterface), nameof(DoConfigInterface.MinusButton));
 

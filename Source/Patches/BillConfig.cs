@@ -16,7 +16,7 @@ namespace Inventory
         private static FieldInfo bill = AccessTools.Field(typeof(Dialog_BillConfig), nameof(Dialog_BillConfig.bill));
         private static MethodInfo drawConfig = AccessTools.Method(typeof(BillConfig), nameof(BillConfig.DrawConfig));
         private static FieldInfo repeatMode = AccessTools.Field(typeof(Bill_Production), nameof(Bill_Production.repeatMode));
-        private static FieldInfo w_PerTag = AccessTools.Field(typeof(Inventory.BillRepeatModeDefOf), nameof(BillRepeatModeDefOf.W_PerTag));
+        private static FieldInfo w_PerTag = AccessTools.Field(typeof(Inventory.InvBillRepeatModeDefOf), nameof(InvBillRepeatModeDefOf.W_PerTag));
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
@@ -61,6 +61,27 @@ namespace Inventory
 	        bill.unpauseWhenYouHave = Mathf.Max(0, bill.unpauseWhenYouHave + (bill.targetCount - targetCount));
 	        var producedThingDef = bill.recipe.ProducedThingDef;
 	        if (producedThingDef == null) return;
+
+	        var tag = LoadoutManager.TagFor(bill);
+	        if (tag.HasThingDef(producedThingDef, out var item))
+	        {
+		        if (standard.ButtonText("Copy Settings from Tag Item"))
+		        {
+			        item.Filter.CopyTo(bill.ingredientFilter);
+
+			        bill.limitToAllowedStuff = !item.Filter.Generic;
+
+			        if (item.Filter.SpecificQualityRange)
+			        {
+				        bill.qualityRange = item.Filter.QualityRange;
+			        }
+
+			        if (item.Filter.SpecificHitpointRange)
+			        {
+				        bill.hpRange = item.Filter.HpRange;
+			        }
+		        }
+	        }
 
 	        if (producedThingDef.IsWeapon || producedThingDef.IsApparel)
 	        {

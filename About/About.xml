@@ -6,7 +6,11 @@
 	<supportedVersions>
 		<li>1.3</li>
 	</supportedVersions>
-	<description>Mix and match multiple 'tags' on a single pawn, allowing for composition of loadouts. Ever wondered why you couldn't just call your Planter/Melee pawn just that, and instead had to make one loadout with items from both in it? - No longer.</description>
+	<description>Mix and match multiple 'tags' on a single pawn, allowing for composition of loadouts. Ever wondered why you couldn't just call your Planter/Melee pawn just that, and instead had to make one loadout with items from both in it? - No longer.
+Mod Integrations:
+- Better Workbench Management: When copying a bill which targets a tag to another bill, copy the tag with it.
+- Pick up and Haul: Disable pick up patch from our side when PUAH is loaded (duplicate functionality).
+	</description>
 	
 	<modDependencies>
 		<li>

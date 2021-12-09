@@ -40,13 +40,16 @@ namespace Inventory
 
         public static void GetOptions(List<FloatMenuOption> options, Bill_Production bill)
         {
-            options.Add(new FloatMenuOption(BillRepeatModeDefOf.W_PerTag.LabelCap, () => {
+            options.Add(new FloatMenuOption(InvBillRepeatModeDefOf.W_PerTag.LabelCap, () => {
                 if (!bill.recipe.WorkerCounter.CanCountProducts(bill))
                 {
                     Messages.Message("RecipeCannotHaveTargetCount".Translate(), MessageTypeDefOf.RejectInput, false);
                     return;
                 }
-                bill.repeatMode = BillRepeatModeDefOf.W_PerTag;
+                // some qol for common use cases
+                bill.repeatMode = InvBillRepeatModeDefOf.W_PerTag;
+                bill.targetCount = 1;
+                bill.includeEquipped = true;
             }));
         }
     }

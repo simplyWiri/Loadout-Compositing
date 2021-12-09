@@ -10,7 +10,7 @@ namespace Inventory
     {
         public static bool Prefix(ref bool __result, Bill_Production __instance)
         {
-            if (__instance.repeatMode != BillRepeatModeDefOf.W_PerTag) return true;
+            if (__instance.repeatMode != InvBillRepeatModeDefOf.W_PerTag) return true;
 
             if (__instance.suspended || __instance.Satisfied()) {
                 __result = false;
