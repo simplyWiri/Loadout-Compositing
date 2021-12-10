@@ -46,7 +46,7 @@ namespace Inventory
             var tag = TagFor(bill);
             if (tag == null) return 0;
             
-            return instance.pawnTags[tag].Pawns.Count;
+            return instance.pawnTags[tag].Pawns.Count(p => p.Map == bill.Map);
         }
         
         public LoadoutManager(Game game)
