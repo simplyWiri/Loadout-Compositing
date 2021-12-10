@@ -5,7 +5,6 @@ using Verse;
 
 namespace Inventory
 {
-    [HotSwappable]
     public static class GUIUtility
     {
         public static readonly Texture ValvetTex = SolidColorMaterials.NewSolidColorTexture(GenColor.FromHex("cc1a00"));

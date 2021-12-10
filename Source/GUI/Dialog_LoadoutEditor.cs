@@ -10,7 +10,6 @@ using Text = Verse.Text;
 
 namespace Inventory
 {
-    [HotSwappable]
     public class Dialog_LoadoutEditor : Window
     {
         internal Pawn pawn;

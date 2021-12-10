@@ -8,7 +8,6 @@ using Verse;
 
 namespace Inventory
 {
-    [HotSwappable]
     public class Dialog_ItemSpecifier : Window
     {
         private static List<StatDef> armorStats;

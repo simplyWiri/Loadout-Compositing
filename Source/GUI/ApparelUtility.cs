@@ -161,8 +161,6 @@ namespace Inventory
         }
 
     }
-
-    [HotSwappable]
     public static class ApparelUtility
     {
         private static Dictionary<BodyDef, BodyPartGroup> bodyPartGroups = new Dictionary<BodyDef, BodyPartGroup>();

@@ -7,7 +7,6 @@ using Verse;
 
 namespace Inventory
 {
-    [HotSwappable]
     public class Panel_ShowCoverage
     {
         private Dialog_LoadoutEditor parent;

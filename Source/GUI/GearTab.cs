@@ -6,7 +6,6 @@ using Verse;
 
 namespace Inventory
 {
-    [HotSwappable]
     public static class GearTab
     {
         public static void DrawTags(Pawn p, ref float curY, float width)

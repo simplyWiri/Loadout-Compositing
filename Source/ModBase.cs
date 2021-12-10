@@ -6,11 +6,6 @@ using Verse;
 
 namespace Inventory
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-    public class HotSwappableAttribute : Attribute
-    {
-    }
-    
     // What was initially wrote as the goals of the project on
     // 6/12/2021. 
     

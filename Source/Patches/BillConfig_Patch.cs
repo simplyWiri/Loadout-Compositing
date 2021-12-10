@@ -76,7 +76,7 @@ namespace Inventory
 	        if (tag != null && tag.HasThingDef(producedThingDef, out var item))
 	        {
 		        var copyTagStr = Strings.CopyFromTag(tag.name, item.Def.LabelCap);
-		        var size = Text.CalcHeight(copyTagStr, standard.ColumnWidth);
+		        var size = Text.CalcHeight(copyTagStr, standard.ColumnWidth - 80f);
 		        var rect = standard.GetRect(size);
 		        if ( Widgets.ButtonText(rect, copyTagStr))
 		        {

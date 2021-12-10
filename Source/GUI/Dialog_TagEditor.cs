@@ -8,7 +8,6 @@ using Verse;
 
 namespace Inventory
 {
-    [HotSwappable]
     public class Dialog_TagEditor : Window
     {
         enum State
