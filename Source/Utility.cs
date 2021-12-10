@@ -17,12 +17,21 @@ namespace Inventory
 
         public static void CalculateDefLists()
         {
-            apparelDefs ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsApparel).ToList();
-            meleeWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsMeleeWeapon).ToList();
-            rangedWeapons ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsRangedWeapon && def.PlayerAcquirable && def.category != ThingCategory.Building).ToList();
-            medicinalDefs ??= DefDatabase<ThingDef>.AllDefs.Where(def => def.IsMedicine || def.IsDrug).ToList();
-            items ??= DefDatabase<ThingDef>.AllDefs
-                .Where(def => def.category == ThingCategory.Item)
+            items ??= DefDatabase<ThingDef>.AllDefsListForReading.Where(td =>!( 
+                !td.EverHaulable
+                || td.IsFrame
+                || td.destroyOnDrop
+                || !td.PlayerAcquirable
+                || typeof(UnfinishedThing).IsAssignableFrom(td.thingClass)
+                || typeof(MinifiedThing).IsAssignableFrom(td.thingClass)
+                || td.IsCorpse)).ToList();
+            
+            apparelDefs ??= items.Where(def => def.IsApparel).ToList();
+            meleeWeapons ??= items.Where(def => def.IsMeleeWeapon).ToList();
+            rangedWeapons ??= items.Where(def => def.IsRangedWeapon && def.category != ThingCategory.Building).ToList();
+            medicinalDefs ??= items.Where(def => def.IsMedicine || def.IsDrug).ToList();
+            
+            items = items
                 .Except(apparelDefs)
                 .Except(meleeWeapons)
                 .Except(rangedWeapons)
