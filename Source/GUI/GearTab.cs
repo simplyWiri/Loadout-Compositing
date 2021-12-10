@@ -18,30 +18,8 @@ namespace Inventory
             curY += GUIUtility.DEFAULT_HEIGHT;
             
             DrawButtons(rect, p);
-            
-            var loadoutComp = p.GetComp<LoadoutComponent>();
-
-            List<Tag> toRemove = new List<Tag>();
-            
-
-            foreach (var tag in loadoutComp.Loadout.tags)
-            {
-                var r = new Rect(0, curY, width - GUIUtility.DEFAULT_HEIGHT, GUIUtility.DEFAULT_HEIGHT);
-                GUIUtility.DrawTag(r, tag);
-                if (Widgets.ButtonImageFitted(new Rect(0 + width - GUIUtility.DEFAULT_HEIGHT, curY, GUIUtility.DEFAULT_HEIGHT, GUIUtility.DEFAULT_HEIGHT), TexButton.DeleteX))
-                {
-                    toRemove.Add(tag);
-                }
-                curY += GUIUtility.DEFAULT_HEIGHT;
-            }
-
-            foreach (var tag in toRemove)
-            {
-                loadoutComp.Loadout.tags.Remove(tag);
-            }
         }
         
-        // [ Add Tag ] [ Edit Tags ] [ Create Tag from Pawn ] 
         public static void DrawButtons(Rect rect, Pawn p)
         {
             if (Widgets.ButtonText(rect.LeftHalf(), Strings.EditXLoadout(p.LabelShort)))
@@ -54,8 +32,5 @@ namespace Inventory
                 Find.WindowStack.Add(new Dialog_TagEditor());
             }
         }
-
-
-
     }
 }

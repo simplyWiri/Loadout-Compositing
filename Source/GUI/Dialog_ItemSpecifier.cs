@@ -14,6 +14,7 @@ namespace Inventory
         private static List<StatDef> armorStats;
         private static List<StatDef> baseWeaponStats;
         private static List<StatDef> meleeWeaponStats;
+        private static List<StatDef> rangedWeaponStats;
         private static List<StatDef> generalItemStats;
 
         private ThingDef stuffPreview;
@@ -57,7 +58,11 @@ namespace Inventory
             {
                 StatDefOf.MeleeWeapon_CooldownMultiplier,
             };
-            
+
+            rangedWeaponStats = new List<StatDef>()
+            {
+                StatDefOf.RangedWeapon_Cooldown,
+            };
 
             generalItemStats = new List<StatDef>()
             {
@@ -481,7 +486,7 @@ namespace Inventory
             List<StatDef> stats = new List<StatDef>();
             if (filter.Thing.IsApparel) stats = armorStats;
             else if (filter.Thing.IsMeleeWeapon) stats = baseWeaponStats.Union(meleeWeaponStats).ToList();
-            else if (filter.Thing.IsRangedWeapon) stats = baseWeaponStats;
+            else if (filter.Thing.IsRangedWeapon) stats = baseWeaponStats.Union(rangedWeaponStats).ToList();
             else stats = generalItemStats;
 
             statScrollViewHeight = GenUI.ListSpacing * stats.Count;

@@ -149,13 +149,8 @@ namespace Inventory
             
             GUIUtility.ListSeperator(ref rect, Strings.ApparelWhichCanBeWorn);
             
-            var itemsWithPrios = component.Loadout.tags.SelectMany(t => t
-                    .ItemsWithTagMatching(item => item.Def.IsApparel)
-                    .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, component.Loadout.tags.IndexOf(tuple.Item1))))
-                .ToList();
-            
-            var wornApparel = ApparelUtility.WornApparelFor(pawn.RaceProps.body, itemsWithPrios) ?? new List<Tuple<Item, Tag>>();
-            var apparels = ApparelUtility.ApparelCanFitOnBody(pawn.RaceProps.body, wornApparel.Select(td => td.Item1.Def).ToList()).ToList();
+            var wornApparel = component.Loadout.HypotheticalWornApparel(pawn.RaceProps.body).ToList();
+            var apparels = ApparelUtility.ApparelCanFitOnBody(pawn.RaceProps.body, wornApparel.Select(td => td.Def).ToList()).ToList();
             var allocatedHeight = apparels.Count * GUIUtility.DEFAULT_HEIGHT;
 
             var viewRect = new Rect(rect.x, rect.y, rect.width - 16f, allocatedHeight);
@@ -328,7 +323,7 @@ namespace Inventory
             var loadoutItems = component.Loadout.AllItems.ToList();
             
             GUIUtility.BarWithOverlay(
-                viewRect.TopPartPixels(GUIUtility.SPACED_HEIGHT),
+                viewRect.PopTopPartPixels(GUIUtility.SPACED_HEIGHT),
                 Utility.HypotheticalEncumberancePercent(pawn, loadoutItems),
                 Utility.HypotheticalUnboundedEncumberancePercent(pawn, loadoutItems) > 1f ? GUIUtility.ValvetTex as Texture2D : GUIUtility.RWPrimaryTex as Texture2D,
                 Strings.Weight,
@@ -336,10 +331,59 @@ namespace Inventory
                 Strings.WeightOverCapacity);
 
             height += GenUI.GapTiny + GUIUtility.SPACED_HEIGHT;
+
+            // var statBonuses = new Dictionary<StatDef, List<Item>>();
+            // var wornApparel = component.Loadout.HypotheticalWornApparel(pawn.RaceProps.body).ToList();
+            // var heldItems = loadoutItems.Where(item => !item.Def.IsApparel).ToList();
+            //
+            // foreach (var potentialStatBoost in wornApparel.Union(heldItems))
+            // {
+            //     if (!potentialStatBoost.Def?.equippedStatOffsets?.Any() ?? true) continue;
+            //
+            //     foreach (var mod in potentialStatBoost.Def.equippedStatOffsets.Select(m => m.stat)) {
+            //         if (!statBonuses.TryGetValue(mod, out var list)) {
+            //             statBonuses.Add(mod, new List<Item> { potentialStatBoost });
+            //             continue;
+            //         }
+            //         list.Add(potentialStatBoost);
+            //     }
+            // }
+            //
+            // var apparelBonuses = new List<StatDef> {
+            //     StatDefOf.SharpDamageMultiplier, StatDefOf.ArmorRating_Blunt, StatDefOf.ArmorRating_Heat, 
+            //     StatDefOf.Insulation_Cold, StatDefOf.Insulation_Heat
+            // };
+            //
+            // foreach (var stat in apparelBonuses) {
+            //     statBonuses.Add(stat, wornApparel);
+            // }
+            //
+            // foreach (var statBonus in statBonuses) {
+            //     TryDrawSpoofStatCalculations(ref viewRect, statBonus.Key, statBonus.Value);
+            //     height += GUIUtility.SPACED_HEIGHT;
+            // }
             
             Widgets.EndScrollView();
             
             statsHeight = height;
+        }
+        
+        private void TryDrawSpoofStatCalculations(ref Rect rect, StatDef stat, List<Item> items)
+        {
+            var statRect = rect.PopTopPartPixels(GUIUtility.SPACED_HEIGHT);
+
+            float statValue = stat.defaultBaseValue;
+            
+            
+            foreach (var thing in items) {
+                statValue += thing.MakeDummyThingNoId().GetStatValue(stat);
+                // statValue += StatWorker.StatOffsetFromGear(thing.MakeDummyThingNoId(), stat);
+            }
+
+            Widgets.Label(statRect, stat.LabelForFullStatList);
+            Text.Anchor = TextAnchor.UpperRight;
+            Widgets.Label(statRect, statValue.ToString());
+            Text.Anchor = TextAnchor.UpperLeft;
         }
     }
 }

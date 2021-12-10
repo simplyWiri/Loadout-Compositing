@@ -56,12 +56,7 @@ namespace Inventory
             float curY = GUIUtility.SPACED_HEIGHT;
             float beginY = rect.x;
 
-            var itemsWithPrios = component.Loadout.tags.SelectMany(t => t
-                    .ItemsWithTagMatching(item => item.Def.IsApparel)
-                    .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, component.Loadout.tags.IndexOf(tuple.Item1))))
-                .ToList();
-            
-            var wornApparel = ApparelUtility.WornApparelFor(def, itemsWithPrios) ?? new List<Tuple<Item, Tag>>();
+            var wornApparel = component.Loadout.HypotheticalWornApparelWithTag(def).ToList();
 
             foreach (var category in ApparelUtility.GetBodyPartGroupFor(def).GetCategories().OrderByDescending(t => t.First().def.listOrder))
             {

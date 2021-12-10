@@ -42,6 +42,26 @@ namespace Inventory
             return tags.Any(t => t.ItemsMatching(item => item.Def == thing.def && item.Filter.Allows(thing)).Any());
         }
 
+        public IEnumerable<Item> HypotheticalWornApparel(BodyDef def) {
+            var itemsWithPrios = tags.SelectMany(t => t
+                    .ItemsWithTagMatching(item => item.Def.IsApparel)
+                    .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, tags.IndexOf(tuple.Item1))))
+                .ToList();
+            
+            var wornApparel = ApparelUtility.WornApparelFor(def, itemsWithPrios) ?? new List<Tuple<Item, Tag>>();
+            return wornApparel.Select(tuple => tuple.Item1);
+        }
+        
+        public IEnumerable<Tuple<Item, Tag>> HypotheticalWornApparelWithTag(BodyDef def) {
+            var itemsWithPrios = tags.SelectMany(t => t
+                    .ItemsWithTagMatching(item => item.Def.IsApparel)
+                    .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, tags.IndexOf(tuple.Item1))))
+                .ToList();
+            
+            var wornApparel = ApparelUtility.WornApparelFor(def, itemsWithPrios) ?? new List<Tuple<Item, Tag>>();
+            return wornApparel;
+        }
+
         public IEnumerable<Item> DesiredItems(List<Thing> heldThings)
         {
             var desiredThings = AllItems.Where(t => !t.Def.IsApparel);
