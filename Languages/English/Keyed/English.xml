@@ -29,6 +29,7 @@
 	<CompositableLoadouts.AppliedTags>Applied Tags (priority high to low)</CompositableLoadouts.AppliedTags>
 	<CompositableLoadouts.PawnStats>Pawn Stats</CompositableLoadouts.PawnStats>
 	<CompositableLoadouts.ShowCoverage>Show Coverage</CompositableLoadouts.ShowCoverage>
+	<CompositableLoadouts.HideCoverage>Hide Coverage</CompositableLoadouts.HideCoverage>
 	<CompositableLoadouts.LoadoutStatistics>Loadout Statistics (when fully satisfied)</CompositableLoadouts.LoadoutStatistics>
 	<CompositableLoadouts.Weight>Weight</CompositableLoadouts.Weight>
 	<CompositableLoadouts.WeightOverCapacity>The weight of gear carried by the pawn, vs the carry capacity of the pawn</CompositableLoadouts.WeightOverCapacity>
@@ -39,5 +40,7 @@
 	<CompositableLoadouts.Statistics>Statistics</CompositableLoadouts.Statistics>
 	<CompositableLoadouts.StuffFilter>Stuff Filter</CompositableLoadouts.StuffFilter>
 	<CompositableLoadouts.NoMaterial>No Material</CompositableLoadouts.NoMaterial>
+	<CompositableLoadouts.AddTag>Add Tag</CompositableLoadouts.AddTag>
+	<CompositableLoadouts.PreviewQuality>Preview Quality: </CompositableLoadouts.PreviewQuality>
 
 </LanguageData>

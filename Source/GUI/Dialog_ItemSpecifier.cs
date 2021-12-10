@@ -153,9 +153,7 @@ namespace Inventory
             DrawStuffScrollableList(listRect);
 
             // // Draw quality choice for preview
-            WidgetRow previewQualityRow =
-                new WidgetRow(listRect.x, listRect.yMax, UIDirection.RightThenDown, listRect.width);
-            this.DrawPreviewQuality(previewQualityRow);
+            this.DrawPreviewQuality(new Rect(listRect.x, listRect.yMax, listRect.width, GenUI.ListSpacing));
 
             // Draw stats
             Rect rect = canvas.RightPart(0.65f);
@@ -212,21 +210,26 @@ namespace Inventory
              filter.SetHpRange(hitpointRange);
          }
          
-        protected virtual void DrawPreviewQuality(WidgetRow widgetRow)
+        protected virtual void DrawPreviewQuality(Rect rect)
         {
             GUI.color = Color.grey;
             Text.Anchor = TextAnchor.MiddleLeft;
-            widgetRow.Label("Preview Quality");
+            var previewQualityRect = rect.PopLeftPartPixels(rect.width / 2.3f);
+            Widgets.Label(previewQualityRect, Strings.PreviewQuality);
             GUI.color = Color.white;
 
-            if (widgetRow.ButtonIcon(Textures.PlaceholderTex))
+            rect.PopRightPartPixels(GenUI.ListSpacing);
+
+            var lRect = rect.PopLeftPartPixels(GenUI.SmallIconSize);
+            var rRect = rect.PopRightPartPixels(GenUI.SmallIconSize);
+            if ( Widgets.ButtonImageFitted(lRect, Textures.PlaceholderTex) )
                 qualityPreview = qualityPreview.Previous();
 
             Text.Anchor = TextAnchor.MiddleCenter;
-            widgetRow.Label(qualityPreview.GetLabel());
+            Widgets.Label(rect, qualityPreview.GetLabel());
             Text.Anchor = TextAnchor.UpperLeft;
 
-            if (widgetRow.ButtonIcon(Textures.PlaceholderTex))
+            if ( Widgets.ButtonImageFitted(rRect, Textures.PlaceholderTex) )
                 qualityPreview = qualityPreview.Next();
         }
 
