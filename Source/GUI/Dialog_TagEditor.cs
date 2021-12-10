@@ -111,8 +111,16 @@ namespace Inventory
 
                 // Icon
                 var iconRect = itemRect.PopLeftPartPixels(GUIUtility.SPACED_HEIGHT * 2);
-                Widgets.DefIcon(iconRect, def, item.RandomStuff);
-
+                if (item.Quantity > 1)
+                {
+                    GUIUtility.FittedDefIconCount(iconRect, def, item.RandomStuff, item.Quantity);
+                }
+                else
+                {
+                    Widgets.DefIcon(iconRect, def, item.RandomStuff);
+                }
+                TooltipHandler.TipRegion(iconRect, item.Def.DescriptionDetailed);
+                
                 // Remove
                 var removeButton = itemRect.PopRightPartPixels(GUIUtility.SPACED_HEIGHT * 1.5f);
                 if (Widgets.ButtonImageFitted(removeButton.ContractedBy(1f), TexButton.DeleteX))
@@ -235,6 +243,7 @@ namespace Inventory
 
                 Widgets.DefIcon(descRect.LeftPart(.15f), def);
                 Widgets.Label(descRect.RightPart(.85f), def.LabelCap);
+                TooltipHandler.TipRegion(rect, def.DescriptionDetailed);
                 
                 if (Widgets.ButtonInvisible(descRect)) {
                     AddDefToTag(def);

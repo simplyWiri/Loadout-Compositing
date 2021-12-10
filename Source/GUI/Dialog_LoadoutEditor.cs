@@ -383,7 +383,15 @@ namespace Inventory
                         var idx = i + j;
                         if (idx >= tag.requiredItems.Count) break;
                         var item = tag.requiredItems[idx];
-                        Widgets.DefIcon(drawRect, item.Def, item.RandomStuff);
+                        if (item.Quantity > 1)
+                        {
+                            GUIUtility.FittedDefIconCount(drawRect, item.Def, item.RandomStuff, item.Quantity);
+                        }
+                        else
+                        {
+                            Widgets.DefIcon(drawRect, item.Def, item.RandomStuff);
+                        }
+                        TooltipHandler.TipRegion(drawRect, item.Def.LabelCap);
                     }
                 }
             }
@@ -396,14 +404,14 @@ namespace Inventory
         public void DrawHeaderButtons(ref Rect rect, List<Tag> tags)
         {
             var buttonRect = rect.PopTopPartPixels(GenUI.ListSpacing);
-
+            
             if (Widgets.ButtonText(buttonRect.PopLeftPartPixels(rect.width / 3f), Strings.PawnStats))
             {
                 this.windowRect.width = windowRect.width + (drawPawnStats ? -210f : 210f);
                 drawPawnStats = !drawPawnStats;
             }
             
-            if (Widgets.ButtonText(buttonRect.LeftHalf(), Strings.CreateNewTag))
+            if (Widgets.ButtonText(buttonRect.LeftHalf(), Strings.AddTag))
             {
                 var opts = LoadoutManager.Tags.Except(tags).Select(tag =>
                     new FloatMenuOption(tag.name, () =>
@@ -416,6 +424,7 @@ namespace Inventory
                         pList.pawns.Add(pawn);
                         component.Loadout.tags.Add(tag);
                     })).ToList();
+                
                 if(opts.Count == 0)
                 {
                     Messages.Message(new Message(Strings.NoTagsYetWarning, MessageTypeDefOf.RejectInput));
@@ -426,7 +435,7 @@ namespace Inventory
                 }
             }
 
-            if (Widgets.ButtonText(buttonRect.RightHalf(), Strings.ShowCoverage))
+            if (Widgets.ButtonText(buttonRect.RightHalf(), drawShowCoverage ? Strings.HideCoverage : Strings.ShowCoverage))
             {
                 this.windowRect.width = windowRect.width + (drawShowCoverage ? -420f : 420f);
                 drawShowCoverage = !drawShowCoverage;

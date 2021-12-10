@@ -28,6 +28,16 @@ namespace Inventory
                 Widgets.DefIcon(rect.PopLeftPartPixels(SPACED_HEIGHT), td.Def, td.RandomStuff);
             }
         }
+
+        public static void FittedDefIconCount(Rect rect, ThingDef def, ThingDef stuff, int quantity)
+        {
+            Widgets.DefIcon(rect, def, stuff);
+            Text.Anchor = TextAnchor.LowerCenter;
+            Text.Font = GameFont.Tiny;
+            Widgets.Label(rect, quantity.ToString());
+            Text.Anchor = TextAnchor.UpperLeft;
+            Text.Font = GameFont.Small;
+        }
         
         // returns whether the input field is in focus or not.
         public static bool InputField(Rect rect, string name, ref string buff, bool ShowName = false)

@@ -37,6 +37,7 @@ namespace Inventory
         public static string AppliedTags => $"{P}AppliedTags".TranslateSimple();
         public static string PawnStats => $"{P}PawnStats".TranslateSimple();
         public static string ShowCoverage => $"{P}ShowCoverage".TranslateSimple();
+        public static string HideCoverage => $"{P}HideCoverage".TranslateSimple();
         public static string LoadoutStatistics => $"{P}LoadoutStatistics".TranslateSimple();
         public static string Weight => $"{P}Weight".TranslateSimple();
         public static string WeightOverCapacity => $"{P}WeightOverCapacity".TranslateSimple();
@@ -49,5 +50,9 @@ namespace Inventory
         public static string Statistics => $"{P}Statistics".TranslateSimple();
         public static string StuffFilter => $"{P}StuffFilter".TranslateSimple();
         public static string NoMaterial => $"{P}NoMaterial".TranslateSimple();
+        public static string AddTag => $"{P}AddTag".TranslateSimple();
+        public static string PreviewQuality => $"{P}PreviewQuality".TranslateSimple();
+
+
     }
 }
