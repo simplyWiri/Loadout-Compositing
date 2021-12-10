@@ -23,7 +23,7 @@ namespace Inventory {
             if (Find.TickManager.TicksGame < nextTick)
                 return null;
 
-            var items = pawn.inventory.innerContainer.InnerListForReading;
+            var items = pawn.inventory.innerContainer.InnerListForReading.ConcatIfNotNull(pawn.equipment.AllEquipmentListForReading).ToList();
             var requiredItems = pawn.GetComp<LoadoutComponent>().Loadout.DesiredItems(items);
 
             // check to see if there are any required items on the map
