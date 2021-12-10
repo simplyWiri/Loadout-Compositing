@@ -52,7 +52,7 @@ namespace Inventory
 
         public void CopyTo(ThingFilter thingFilter)
         {
-            thingFilter.allowedDefs = stuffs.ToHashSet();
+            thingFilter.allowedDefs = stuffs.Count == 0 ? GenStuff.AllowedStuffsFor(forThing).ToHashSet() : stuffs.ToHashSet();
         }
         public static Filter CopyFrom(Filter from, Filter to)
         {
