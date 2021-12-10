@@ -216,7 +216,18 @@ namespace Inventory
 
             if (defFilter != string.Empty) {
                 var filter = defFilter.ToLower();
-                defs.RemoveAll(td => !td.LabelCap.ToString().ToLowerInvariant().Contains(filter));
+                var acceptedLayers = DefDatabase<ApparelLayerDef>.AllDefsListForReading
+                    .Where(l => l.LabelCap.ToString().ToLower().Contains(filter));
+                
+                defs.RemoveAll(td =>
+                {
+                    if (td.IsApparel)
+                    {
+                        if (td.apparel.layers.Intersect(acceptedLayers).Any())
+                            return false;
+                    }
+                    return !td.LabelCap.ToString().ToLowerInvariant().Contains(filter);
+                });
             }
             
             GUIUtility.InputField(r.PopTopPartPixels(GUIUtility.SPACED_HEIGHT).ContractedBy(2f), "Def List Filter", ref defFilter);
