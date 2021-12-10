@@ -27,8 +27,13 @@ namespace Inventory
             
             AddToDefs(def, apparel);
         }
-
-        private void AddToDefs(BodyDef def, ThingDef apparel)
+        
+        public ApparelSlots()
+        {
+            this.defs = new Dictionary<BodyPartGroupDef, HashSet<ApparelLayerDef>>();
+        }
+        
+        public void AddToDefs(BodyDef def, ThingDef apparel)
         {
             // we do this by adding an entry per BodyPartGroupDef that the
             // apparel covers, and the layers being the layers which the
@@ -43,7 +48,13 @@ namespace Inventory
                 else
                 {
                     defs.Add(groupDef, layers);
-                }            }
+                }            
+            }
+        }
+
+        public int GetSlotsCoveredNumber()
+        {
+            return defs.Sum(kv => kv.Value.Count);
         }
         
         private Dictionary<BodyPartGroupDef, HashSet<ApparelLayerDef>> defs;
@@ -264,6 +275,22 @@ namespace Inventory
             }
 
             return bodyPartGroup;
+        }
+
+        public static List<Tuple<Item, Tag>> WornApparelFor(BodyDef def, List<Tuple<Item, Tag, int>> apparels)
+        {
+            var wornApparels = new List<Tuple<Item, Tag>>();
+            var wornApparelSlots = new ApparelSlots();
+            foreach (var (apparel, tag, _) in apparels.OrderBy(app => app.Item3))
+            {
+                var apparelSlots = new ApparelSlots(def, apparel.Def);
+
+                if (!wornApparelSlots.Intersects(apparelSlots)) {
+                    wornApparels.Add(new Tuple<Item, Tag>(apparel, tag));
+                    wornApparelSlots.AddToDefs(def, apparel.Def);
+                }
+            }
+            return wornApparels;
         }
     }
 }

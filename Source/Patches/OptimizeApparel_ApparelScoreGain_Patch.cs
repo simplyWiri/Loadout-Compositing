@@ -11,9 +11,10 @@ namespace Inventory
         public static void Postfix(Pawn pawn, Apparel ap, ref float __result)
         {
             var comp = pawn.GetComp<LoadoutComponent>();
-            if (comp?.Loadout.Desires(ap) ?? false) {
-                __result += 0.24f;
-                __result *= 10;
+            var multiplier = comp?.Loadout.WeightAtWhichLoadoutDesires(ap) ?? 0;
+            if (multiplier != 0) {
+                __result += 0.24f; // flat bonus for being an apparel in the loadout
+                __result *= multiplier; 
             }
         }
     }

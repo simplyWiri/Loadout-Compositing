@@ -24,9 +24,18 @@ namespace Inventory
             this.uniqueId = LoadoutManager.GetNextTagId();
         }
 
+        public IEnumerable<Item> ItemsMatching(Thing thing)
+        {
+            return requiredItems.Where(item => thing.def == item.Def && item.Filter.Allows(thing));
+        }
         public IEnumerable<Item> ItemsMatching(Predicate<Item> pred)
         {
             return requiredItems.Where(item => pred(item));
+        }
+        
+        public IEnumerable<Tuple<Tag, Item>> ItemsWithTagMatching(Predicate<Item> pred)
+        {
+            return requiredItems.Where(item => pred(item)).Select(item => new Tuple<Tag, Item>(this, item));
         }
 
         public void Add(ThingDef thing)
