@@ -324,7 +324,7 @@ namespace Inventory
             GUIUtility.BarWithOverlay(
                 viewRect.PopTopPartPixels(GUIUtility.SPACED_HEIGHT),
                 Utility.HypotheticalEncumberancePercent(pawn, loadoutItems),
-                Utility.HypotheticalUnboundedEncumberancePercent(pawn, loadoutItems) > 1f ? GUIUtility.ValvetTex as Texture2D : GUIUtility.RWPrimaryTex as Texture2D,
+                Utility.HypotheticalUnboundedEncumberancePercent(pawn, loadoutItems) > 1f ? Textures.ValvetTex as Texture2D : Textures.RWPrimaryTex as Texture2D,
                 Strings.Weight,
                 Utility.HypotheticalGearAndInventoryMass(pawn, loadoutItems).ToString("0.#") + "/" + MassUtility.Capacity(pawn).ToStringMass(),
                 Strings.WeightOverCapacity);
