@@ -60,6 +60,25 @@ namespace Inventory
             PawnsWithTags.Add(tag, new SerializablePawnList(new List<Pawn>()));
         }
 
+        public static void RemoveTag(Tag tag)
+        {
+            Tags.Remove(tag);
+            if (PawnsWithTags.ContainsKey(tag))
+                PawnsWithTags.Remove(tag);
+
+            instance.billToTag.RemoveAll(bill => bill.Value == tag);
+
+            foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.FreeColonists)
+                         .Where(p => !p.IsQuestLodger() && p.TryGetComp<LoadoutComponent>() != null))
+            {
+                var loadout = pawn.TryGetComp<LoadoutComponent>();
+                if (loadout == null) continue;
+                if (loadout.Loadout.tags.Contains(tag)) {
+                    loadout.Loadout.tags.Remove(tag);
+                }
+            }
+        }
+
         public static List<FloatMenuOption> OptionPerTag(Func<Tag, string> labelGen, Action<Tag> onClick)
         {
             return Tags.Select(tag => new FloatMenuOption(labelGen(tag), () => onClick(tag) )).ToList();

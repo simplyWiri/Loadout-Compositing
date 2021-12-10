@@ -23,6 +23,8 @@ namespace Inventory
 
         public static string NoTagsYetWarning => $"{P}NoTagsYetWarning".TranslateSimple();
         public static string CreateNewTag => $"{P}CreateNewTag".TranslateSimple();
+        public static string DeleteTag => $"{P}DeleteTag".TranslateSimple();
+
         public static string ChangeTagName => $"{P}ChangeTagName".TranslateSimple();
         public static string CopyPasteExplain => $"{P}CopyPasteExplain".TranslateSimple();
         

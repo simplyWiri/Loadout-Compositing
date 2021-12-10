@@ -69,6 +69,17 @@ namespace Inventory
                 curTag = new Tag("Placeholder");
                 LoadoutManager.AddTag(curTag);
             }
+
+            if (Widgets.ButtonText(topRect.RightHalf(), Strings.DeleteTag))
+            {
+                var floatOpts = LoadoutManager.OptionPerTag(tag => $"{tag.name}", LoadoutManager.RemoveTag);
+                if (floatOpts.Count == 0) {
+                    Messages.Message(new Message(Strings.NoTagsYetWarning, MessageTypeDefOf.RejectInput));
+                }
+                else {
+                    Find.WindowStack.Add(new FloatMenu(floatOpts));
+                }
+            }
             
             r.AdjVertBy(GUIUtility.DEFAULT_HEIGHT);
             

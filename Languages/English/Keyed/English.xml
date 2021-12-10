@@ -14,6 +14,7 @@
 	<CompositableLoadouts.SelectTag>Select Tag</CompositableLoadouts.SelectTag>
 	<CompositableLoadouts.NoTagsYetWarning>You have not created any tags yet</CompositableLoadouts.NoTagsYetWarning>
 	<CompositableLoadouts.CreateNewTag>Create New Tag</CompositableLoadouts.CreateNewTag>
+	<CompositableLoadouts.DeleteTag>Delete Tag</CompositableLoadouts.DeleteTag>
 	<CompositableLoadouts.ChangeTagName>Change Tag Name</CompositableLoadouts.ChangeTagName>
 
 	<CompositableLoadouts.RemoveItemFromTag>Remove item from Tag</CompositableLoadouts.RemoveItemFromTag>
