@@ -26,9 +26,9 @@ namespace Inventory
             {
                 if (Matches(insts, i))
                 {
-                    yield return new CodeInstruction(OpCodes.Ldarg_0);
+                    yield return new CodeInstruction(OpCodes.Ldarg_0).MoveLabelsFrom(insts[i]);
                     yield return new CodeInstruction(OpCodes.Call, getPawn);
-                    yield return new CodeInstruction(OpCodes.Ldloca_S, insts[i - 8].operand).MoveLabelsFrom(insts[i]);
+                    yield return new CodeInstruction(OpCodes.Ldloca_S, insts[i - 8].operand);
                     yield return new CodeInstruction(OpCodes.Ldloca_S, insts[i - 7].operand);
                     yield return new CodeInstruction(OpCodes.Call, rectWidth);
                     yield return new CodeInstruction(OpCodes.Call, drawTags);
@@ -42,6 +42,7 @@ namespace Inventory
         public static void DrawTags(Pawn p, ref float curY, float width)
         {
             if (!p.RaceProps.Humanlike) return;
+            if (!p.IsColonist || p.IsQuestLodger() || (p.apparel?.AnyApparelLocked ?? true) ) return;
 
             GearTab.DrawTags(p, ref curY, width);
         }

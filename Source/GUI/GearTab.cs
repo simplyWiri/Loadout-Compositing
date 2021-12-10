@@ -10,8 +10,6 @@ namespace Inventory
     {
         public static void DrawTags(Pawn p, ref float curY, float width)
         {
-            if (!p.IsColonist || p.IsQuestLodger() || p.apparel.AnyApparelLocked ) return;
-
             Widgets.ListSeparator(ref curY, width, Strings.TagLoadoutComposition);
             var rect = new Rect(0, curY, width, GUIUtility.DEFAULT_HEIGHT);
             curY += GUIUtility.DEFAULT_HEIGHT;
