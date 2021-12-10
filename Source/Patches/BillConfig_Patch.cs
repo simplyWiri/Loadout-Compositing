@@ -47,7 +47,15 @@ namespace Inventory
         // todo: move to GUI/ and clean up
         public static void DrawConfig(Dialog_BillConfig window, Listing_Standard standard, Bill_Production bill)
         {
-	        Widgets.Dropdown(standard.GetRect(30f), bill, LoadoutManager.TagFor, GenerateTagOptions, LoadoutManager.TagFor(bill) == null ? Strings.PickTargetTag : Strings.SwitchTargetTag(LoadoutManager.TagFor(bill).name));
+	        // Drop down
+	        var dropdownStr = LoadoutManager.TagFor(bill) == null
+		        ? Strings.PickTargetTag
+		        : Strings.SwitchTargetTag(LoadoutManager.TagFor(bill).name);
+	        var dropdownStrSize = Text.CalcHeight(dropdownStr, standard.ColumnWidth);
+	        var dropDownRect = standard.GetRect(dropdownStrSize);
+	        Widgets.Dropdown(dropDownRect, bill, LoadoutManager.TagFor, GenerateTagOptions, dropdownStr);
+	        
+	        // How many do we currently have?
 	        var text = $"{"CurrentlyHave".Translate()}: {bill.recipe.WorkerCounter.CountProducts(bill)} / {bill.targetCount * LoadoutManager.ColonistCountFor(bill)}";
 	        var str = bill.recipe.WorkerCounter.ProductsDescription(bill);
 	        if (!str.NullOrEmpty())
@@ -56,6 +64,8 @@ namespace Inventory
 	        }
 
 	        standard.Label(text);
+	        
+	        // integer input for the number of items to produce
 	        int targetCount = bill.targetCount;
 	        standard.IntEntry(ref bill.targetCount, ref window.targetCountEditBuffer, bill.recipe.targetCountAdjustment);
 	        bill.unpauseWhenYouHave = Mathf.Max(0, bill.unpauseWhenYouHave + (bill.targetCount - targetCount));
@@ -63,9 +73,12 @@ namespace Inventory
 	        if (producedThingDef == null) return;
 
 	        var tag = LoadoutManager.TagFor(bill);
-	        if (tag.HasThingDef(producedThingDef, out var item))
+	        if (tag != null && tag.HasThingDef(producedThingDef, out var item))
 	        {
-		        if (standard.ButtonText(Strings.CopyFromTag(tag.name, item.Def.LabelCap)))
+		        var copyTagStr = Strings.CopyFromTag(tag.name, item.Def.LabelCap);
+		        var size = Text.CalcHeight(copyTagStr, standard.ColumnWidth);
+		        var rect = standard.GetRect(size);
+		        if ( Widgets.ButtonText(rect, copyTagStr))
 		        {
 			        item.Filter.CopyTo(bill.ingredientFilter);
 
