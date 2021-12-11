@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
+using RimWorld;
 using Verse;
+using Verse.AI;
 
 namespace Inventory
 {
@@ -9,6 +12,33 @@ namespace Inventory
         private Loadout loadout = new Loadout();
 
         public Loadout Loadout => loadout;
+        
+        public bool ShouldDropSomething()
+        {
+            var pawn = parent as Pawn;
+            var comp = pawn.GetComp<LoadoutComponent>();
+            var items = pawn.inventory.innerContainer.InnerListForReading.ConcatIfNotNull(pawn.equipment.AllEquipmentListForReading).ToList();
+            
+            foreach (var heldThing in items)
+            {
+                var itemsAcceptingThing = comp.Loadout.ItemsAccepting(heldThing).ToList();
+                var desiredQuantity = itemsAcceptingThing.Sum(item => item.Quantity);
+                int currentQuantity = heldThing.stackCount;
+            
+                foreach (var otherThing in items.Except(heldThing))
+                {
+                    if (itemsAcceptingThing.Any(item => item.Allows(otherThing))) {
+                        currentQuantity += otherThing.stackCount;
+                    }
+                }
+            
+                if (currentQuantity > desiredQuantity) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         public override void PostExposeData()
         {

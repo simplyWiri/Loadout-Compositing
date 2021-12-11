@@ -41,8 +41,7 @@ namespace Inventory
 
         public static void DrawTags(Pawn p, ref float curY, float width)
         {
-            if (!p.RaceProps.Humanlike) return;
-            if (!p.IsColonist || p.IsQuestLodger() || (p.apparel?.AnyApparelLocked ?? true) ) return;
+            if (!p.IsValidLoadoutHolder()) return;
 
             GearTab.DrawTags(p, ref curY, width);
         }

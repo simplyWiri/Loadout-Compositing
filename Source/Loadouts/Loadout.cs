@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace Inventory
 {
     public class Loadout : IExposable
     {
         public List<Tag> tags;
-        public Loadout()
-        {
+        public List<ThingCount> itemsToRemove;
+        public Loadout() {
             tags = new List<Tag>();
+            itemsToRemove = new List<ThingCount>();
         }
 
         public IEnumerable<Item> AllItems => tags.SelectMany(t => t.requiredItems);
@@ -20,6 +23,7 @@ namespace Inventory
         {
             return tags.Where(tag => tag.ItemsMatching(predicate).Any());
         }
+        
         public IEnumerable<Item> ThingsMatching(Predicate<Item> predicate)
         {
             return tags.SelectMany(tag => tag.ItemsMatching(predicate));
@@ -39,7 +43,13 @@ namespace Inventory
         
         public bool Desires(Thing thing)
         {
-            return tags.Any(t => t.ItemsMatching(item => item.Def == thing.def && item.Filter.Allows(thing)).Any());
+            return tags.Any(t => t.ItemsMatching(item => item.Allows(thing)).Any());
+        }
+        
+        public IEnumerable<Item> ItemsAccepting(Thing thing)
+        {
+            return tags.SelectMany(t => t
+                .ItemsMatching(item => item.Allows(thing)));
         }
 
         public IEnumerable<Item> HypotheticalWornApparel(BodyDef def) {
@@ -67,7 +77,7 @@ namespace Inventory
             var desiredThings = AllItems.Where(t => !t.Def.IsApparel);
             foreach (var thing in desiredThings)
             {
-                if (heldThings.Any(t => t.def == thing.Def && thing.Filter.Allows(t) && t.stackCount >= thing.Quantity))
+                if (heldThings.Any(t => thing.Allows(t) && t.stackCount >= thing.Quantity))
                     continue;
                 
                 yield return thing;
@@ -77,6 +87,10 @@ namespace Inventory
         public void ExposeData()
         {
             Scribe_Collections.Look(ref tags, nameof(tags), LookMode.Reference);
+            Scribe_Collections.Look(ref itemsToRemove, nameof(itemsToRemove), LookMode.Deep);
+
+            itemsToRemove ??= new List<ThingCount>();
+            tags ??= new List<Tag>();
         }
     }
 }

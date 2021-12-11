@@ -24,6 +24,8 @@ namespace Inventory
         public ThingDef RandomStuff => !Def.MadeFromStuff ? null : filter.AllowedStuffs.Any() ? filter.AllowedStuffs.First() : GenStuff.AllowedStuffsFor(Def).First();
         public QualityCategory RandomQuality => (QualityCategory)Mathf.FloorToInt(((int)filter.QualityRange.max + (int)filter.QualityRange.min)/2.0f);
         public string Label => Print();
+
+        public bool Allows(Thing thing) => thing.def == Def && Filter.Allows(thing); 
         
         // Stuff? Def.LabelCap Quality-Range?
         public string Print() {

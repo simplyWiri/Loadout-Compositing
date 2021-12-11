@@ -12,9 +12,9 @@ namespace Inventory {
         
         public override Job TryGiveJob(Pawn pawn)
         {
-            if (!pawn.IsColonist || pawn.IsQuestLodger() || pawn.apparel.AnyApparelLocked ) 
+            if (!pawn.IsValidLoadoutHolder()) 
                 return null;
-
+            
             if (!nextUpdates.TryGetValue(pawn, out var nextTick)) {
                 nextTick = Find.TickManager.TicksGame + Rand.Range(10000, 15000);
                 nextUpdates.Add(pawn, nextTick);
@@ -23,8 +23,10 @@ namespace Inventory {
             if (Find.TickManager.TicksGame < nextTick)
                 return null;
 
+            var comp = pawn.GetComp<LoadoutComponent>();
+
             var items = pawn.inventory.innerContainer.InnerListForReading.ConcatIfNotNull(pawn.equipment.AllEquipmentListForReading).ToList();
-            var requiredItems = pawn.GetComp<LoadoutComponent>().Loadout.DesiredItems(items);
+            var requiredItems = comp.Loadout.DesiredItems(items).ToList();
 
             // check to see if there are any required items on the map
             foreach (var item in requiredItems) {
@@ -47,7 +49,30 @@ namespace Inventory {
                     return job;
                 }
             }
-            
+
+            // Removed a tag, and have an item lingering around
+            foreach (var item in comp.Loadout.itemsToRemove.ToList()) {
+                // player might have manually removed thing
+                if (!pawn.inventory.Contains(item.thing)) {
+                    comp.Loadout.itemsToRemove.Remove(item);
+                    continue;
+                }
+                
+                var job = JobMaker.MakeJob(InvJobDefOf.CL_UnloadInventory);
+                job.SetTarget(TargetIndex.A, item.thing);
+                job.count = item.Count;
+                
+                comp.Loadout.itemsToRemove.Remove(item);
+                
+                return job;
+            }
+
+            // check to see if we are holding too many items (holding 75 wood, expecting 50, drop the 25)
+            // the actual logic to calc what to drop is in `FirstUnloadableThing_Patch.cs`
+            if (comp.ShouldDropSomething()) {
+                return JobMaker.MakeJob(InvJobDefOf.CL_UnloadInventory);
+            }
+
             nextUpdates[pawn] = Find.TickManager.TicksGame + Rand.Range(10000, 15000);
             
             return null;

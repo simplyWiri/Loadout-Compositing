@@ -201,10 +201,14 @@ namespace Inventory
                 
                 if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(GenUI.ListSpacing).TopPartPixels(GenUI.ListSpacing), TexButton.DeleteX)) {
                     component.Loadout.tags.Remove(tag);
+                    
                     if ( LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList))
                     {
                         pList.pawns.Remove(pawn);
                     }
+
+                    var loadoutItems = tag.ThingsAcceptedInList(pawn.InventoryAndEquipment().ToList()).ToList();
+                    component.Loadout.itemsToRemove.AddRange(loadoutItems.ToList());
                 }
 
                 if (tagIdx != 0) {

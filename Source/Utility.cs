@@ -102,6 +102,20 @@ namespace Inventory
             }
             return mass;
         }
+
+        public static bool IsValidLoadoutHolder(this Pawn pawn)
+        {
+            return pawn.RaceProps.Humanlike 
+                   && pawn.IsColonist 
+                   && !pawn.IsQuestLodger() 
+                   && !(pawn.apparel?.AnyApparelLocked ?? true);
+        }
+
+        public static IEnumerable<Thing> InventoryAndEquipment(this Pawn pawn)
+        {
+            return pawn.inventory.innerContainer.InnerListForReading
+                .ConcatIfNotNull(pawn.equipment.AllEquipmentListForReading);
+        }
         
     }
 }

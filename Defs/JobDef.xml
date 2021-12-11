@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	
+  <JobDef>
+    <defName>CL_UnloadInventory</defName>
+    <driverClass>Inventory.JobDriver_UnloadInventory</driverClass>
+    <reportString>unloading inventory.</reportString>
+    <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+  </JobDef>
+
+</Defs>
