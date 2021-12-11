@@ -17,7 +17,7 @@ namespace Inventory
         {
             var pawn = parent as Pawn;
             var comp = pawn.GetComp<LoadoutComponent>();
-            var items = pawn.inventory.innerContainer.InnerListForReading.ConcatIfNotNull(pawn.equipment.AllEquipmentListForReading).ToList();
+            var items = pawn.InventoryAndEquipment().ToList();
             
             foreach (var heldThing in items)
             {

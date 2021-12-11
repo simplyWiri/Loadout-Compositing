@@ -125,9 +125,7 @@ namespace Inventory
             var thing = inventory.innerContainer.innerList[thingIndex];
             var comp = inventory.pawn.GetComp<LoadoutComponent>();
 
-            var allOtherEqualThings = inventory.innerContainer.innerList
-                .Except(thing)
-                .ConcatIfNotNull(inventory.pawn.equipment.AllEquipmentListForReading)
+            var allOtherEqualThings = inventory.pawn.InventoryAndEquipment().ToList()
                 .Where(td => td.def == thing.def)
                 .ToList();
 
