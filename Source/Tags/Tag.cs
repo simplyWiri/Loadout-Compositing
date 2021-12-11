@@ -27,7 +27,7 @@ namespace Inventory
             this.uniqueId = LoadoutManager.GetNextTagId();
             if (name == "")
             {
-                name = "Placeholder-" + uniqueId;
+                this.name = "Placeholder-" + uniqueId;
             }
         }
 
