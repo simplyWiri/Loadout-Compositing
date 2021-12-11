@@ -49,6 +49,7 @@ namespace Inventory
 
         public void DrawTagEditor(Rect r)
         {
+            _ = r.PopRightPartPixels(this.Margin);
             var topRect = r.TopPartPixels(22f);
             
             if (Widgets.ButtonText(topRect.LeftPart(0.33f), Strings.SelectTag))
@@ -144,7 +145,7 @@ namespace Inventory
 
                 // Edit 
                 var constrainButton = itemRect.PopRightPartPixels(GUIUtility.SPACED_HEIGHT * 1.5f);
-                if (Widgets.ButtonImageFitted(constrainButton.ContractedBy(1f), Textures.PlaceholderTex))
+                if (Widgets.ButtonImageFitted(constrainButton.ContractedBy(1f), Textures.EditTex))
                     Find.WindowStack.Add(new Dialog_ItemSpecifier(item.Filter));
                 TooltipHandler.TipRegion(constrainButton, Strings.SpecifyElementsToolTip);
 
@@ -198,11 +199,11 @@ namespace Inventory
 
             r.AdjVertBy(GUIUtility.DEFAULT_HEIGHT);
 
-            DrawOptionButton(Textures.PlaceholderTex, "Apparel", State.Apparel);
-            DrawOptionButton(Textures.PlaceholderTex, "Melee", State.Melee);
-            DrawOptionButton(Textures.PlaceholderTex, "Ranged", State.Ranged);
-            DrawOptionButton(Textures.PlaceholderTex, "Medicine", State.Medicinal);
-            DrawOptionButton(Textures.PlaceholderTex, "Items", State.Items);
+            DrawOptionButton(Textures.ApparelTex, "Apparel", State.Apparel);
+            DrawOptionButton(Textures.MeleeTex, "Melee", State.Melee);
+            DrawOptionButton(Textures.RangedTex, "Ranged", State.Ranged);
+            DrawOptionButton(Textures.MedicalTex, "Medicine", State.Medicinal);
+            DrawOptionButton(Textures.MiscItemsTex, "Items", State.Items);
 
             switch (curState)
             {

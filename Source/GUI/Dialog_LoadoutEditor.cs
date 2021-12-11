@@ -99,14 +99,14 @@ namespace Inventory
 
             var lhs = topPartRect.PopLeftPartPixels(GUIUtility.SPACED_HEIGHT);
             var rhs = topPartRect.PopRightPartPixels(GUIUtility.SPACED_HEIGHT);
-            if (Widgets.ButtonImageFitted(lhs, Textures.PlaceholderTex) || Input.GetKeyDown(KeyCode.LeftArrow)) {
+            if (Widgets.ButtonImageFitted(lhs, Textures.PreviousTex) || Input.GetKeyDown(KeyCode.LeftArrow)) {
                 ThingSelectionUtility.SelectPreviousColonist();
                 this.Close();
                 Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), drawShowCoverage, drawPawnStats ));
                 return true;
             }
             TooltipHandler.TipRegion(lhs, Strings.SelectPrevious);
-            if (Widgets.ButtonImageFitted(rhs, Textures.PlaceholderTex) || Input.GetKeyDown(KeyCode.RightArrow)) {
+            if (Widgets.ButtonImageFitted(rhs, Textures.NextTex) || Input.GetKeyDown(KeyCode.RightArrow)) {
                 ThingSelectionUtility.SelectNextColonist();
                 this.Close();
                 Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), drawShowCoverage, drawPawnStats));
@@ -187,7 +187,6 @@ namespace Inventory
             GUIUtility.ListSeperator(ref viewRect, Strings.AppliedTags);
             height += 35;
 
-            
             foreach (var tag in tags)
             {
                 var tagIdx = tags.FindIndex(t => t == tag);
@@ -195,9 +194,11 @@ namespace Inventory
                 var tagRect = viewRect.PopTopPartPixels(tagHeight );
                 height += tagHeight;
 
-                if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(GenUI.ListSpacing).TopPartPixels(GenUI.ListSpacing), Textures.PlaceholderTex)) {
+                var editButtonRect = tagRect.PopRightPartPixels(GenUI.ListSpacing).TopPartPixels(GenUI.ListSpacing);
+                if (Widgets.ButtonImageFitted(editButtonRect, Textures.EditTex)) {
                     Find.WindowStack.Add(new Dialog_TagEditor(tag));
                 }
+                TooltipHandler.TipRegion(editButtonRect, $"Edit {tag.name}");
                 
                 if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(GenUI.ListSpacing).TopPartPixels(GenUI.ListSpacing), TexButton.DeleteX)) {
                     component.Loadout.tags.Remove(tag);
@@ -271,6 +272,7 @@ namespace Inventory
         public void DrawHeaderButtons(ref Rect rect, List<Tag> tags)
         {
             var buttonRect = rect.PopTopPartPixels(GenUI.ListSpacing);
+            buttonRect.PopRightPartPixels(16f);
             
             if (Widgets.ButtonText(buttonRect.PopLeftPartPixels(rect.width / 3f), Strings.PawnStats))
             {
@@ -304,8 +306,8 @@ namespace Inventory
 
             if (Widgets.ButtonText(buttonRect.RightHalf(), drawShowCoverage ? Strings.HideCoverage : Strings.ShowCoverage))
             {
-                var width = 210f + coveragePanel.extraWidth;
-                this.windowRect.width = windowRect.width + (drawShowCoverage ? -width : width);
+                var width = 210f + coveragePanel.extraWidth + 16f;
+                this.windowRect.width += (drawShowCoverage ? -width : width);
                 drawShowCoverage = !drawShowCoverage;
             }
         }

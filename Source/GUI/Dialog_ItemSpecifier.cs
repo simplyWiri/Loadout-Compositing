@@ -226,14 +226,14 @@ namespace Inventory
 
             var lRect = rect.PopLeftPartPixels(GenUI.SmallIconSize);
             var rRect = rect.PopRightPartPixels(GenUI.SmallIconSize);
-            if ( Widgets.ButtonImageFitted(lRect, Textures.PlaceholderTex) )
+            if ( Widgets.ButtonImageFitted(lRect, Textures.PreviousTex) )
                 qualityPreview = qualityPreview.Previous();
 
             Text.Anchor = TextAnchor.MiddleCenter;
             Widgets.Label(rect, qualityPreview.GetLabel());
             Text.Anchor = TextAnchor.UpperLeft;
 
-            if ( Widgets.ButtonImageFitted(rRect, Textures.PlaceholderTex) )
+            if ( Widgets.ButtonImageFitted(rRect, Textures.NextTex) )
                 qualityPreview = qualityPreview.Next();
         }
 
