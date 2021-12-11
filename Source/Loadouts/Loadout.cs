@@ -77,7 +77,9 @@ namespace Inventory
             var desiredThings = AllItems.Where(t => !t.Def.IsApparel);
             foreach (var thing in desiredThings)
             {
-                if (heldThings.Any(t => thing.Allows(t) && t.stackCount >= thing.Quantity))
+                var count = heldThings.Where(heldThing => thing.Allows(heldThing)).Sum(heldThing => heldThing.stackCount);
+
+                if ( count >= thing.Quantity)
                     continue;
                 
                 yield return thing;

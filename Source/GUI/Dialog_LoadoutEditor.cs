@@ -83,7 +83,7 @@ namespace Inventory
             var middlePanel = drawShowCoverage ? inRect.PopLeftPartPixels(420f) : inRect;
 
             DrawTags(middlePanel.TopPartPixels(middlePanel.height / 2.0f));
-            DrawStatistics(middlePanel.BottomPartPixels((middlePanel.height - Mathf.Min(middlePanel.height/2.0f, tagsHeight)) - GUIUtility.SPACED_HEIGHT * 2f));
+            DrawStatistics(middlePanel.BottomPartPixels((middlePanel.height - Mathf.Min(middlePanel.height/2.0f, tagsHeight + 10)) - GUIUtility.SPACED_HEIGHT * 2f));
 
             if (drawShowCoverage)
             {
@@ -173,26 +173,22 @@ namespace Inventory
         public void DrawTags(Rect rect)
         {
             var tags = component.Loadout.tags.ToList();
-            var height = 0f;
             
             DrawHeaderButtons(ref rect, tags);
-                
             rect.AdjVertBy(GenUI.GapTiny);
-            height += GenUI.ListSpacing + GenUI.GapTiny;
             
+            GUIUtility.ListSeperator(ref rect, Strings.AppliedTags);
+            
+            tagsHeight = tags.Sum(tag => GenUI.ListSpacing * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f))));
             var viewRect = new Rect(rect.x, rect.y, rect.width - 16f, tagsHeight);
             
             Widgets.BeginScrollView(rect, ref tagScroll, viewRect);
             
-            GUIUtility.ListSeperator(ref viewRect, Strings.AppliedTags);
-            height += 35;
-
             foreach (var tag in tags)
             {
                 var tagIdx = tags.FindIndex(t => t == tag);
                 var tagHeight = GenUI.ListSpacing * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
                 var tagRect = viewRect.PopTopPartPixels(tagHeight );
-                height += tagHeight;
 
                 var editButtonRect = tagRect.PopRightPartPixels(GenUI.ListSpacing).TopPartPixels(GenUI.ListSpacing);
                 if (Widgets.ButtonImageFitted(editButtonRect, Textures.EditTex)) {
@@ -236,15 +232,14 @@ namespace Inventory
                 {
                     tagRect.PopRightPartPixels(GenUI.ListSpacing);
                 }
-
-
-                Widgets.DrawBoxSolid(tagRect.PopLeftPartPixels(10.0f), Panel_ShowCoverage.coloursByIdx[tagIdx]);
+                
+                Widgets.DrawBoxSolid(tagRect.PopLeftPartPixels(10.0f), Panel_ShowCoverage.GetColorForTagAtIndex(tagIdx));
+                tagRect.AdjHorzBy(3f);
                 Widgets.Label(tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + 10f), tag.name);
-
                 
                 var y = tagRect.y;
                 
-                // draw required items in blocks of 3
+                // draw required items in blocks of 4
                 for (int i = 0; i < tag.requiredItems.Count; i+= 4) {
                     for (int j = 0; j < 4; j++) {
                         var drawRect = new Rect(tagRect.x + GenUI.ListSpacing * j, y + (i/4.0f) * GenUI.ListSpacing, GenUI.ListSpacing, GenUI.ListSpacing);
@@ -263,8 +258,6 @@ namespace Inventory
                     }
                 }
             }
-
-            tagsHeight = height;
             
             Widgets.EndScrollView();
         }
@@ -293,6 +286,8 @@ namespace Inventory
                         pList.pawns.Add(pawn);
                         component.Loadout.tags.Add(tag);
                     })).ToList();
+                opts.Insert(0, new FloatMenuOption(Strings.CreateNewTag,
+                    () => Find.WindowStack.Add(new Dialog_TagEditor())));   
                 
                 if(opts.Count == 0)
                 {
@@ -319,7 +314,7 @@ namespace Inventory
             //Widgets.DrawBoxSolid(rect, Color.green);
 
             var height = 0f;
-            Widgets.BeginScrollView(rect, ref tagScroll, viewRect);
+            Widgets.BeginScrollView(rect, ref statsScroll, viewRect);
             
             GUIUtility.ListSeperator(ref viewRect, Strings.LoadoutStatistics);
 

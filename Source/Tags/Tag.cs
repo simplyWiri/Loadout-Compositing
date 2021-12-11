@@ -16,8 +16,8 @@ namespace Inventory
         public Tag()
         {
             this.requiredItems = new List<Item>();
-            this.uniqueId = LoadoutManager.GetNextTagId();
-            this.name = "Placeholder-" + this.uniqueId;
+            this.uniqueId = -1;
+            this.name = "";
         }
 
         public Tag(string name)
@@ -25,6 +25,10 @@ namespace Inventory
             this.name = name;
             this.requiredItems = new List<Item>();
             this.uniqueId = LoadoutManager.GetNextTagId();
+            if (name == "")
+            {
+                name = "Placeholder-" + uniqueId;
+            }
         }
 
         public IEnumerable<Item> ItemsMatching(Thing thing)

@@ -34,6 +34,11 @@ namespace Inventory
                 Color.cyan
             };
         }
+
+        public static Color GetColorForTagAtIndex(int index)
+        {
+            return Panel_ShowCoverage.coloursByIdx[index % 10];
+        }
         
         public Panel_ShowCoverage(Dialog_LoadoutEditor parent)
         {
@@ -179,7 +184,7 @@ namespace Inventory
                 {
                     if (overlappingApparel != null)
                     {
-                        var col = coloursByIdx[loadoutTags.IndexOf(overlappingTag)];
+                        var col = GetColorForTagAtIndex(loadoutTags.IndexOf(overlappingTag));
                         Widgets.DrawBoxSolidWithOutline(columnRect, Widgets.WindowBGFillColor, col);
                         Widgets.DefIcon(columnRect.ContractedBy(3f), overlappingApparel.Def, overlappingApparel.RandomStuff);
                         

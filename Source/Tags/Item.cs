@@ -77,6 +77,9 @@ namespace Inventory
         public void SetQuantity(int quantity)
         {
             this.quantity = quantity;
+            if(quantity <= 0) {
+                this.quantity = 1;
+            }
         }
 
         public void ExposeData()
