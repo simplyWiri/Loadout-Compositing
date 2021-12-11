@@ -22,6 +22,8 @@ namespace Inventory
             foreach (var heldThing in items)
             {
                 var itemsAcceptingThing = comp.Loadout.ItemsAccepting(heldThing).ToList();
+                if (!itemsAcceptingThing.Any()) continue;
+
                 var desiredQuantity = itemsAcceptingThing.Sum(item => item.Quantity);
                 int currentQuantity = heldThing.stackCount;
             

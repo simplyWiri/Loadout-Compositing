@@ -57,19 +57,23 @@ namespace Inventory {
                     comp.Loadout.itemsToRemove.Remove(item);
                     continue;
                 }
+
+                Log.Message("From itemsToRemove");
                 
                 var job = JobMaker.MakeJob(InvJobDefOf.CL_UnloadInventory);
                 job.SetTarget(TargetIndex.A, item.thing);
                 job.count = item.Count;
-                
+
                 comp.Loadout.itemsToRemove.Remove(item);
-                
+
+
                 return job;
             }
 
             // check to see if we are holding too many items (holding 75 wood, expecting 50, drop the 25)
             // the actual logic to calc what to drop is in `FirstUnloadableThing_Patch.cs`
             if (comp.ShouldDropSomething()) {
+                Log.Message("From `shouldDropSomething`");
                 return JobMaker.MakeJob(InvJobDefOf.CL_UnloadInventory);
             }
 

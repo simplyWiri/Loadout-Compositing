@@ -131,7 +131,7 @@ namespace Inventory
 
             var itemsAcceptingThing = comp.Loadout.ItemsAccepting(thing).ToList();
             var desiredQuantity = itemsAcceptingThing.Sum(item => item.Quantity);
-            int currentQuantity = thing.stackCount;
+            int currentQuantity = 0;
 
             foreach (var otherThing in allOtherEqualThings) {
                 if (itemsAcceptingThing.Any(item => item.Allows(otherThing))) {

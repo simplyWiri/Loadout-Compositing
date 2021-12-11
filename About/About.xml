@@ -6,15 +6,22 @@
 	<supportedVersions>
 		<li>1.3</li>
 	</supportedVersions>
-	<description>Mix and match multiple 'tags' on a single pawn, allowing for composition of loadouts. Ever wondered why you couldn't just call your Planter/Melee pawn just that, and instead had to make one loadout with items from both in it? - No longer.
-Mod Integrations:
+	<description>Mix and match multiple 'tags' on a single pawn, allowing for composition of loadouts.
+
+&lt;size=24&gt;Features:&lt;/size&gt;
+- Create tags containing items which a pawn will wear / pick up / equip automatically
+- Create loadouts consisting of multiple tags for flexibility (composition)
+- Create bills which make `x` number of items, where `x` is the number of pawns with the tag `y`
+
+&lt;size=24&gt;Mod Integrations:&lt;/size&gt;
 - Better Workbench Management: When copying a bill which targets a tag to another bill, copy the tag with it.
 - Pick up and Haul: Disable pick up patch from our side when PUAH is loaded (duplicate functionality).
-Incompatibilies:
+
+&lt;size=24&gt;Incompatibilies:&lt;/size&gt;
 - Awesome Inventory: Both mods work in the same space, and will never be compatible. Sorry.
 - Combat Extended: This mod will be integrated into Combat Extended replacing their existing loadout system in the near (ish) future
 
-Credits:
+&lt;size=24&gt;Credits:&lt;/size&gt;
 - DrowsyCorgi ( NotooShabby ) for their incredible work on Awesome Inventory. I hope that it is visible the influence their mod has had; with regards to both the functionality of the mod, and the aesthetics of the GUI.  
 - Madman666 for their work creating the custom textures which this mod uses
 - All those who helped test, and gave feedback - it all helps

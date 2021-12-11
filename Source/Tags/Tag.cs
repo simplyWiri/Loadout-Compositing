@@ -15,9 +15,11 @@ namespace Inventory
 
         public Tag()
         {
-            this.name = string.Empty;
             this.requiredItems = new List<Item>();
+            this.uniqueId = LoadoutManager.GetNextTagId();
+            this.name = "Placeholder-" + this.uniqueId;
         }
+
         public Tag(string name)
         {
             this.name = name;

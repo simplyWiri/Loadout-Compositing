@@ -190,7 +190,7 @@ namespace Inventory
             foreach (var tag in tags)
             {
                 var tagIdx = tags.FindIndex(t => t == tag);
-                var tagHeight = GenUI.ListSpacing * (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f));
+                var tagHeight = GenUI.ListSpacing * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
                 var tagRect = viewRect.PopTopPartPixels(tagHeight );
                 height += tagHeight;
 

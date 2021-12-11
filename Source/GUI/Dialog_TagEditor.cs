@@ -66,7 +66,7 @@ namespace Inventory
             topRect.AdjHorzBy(topRect.width * 0.33f);
             if (Widgets.ButtonText(topRect.LeftHalf(), Strings.CreateNewTag))
             {
-                curTag = new Tag("Placeholder");
+                curTag = new Tag();
                 LoadoutManager.AddTag(curTag);
             }
 
