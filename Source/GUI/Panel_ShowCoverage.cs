@@ -57,8 +57,8 @@ namespace Inventory
             var viewRect = new Rect(rect.x, rect.y, rect.width - 16f, apparelSlotsHeight);
             Widgets.BeginScrollView(rect, ref apparelSlotsScroll, viewRect);
             
-            float curY = GUIUtility.SPACED_HEIGHT;
-            float beginY = rect.x;
+            float curY = rect.y + GUIUtility.DEFAULT_HEIGHT;
+            float beginY = curY;
 
             var wornApparel = component.Loadout.HypotheticalWornApparelWithTag(def).ToList();
 
@@ -100,7 +100,7 @@ namespace Inventory
                 curY += GUIUtility.DEFAULT_HEIGHT;
             }
 
-            apparelSlotsHeight = curY - beginY;
+            apparelSlotsHeight = (curY - beginY) + GUIUtility.DEFAULT_HEIGHT;
             
             Widgets.EndScrollView();
         }
