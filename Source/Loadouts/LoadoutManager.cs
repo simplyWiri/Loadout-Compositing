@@ -81,7 +81,7 @@ namespace Inventory
 
         public static List<FloatMenuOption> OptionPerTag(Func<Tag, string> labelGen, Action<Tag> onClick)
         {
-            return Tags.Select(tag => new FloatMenuOption(labelGen(tag), () => onClick(tag) )).ToList();
+            return Tags.OrderBy(t => t.name).Select(tag => new FloatMenuOption(labelGen(tag), () => onClick(tag) )).ToList();
         }
 
         public override void FinalizeInit()

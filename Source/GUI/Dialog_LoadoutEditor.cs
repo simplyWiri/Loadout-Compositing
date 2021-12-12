@@ -275,7 +275,7 @@ namespace Inventory
             
             if (Widgets.ButtonText(buttonRect.LeftHalf(), Strings.AddTag))
             {
-                var opts = LoadoutManager.Tags.Except(tags).Select(tag =>
+                var opts = LoadoutManager.Tags.Except(tags).OrderBy(t => t.name).Select(tag =>
                     new FloatMenuOption(tag.name, () =>
                     {
                         if ( !LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList))
@@ -286,17 +286,10 @@ namespace Inventory
                         pList.pawns.Add(pawn);
                         component.Loadout.tags.Add(tag);
                     })).ToList();
-                opts.Insert(0, new FloatMenuOption(Strings.CreateNewTag,
-                    () => Find.WindowStack.Add(new Dialog_TagEditor())));   
                 
-                if(opts.Count == 0)
-                {
-                    Messages.Message(new Message(Strings.NoTagsYetWarning, MessageTypeDefOf.RejectInput));
-                }
-                else
-                {
-                    Find.WindowStack.Add(new FloatMenu(opts));
-                }
+                opts.Add(new FloatMenuOption(Strings.CreateNewTag, () => Find.WindowStack.Add(new Dialog_TagEditor())));   
+                
+                Find.WindowStack.Add(new FloatMenu(opts));
             }
 
             if (Widgets.ButtonText(buttonRect.RightHalf(), drawShowCoverage ? Strings.HideCoverage : Strings.ShowCoverage))
