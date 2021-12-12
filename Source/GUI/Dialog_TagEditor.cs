@@ -148,18 +148,7 @@ namespace Inventory {
 
                 var quantityFieldRect = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 2f);
                 item.quantityStr ??= item.Quantity.ToString();
-                GUIUtility.InputField(quantityFieldRect.ContractedBy(0, quantityFieldRect.height / 4.0f),
-                    "QuantityField" + item.Def.defName, ref item.quantityStr);
-                if (item.quantityStr == "")
-                    item.SetQuantity(0);
-                else
-                    try {
-                        item.SetQuantity(int.Parse(item.quantityStr));
-                    }
-                    catch (Exception e) {
-                        Log.ErrorOnce($"Invalid numeric string {item.quantityStr}: " + e.Message,
-                            item.quantityStr.GetHashCode());
-                    }
+                Widgets.TextFieldNumeric(quantityFieldRect.ContractedBy(0, quantityFieldRect.height / 4.0f), ref item.quantity, ref item.quantityStr, 1);
 
                 TooltipHandler.TipRegion(quantityFieldRect, Strings.EditQuantity);
 

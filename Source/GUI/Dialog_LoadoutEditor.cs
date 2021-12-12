@@ -58,7 +58,7 @@ namespace Inventory {
             absorbInputAroundWindow = true;
             doCloseX = true;
             draggable = true;
-
+            
             fromOtherRect = new Rect(old.windowRect);
         }
 

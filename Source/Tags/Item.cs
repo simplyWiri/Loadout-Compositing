@@ -15,7 +15,8 @@ namespace Inventory {
         // should only be directly accessed in `Dialog_TagEditor.cs`
         internal Filter filter;
 
-        private int quantity;
+        // should only be directly accessed in `Dialog_TagEditor.cs`
+        internal int quantity;
 
         // intentionally temporary + unsaved, only accessed in `Dialog_TagEditor.cs`
         public string quantityStr;

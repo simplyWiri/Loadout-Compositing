@@ -6,7 +6,7 @@ using Verse;
 
 namespace Inventory {
 
-    public static class GearTab {
+    public static class Panel_GearTab {
 
         public static void DrawTags(Pawn p, ref float curY, float width) {
             Widgets.ListSeparator(ref curY, width, Strings.TagLoadoutComposition);

@@ -38,7 +38,7 @@ namespace Inventory {
         public static void DrawTags(Pawn p, ref float curY, float width) {
             if (!p.IsValidLoadoutHolder()) return;
 
-            GearTab.DrawTags(p, ref curY, width);
+            Panel_GearTab.DrawTags(p, ref curY, width);
         }
 
         private static bool Matches(List<CodeInstruction> insts, int i) {
