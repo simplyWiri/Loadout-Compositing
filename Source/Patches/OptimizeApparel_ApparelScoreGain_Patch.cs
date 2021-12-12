@@ -2,20 +2,21 @@
 using RimWorld;
 using Verse;
 
-namespace Inventory
-{
+namespace Inventory {
+
     // bias the apparel score gain significantly in favour of apparel in the pawns loadout
     [HarmonyPatch(typeof(JobGiver_OptimizeApparel), nameof(JobGiver_OptimizeApparel.ApparelScoreRaw))]
-    public static class OptimizeApparel_ApparelScoreGain_Patch
-    {
-        public static void Postfix(Pawn pawn, Apparel ap, ref float __result)
-        {
+    public static class OptimizeApparel_ApparelScoreGain_Patch {
+
+        public static void Postfix(Pawn pawn, Apparel ap, ref float __result) {
             var comp = pawn.GetComp<LoadoutComponent>();
             var multiplier = comp?.Loadout.WeightAtWhichLoadoutDesires(ap) ?? 0;
             if (multiplier != 0) {
                 __result += 0.24f; // flat bonus for being an apparel in the loadout
-                __result *= multiplier; 
+                __result *= multiplier;
             }
         }
+
     }
+
 }

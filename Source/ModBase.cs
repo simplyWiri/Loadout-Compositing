@@ -4,11 +4,11 @@ using HarmonyLib;
 using UnityEngine;
 using Verse;
 
-namespace Inventory
-{
+namespace Inventory {
+
     // What was initially wrote as the goals of the project on
     // 6/12/2021. 
-    
+
     /*  Features:
      *      Tags:
      *          - Allow you to specify things for a pawn to have in their inventory/wear
@@ -22,14 +22,13 @@ namespace Inventory
      *          - Tags can be created from the Gear menu for pawns
      *          - Tags can use extended filters (stuffable, % wear, etc)
      */
-    
-    public class ModBase : Mod
-    {
+
+    public class ModBase : Mod {
+
         public static Settings settings;
         public static Harmony harmony;
-        
-        public ModBase(ModContentPack content) : base(content)
-        {
+
+        public ModBase(ModContentPack content) : base(content) {
             settings = GetSettings<Settings>();
 
             harmony = new Harmony("Wiri.compositableloadouts");
@@ -45,5 +44,7 @@ namespace Inventory
         // {
         //     return "Compositable Loadouts";
         // }
+
     }
+
 }
