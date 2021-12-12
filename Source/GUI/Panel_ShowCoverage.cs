@@ -16,7 +16,6 @@ namespace Inventory
         private LoadoutComponent component;
 
         public static List<Color> coloursByIdx = null;
-        internal float extraWidth = 0f;
 
         static Panel_ShowCoverage()
         {
@@ -75,8 +74,8 @@ namespace Inventory
                 var rectWidth = cols.Sum(rect => rect.width);
                 var maxWidth = Mathf.Max(sumWidth, rectWidth);
                 if (maxWidth > rect.width) {
-                    extraWidth = (maxWidth - rect.width) + 16f;
-                    parent.windowRect.width += extraWidth; // 16f for the scroll wheel
+                    var extraWidth = maxWidth + 32f;
+                    parent.windowRect.width = Mathf.Max(parent.windowRect.width, (420 + (parent.drawPawnStats ? 210 : 0)) + extraWidth); // 16f for the scroll wheel
                 }
 
                 for (int i = 0; i < cols.Count; i++)
