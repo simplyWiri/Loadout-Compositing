@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -115,6 +116,15 @@ namespace Inventory
         {
             return pawn.inventory.innerContainer.InnerListForReading
                 .ConcatIfNotNull(pawn.equipment.AllEquipmentListForReading);
+        }
+
+        public static void SetOrAppend<K, V>(this Dictionary<K, HashSet<V>> dictionary, K key, IEnumerable<V> elements) {
+            if (dictionary.TryGetValue(key, out var elems)) {
+                elems.AddRange(elements);
+                return;
+            }
+
+            dictionary.Add(key, elements.ToHashSet());
         }
         
     }

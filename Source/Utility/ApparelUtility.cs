@@ -9,78 +9,6 @@ using Verse;
  
 namespace Inventory
 {
-    public class ApparelSlots
-    {
-        public ApparelSlots(BodyDef def, IEnumerable<ThingDef> apparels)
-        {
-            this.defs = new Dictionary<BodyPartGroupDef, HashSet<ApparelLayerDef>>();
-            
-            foreach (var apparel in apparels)
-            {
-                AddToDefs(def, apparel);
-            }
-        }
- 
-        public ApparelSlots(BodyDef def, ThingDef apparel)
-        {
-            this.defs = new Dictionary<BodyPartGroupDef, HashSet<ApparelLayerDef>>();
-            
-            AddToDefs(def, apparel);
-        }
-        
-        public ApparelSlots()
-        {
-            this.defs = new Dictionary<BodyPartGroupDef, HashSet<ApparelLayerDef>>();
-        }
-        
-        public void AddToDefs(BodyDef def, ThingDef apparel)
-        {
-            // we do this by adding an entry per BodyPartGroupDef that the
-            // apparel covers, and the layers being the layers which the
-            // apparel operates on.
-            var layers = apparel.apparel.layers.ToHashSet();
-            foreach (var groupDef in apparel.apparel.GetInterferingBodyPartGroups(def))
-            {
-                if (defs.TryGetValue(groupDef, out var lays))
-                {
-                    lays.UnionWith(layers);
-                }
-                else
-                {
-                    defs.Add(groupDef, layers);
-                }            
-            }
-        }
-
-        public int GetSlotsCoveredNumber()
-        {
-            return defs.Sum(kv => kv.Value.Count);
-        }
-        
-        private Dictionary<BodyPartGroupDef, HashSet<ApparelLayerDef>> defs;
- 
-        public bool Intersects(BodyPartGroupDef def, ApparelLayerDef layer)
-        {
-            return defs.TryGetValue(def, out var layers) && layers.Contains(layer);
-        }
-        public bool Intersects(ApparelSlots other)
-        {
-            // If two apparel slots both contain the same `BodyPartGroupDef` which
-            // also has an equivalent ApparelLayerDef, they are going to clash, this
-            // is equivalent to checking !ApparelUtility.CanWearTogether, but it works
-            // with more than two apparel at a time.
-            
-            foreach (var (key, value) in other.defs)
-            {
-                if (defs.TryGetValue(key, out var layers) && layers.Intersect(value).Any())
-                    return true;
-            }
-            
-            return false;
-        }
-
-    }
- 
     public class BodyPartGroup
     {
         // parent and def can be null if this is the Root BodyPartGroup (this class
@@ -246,7 +174,7 @@ namespace Inventory
 
             foreach (var apparel in apparelDefs)
             {
-                foreach (var bodyGroup in apparel.apparel.GetInterferingBodyPartGroups(def))
+                foreach (var bodyGroup in apparel.apparel.bodyPartGroups)
                 {
                     if (bodyPartToLayersCovered.ContainsKey(bodyGroup))
                     {
@@ -278,14 +206,14 @@ namespace Inventory
         public static List<Tuple<Item, Tag>> WornApparelFor(BodyDef def, List<Tuple<Item, Tag, int>> apparels)
         {
             var wornApparels = new List<Tuple<Item, Tag>>();
-            var wornApparelSlots = new ApparelSlots();
+            var wornApparelSlots = new ApparelSlots(def);
             foreach (var (apparel, tag, _) in apparels.OrderBy(app => app.Item3))
             {
                 var apparelSlots = new ApparelSlots(def, apparel.Def);
 
                 if (!wornApparelSlots.Intersects(apparelSlots)) {
                     wornApparels.Add(new Tuple<Item, Tag>(apparel, tag));
-                    wornApparelSlots.AddToDefs(def, apparel.Def);
+                    wornApparelSlots.AddApparel(apparel.Def);
                 }
             }
             return wornApparels;
