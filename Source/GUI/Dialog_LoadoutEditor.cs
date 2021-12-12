@@ -30,16 +30,16 @@ namespace Inventory
             {
                 var width = 420;
                 if (drawPawnStats) width += 210;
-                if (drawShowCoverage) width += 200;
                 return new Vector2(width, 640);
             }
         }
+
+        private List<float> resizeReqs = new List<float>();
         
         private bool drawShowCoverage = false;
-        private bool drawPawnStats = false;
+        internal bool drawPawnStats = false;
+        private Rect? fromOtherRect = null;
         
-
-
         public Dialog_LoadoutEditor(Pawn pawn)
         {
             this.pawn = pawn;
@@ -50,27 +50,54 @@ namespace Inventory
             coveragePanel = new Panel_ShowCoverage(this);
         }
         
-        public Dialog_LoadoutEditor(Pawn pawn, bool drawShowCoverage, bool drawPawnStats)
+        public Dialog_LoadoutEditor(Pawn pawn, Dialog_LoadoutEditor old)
         {
             this.pawn = pawn;
             this.component = pawn.GetComp<LoadoutComponent>();
-            this.drawShowCoverage = drawShowCoverage;
-            this.drawPawnStats = drawPawnStats;
+            this.drawShowCoverage = old.drawShowCoverage;
+            this.drawPawnStats = old.drawPawnStats;
             absorbInputAroundWindow = true;
             doCloseX = true;
             draggable = true;
             coveragePanel = new Panel_ShowCoverage(this);
+            fromOtherRect = new Rect(old.windowRect);
         }
         
-        /* | Pawn Stats |  Apparel Slots | Add Tag     |
-         * |            |                | Tag1 ^v     |
-         * |            |                | Tag2 ^v     |
-         * |            |                |------------ |
-         * |            |                | Statistics  |
-         * |            |                |             |
-         */  
+        // does nothing
+        // public virtual void SetInitialSizeAndPosition()
+        // {
+        //     if (fromOtherRect.HasValue) {
+        //         this.windowRect = fromOtherRect.Value;
+        //         this.windowRect = this.windowRect.Rounded();
+        //     }
+        // }
+        
         public override void DoWindowContents(Rect inRect)
         {
+            // hack because `SetInitialSizeAndPosition` wasn't playing ball
+            if (fromOtherRect.HasValue) {
+                this.windowRect.x = fromOtherRect.Value.x;
+                this.windowRect.y = fromOtherRect.Value.y;
+                fromOtherRect = null;
+            }
+
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode != KeyCode.None) {
+                if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.Comma)) {
+                    ThingSelectionUtility.SelectPreviousColonist();
+                    this.Close();
+                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this ));
+                    Event.current.Use();
+                    return;
+                }
+                if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.Period)) {
+                    ThingSelectionUtility.SelectNextColonist();
+                    this.Close();
+                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this ));
+                    Event.current.Use();
+                    return;
+                }
+            }
+            
             if (drawPawnStats)
             {
                 var leftPanel = inRect.PopLeftPartPixels(210f);
@@ -80,7 +107,7 @@ namespace Inventory
                 }
             }
             
-            var middlePanel = drawShowCoverage ? inRect.PopLeftPartPixels(420f) : inRect;
+            var middlePanel = inRect.PopLeftPartPixels(420f - 16f);
 
             DrawTags(middlePanel.TopPartPixels(middlePanel.height / 2.0f));
             DrawStatistics(middlePanel.BottomPartPixels((middlePanel.height - Mathf.Min(middlePanel.height/2.0f, tagsHeight + 10)) - GUIUtility.SPACED_HEIGHT * 2f));
@@ -99,17 +126,17 @@ namespace Inventory
 
             var lhs = topPartRect.PopLeftPartPixels(GUIUtility.SPACED_HEIGHT);
             var rhs = topPartRect.PopRightPartPixels(GUIUtility.SPACED_HEIGHT);
-            if (Widgets.ButtonImageFitted(lhs, Textures.PreviousTex) || Input.GetKeyDown(KeyCode.LeftArrow)) {
+            if (Widgets.ButtonImageFitted(lhs, Textures.PreviousTex)) {
                 ThingSelectionUtility.SelectPreviousColonist();
                 this.Close();
-                Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), drawShowCoverage, drawPawnStats ));
+                Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this ));
                 return true;
             }
             TooltipHandler.TipRegion(lhs, Strings.SelectPrevious);
-            if (Widgets.ButtonImageFitted(rhs, Textures.NextTex) || Input.GetKeyDown(KeyCode.RightArrow)) {
+            if (Widgets.ButtonImageFitted(rhs, Textures.NextTex)) {
                 ThingSelectionUtility.SelectNextColonist();
                 this.Close();
-                Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), drawShowCoverage, drawPawnStats));
+                Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this ));
                 return true;
             }
             TooltipHandler.TipRegion(rhs, Strings.SelectNext);
@@ -269,6 +296,7 @@ namespace Inventory
             
             if (Widgets.ButtonText(buttonRect.PopLeftPartPixels(rect.width / 3f), Strings.PawnStats))
             {
+                this.windowRect.x = this.windowRect.x + (drawPawnStats ? 210f : -210f);
                 this.windowRect.width = windowRect.width + (drawPawnStats ? -210f : 210f);
                 drawPawnStats = !drawPawnStats;
             }
@@ -294,8 +322,9 @@ namespace Inventory
 
             if (Widgets.ButtonText(buttonRect.RightHalf(), drawShowCoverage ? Strings.HideCoverage : Strings.ShowCoverage))
             {
-                var width = 210f + coveragePanel.extraWidth + 16f;
-                this.windowRect.width += (drawShowCoverage ? -width : width);
+                if (drawShowCoverage) {
+                    this.windowRect.width = (drawPawnStats ? 210 : 0) + 420;
+                }
                 drawShowCoverage = !drawShowCoverage;
             }
         }
