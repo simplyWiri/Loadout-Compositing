@@ -95,8 +95,8 @@ namespace Inventory
 
         public static IEnumerable<ThingDef> ApparelCanFitOnBody(BodyDef body, List<ThingDef> wornApparel)
         {
-            var slotsUsed = new ApparelSlots(body, wornApparel);
-            foreach (var def in Utility.apparelDefs.Where(t => t.IsApparel && !slotsUsed.Intersects(new ApparelSlots(body, t))))
+            var slotsUsed = ApparelSlotMaker.Create(body, wornApparel);
+            foreach (var def in Utility.apparelDefs.Where(t => t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(body, t))))
                 yield return def;
         }
 
@@ -203,17 +203,30 @@ namespace Inventory
             return bodyPartGroup;
         }
 
+
+        //     var slotsUsed = ApparelSlotMaker.Create(body, wornApparel);
+        //     foreach (var def in Utility.apparelDefs.Where(t => t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(body, t))))
+        //         yield return def;
+
         public static List<Tuple<Item, Tag>> WornApparelFor(BodyDef def, List<Tuple<Item, Tag, int>> apparels)
         {
             var wornApparels = new List<Tuple<Item, Tag>>();
-            var wornApparelSlots = new ApparelSlots(def);
+            ApparelSlot wornApparelSlots = null;
             foreach (var (apparel, tag, _) in apparels.OrderBy(app => app.Item3))
             {
-                var apparelSlots = new ApparelSlots(def, apparel.Def);
+                // can obviously wear it if we aren't wearing anything
+                if (wornApparelSlots == null) {
+                    wornApparelSlots = ApparelSlotMaker.Create(def, apparel.Def);
+                    wornApparels.Add(new Tuple<Item, Tag>(apparel, tag));
+                    continue;
+                }
+                
+                var apparelSlots = ApparelSlotMaker.Create(def, apparel.Def);
 
                 if (!wornApparelSlots.Intersects(apparelSlots)) {
                     wornApparels.Add(new Tuple<Item, Tag>(apparel, tag));
-                    wornApparelSlots.AddApparel(apparel.Def);
+
+                    wornApparelSlots = ApparelSlotMaker.Create(def, wornApparels.Select(kv => kv.Item1.Def));
                 }
             }
             return wornApparels;

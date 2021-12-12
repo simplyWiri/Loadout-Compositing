@@ -165,11 +165,11 @@ namespace Inventory
                 var loadoutTags = component.Loadout.tags;
 
                 var (overlappingApparel, overlappingTag) = wornApparel
-                    .FirstOrDefault(item => new ApparelSlots(bodyDef, item.Item1.Def).Intersects(def, column)) ?? new Tuple<Item, Tag>(null, null);
+                    .FirstOrDefault(item => ApparelSlotMaker.Create(bodyDef, item.Item1.Def).Intersects(def, column)) ?? new Tuple<Item, Tag>(null, null);
 
                 var possibleDefs = loadoutTags
                         .SelectMany(t => 
-                            t.ItemsWithTagMatching(item => item.Def.IsApparel && new ApparelSlots(bodyDef, item.Def).Intersects(def, column)))
+                            t.ItemsWithTagMatching(item => item.Def.IsApparel && ApparelSlotMaker.Create(bodyDef, item.Def).Intersects(def, column)))
                         .ToList();
 
                 if (overlappingApparel != null) {
