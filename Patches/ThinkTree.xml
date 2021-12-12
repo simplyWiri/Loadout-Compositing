@@ -1,6 +1,6 @@
 <Patch>
     <Operation Class="PatchOperationAdd">
-        <xpath>Defs/ThinkTreeDef[defName="Humanlike"]/thinkRoot/subNodes//li[@Class="JobGiver_OptimizeApparel"]/..</xpath>
+        <xpath>Defs/ThinkTreeDef/thinkRoot/subNodes//li[@Class="JobGiver_OptimizeApparel"]/..</xpath>
         <value>
             <li Class="Inventory.JobGiver_OptimizeItems">
                 <leaveJoinableLordIfIssuesJob>true</leaveJoinableLordIfIssuesJob>
