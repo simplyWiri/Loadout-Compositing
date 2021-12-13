@@ -55,6 +55,8 @@ namespace Inventory {
         public static string AddTag => $"{P}AddTag".TranslateSimple();
         public static string PreviewQuality => $"{P}PreviewQuality".TranslateSimple();
 
+        public static string CoverageExplanation => $"{P}CoverageExplanation".TranslateSimple();
+
     }
 
 }

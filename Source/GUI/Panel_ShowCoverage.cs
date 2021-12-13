@@ -55,12 +55,17 @@ namespace Inventory {
         }
 
         public void Draw(Rect rect) {
-            DrawPrelude(ref rect);
             DrawApparelSlots(rect, pawn.RaceProps.body);
+            DrawPrelude(rect);
         }
+        
+        public void DrawPrelude(Rect rect) {
+            var bRect = rect.TopPartPixels(UIC.SMALL_ICON);
+            bRect = bRect.RightPartPixels(UIC.SMALL_ICON);
 
-        // [ i ] 
-        public void DrawPrelude(ref Rect rect) { }
+            Widgets.ButtonImageFitted(bRect, TexButton.Info);
+            TooltipHandler.TipRegion(bRect.ExpandedBy(5f), () => Strings.CoverageExplanation, 489588371);
+        }
 
         public void DrawApparelSlots(Rect rect, BodyDef def) {
             var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, apparelSlotsHeight);
@@ -210,9 +215,7 @@ namespace Inventory {
                     else {
                         var nextHighestPrio = possibleDefs.OrderBy(tup => loadoutTags.IndexOf(tup.Item1)).First().Item2;
                         Widgets.DrawBoxSolidWithOutline(columnRect, Widgets.WindowBGFillColor, Color.red);
-                        Widgets.DefIcon(columnRect.ContractedBy(3f),
-                            nextHighestPrio.Def,
-                            color: new Color(0.5f, 0.5f, 0.5f, 0.3f));
+                        Widgets.DefIcon(columnRect.ContractedBy(3f), nextHighestPrio.Def, color: new Color(0.5f, 0.5f, 0.5f, 0.3f));
 
                         var str = "Blocked Tags:";
                         foreach (var (pTag, pApparel) in possibleDefs) {
