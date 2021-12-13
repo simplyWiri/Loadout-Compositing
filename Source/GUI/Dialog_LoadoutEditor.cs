@@ -44,7 +44,6 @@ namespace Inventory {
             pawnStatPanel = new Panel_PawnStats(this);
 
             // parent fields
-            absorbInputAroundWindow = true;
             doCloseX = true;
             draggable = true;
         }
@@ -55,7 +54,6 @@ namespace Inventory {
             coveragePanel = new Panel_ShowCoverage(this, old.coveragePanel.ShouldDraw);
             pawnStatPanel = new Panel_PawnStats(this, old.pawnStatPanel.ShouldDraw);
 
-            absorbInputAroundWindow = true;
             doCloseX = true;
             draggable = true;
             

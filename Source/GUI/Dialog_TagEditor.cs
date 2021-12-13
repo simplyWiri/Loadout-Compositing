@@ -33,14 +33,12 @@ namespace Inventory {
 
         public Dialog_TagEditor() {
             closeOnClickedOutside = true;
-            absorbInputAroundWindow = true;
             doCloseX = true;
         }
 
         public Dialog_TagEditor(Tag tag) {
             curTag = tag;
             closeOnClickedOutside = true;
-            absorbInputAroundWindow = true;
             doCloseX = true;
         }
 

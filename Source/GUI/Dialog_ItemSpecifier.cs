@@ -31,6 +31,8 @@ namespace Inventory {
         private static Dictionary<Tuple<ThingDef, ThingDef, QualityCategory>, Dictionary<StatDef, float>> statCache;
         private static Dictionary<Tuple<ThingDef, ThingDef, QualityCategory>, Dictionary<StatDef, string>> tipCache;
 
+        public override Vector2 InitialSize => new Vector2(840, 640);
+
 
         static Dialog_ItemSpecifier() {
             armorStats = new List<StatDef>() {
@@ -68,23 +70,12 @@ namespace Inventory {
             tipCache = new Dictionary<Tuple<ThingDef, ThingDef, QualityCategory>, Dictionary<StatDef, string>>();
         }
 
-        private static StatDef ToStatDef(string str) {
-            StatDef newDef = new StatDef() {
-                label = str.TranslateSimple(),
-                defName = str,
-            };
-            ShortHashGiver.GiveShortHash(newDef, typeof(StatDef));
-            return newDef;
-        }
-
         public Dialog_ItemSpecifier(Filter filter) {
             this.filter = filter;
             closeOnClickedOutside = true;
-            absorbInputAroundWindow = true;
             doCloseX = true;
         }
-
-        public override Vector2 InitialSize => new Vector2(840, 640);
+        
 
         public override void DoWindowContents(Rect canvas) {
             if (Event.current.type == EventType.Layout)
