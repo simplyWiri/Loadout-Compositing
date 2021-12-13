@@ -44,4 +44,13 @@
 	<CompositableLoadouts.AddTag>Add Tag</CompositableLoadouts.AddTag>
 	<CompositableLoadouts.PreviewQuality>Preview Quality: </CompositableLoadouts.PreviewQuality>
 
+	<CompositableLoadouts.CoverageExplanation>The coverage panel is a visualisation of all of the 'slots' on a pawn which can be covered by apparel which is currently in your game. 
+	
+Each box represents a BodyPartGroupDef (I.e. Torso) and an associated ApparelLayerDef (I.e. Onskin). Apparels can cover multiple BodyPartGroupDefs, and span multiple Layers. As such, layering clothing can be quite complex, and conflict resolution can get complicated quickly.
+
+Boxes are coloured to represent their current status:
+- Grey: There is no apparel in this loadout which covers this slot on the pawn
+- Red: There are multiple apparel which cover this slot on the pawn, a semi-transparent apparel will be drawn, representing the highest priority apparel which would cover this slot if it was not blocked, and hoving over the slot will show which apparel is blocking it.
+- Other: The remaining colours used on the visualisation represent the Tag in which an apparel comes from, and can be cross-referenced with the primary tag editing view for the pawn.</CompositableLoadouts.CoverageExplanation>
+
 </LanguageData>
