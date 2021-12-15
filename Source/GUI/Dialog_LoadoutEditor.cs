@@ -213,20 +213,15 @@ namespace Inventory {
             }
 
             if (Widgets.ButtonText(buttonRect.LeftHalf(), Strings.AddTag)) {
-                var opts = LoadoutManager.Tags.Except(tags).OrderBy(t => t.name).Select(tag =>
-                    new FloatMenuOption(tag.name, () => {
-                        if (!LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) {
-                            pList = new SerializablePawnList(new List<Pawn>());
-                            LoadoutManager.PawnsWithTags.Add(tag, pList);
-                        }
-
-                        pList.pawns.Add(pawn);
-                        component.Loadout.tags.Add(tag);
-                    })).ToList();
-
-                opts.Add(new FloatMenuOption(Strings.CreateNewTag, () => Find.WindowStack.Add(new Dialog_TagEditor())));
-
-                Find.WindowStack.Add(new FloatMenu(opts));
+                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(tags).ToList(), tag => {
+                    if (!LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) {
+                        pList = new SerializablePawnList(new List<Pawn>());
+                        LoadoutManager.PawnsWithTags.Add(tag, pList);
+                    }
+                    
+                    pList.pawns.Add(pawn);
+                    component.Loadout.tags.Add(tag);
+                }));
             }
 
             if (Widgets.ButtonText(buttonRect.RightHalf(), coveragePanel.ShouldDraw ? Strings.HideCoverage : Strings.ShowCoverage)) {

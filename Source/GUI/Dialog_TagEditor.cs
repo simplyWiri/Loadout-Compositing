@@ -53,13 +53,7 @@ namespace Inventory {
             var topRect = r.TopPartPixels(22f);
 
             if (Widgets.ButtonText(topRect.LeftPart(0.33f), Strings.SelectTag)) {
-                var floatOpts = LoadoutManager.OptionPerTag(tag => $"{tag.name}", tag => curTag = tag);
-                if (floatOpts.Count == 0) {
-                    Messages.Message(new Message(Strings.NoTagsYetWarning, MessageTypeDefOf.RejectInput));
-                }
-                else {
-                    Find.WindowStack.Add(new FloatMenu(floatOpts));
-                }
+                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags, tag => curTag = tag));
             }
 
             topRect.AdjHorzBy(topRect.width * 0.33f);
@@ -69,13 +63,7 @@ namespace Inventory {
             }
 
             if (Widgets.ButtonText(topRect.RightHalf(), Strings.DeleteTag)) {
-                var floatOpts = LoadoutManager.OptionPerTag(tag => $"{tag.name}", LoadoutManager.RemoveTag);
-                if (floatOpts.Count == 0) {
-                    Messages.Message(new Message(Strings.NoTagsYetWarning, MessageTypeDefOf.RejectInput));
-                }
-                else {
-                    Find.WindowStack.Add(new FloatMenu(floatOpts));
-                }
+                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags, LoadoutManager.RemoveTag));
             }
 
             r.AdjVertBy(UIC.DEFAULT_HEIGHT);
