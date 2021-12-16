@@ -6,6 +6,7 @@ using RimWorld;
 using UnityEngine;
 using UnityEngine.UI;
 using Verse;
+using Verse.Sound;
 using Text = Verse.Text;
 
 namespace Inventory {
@@ -26,6 +27,9 @@ namespace Inventory {
 
         private Panel_ShowCoverage coveragePanel = null;
         private Panel_PawnStats pawnStatPanel = null;
+
+        private bool dragging = false;
+        private int curTagIdx = -1;
 
         public override Vector2 InitialSize {
             get {
@@ -127,12 +131,14 @@ namespace Inventory {
             tagsHeight = tags.Sum(tag => UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f))));
             var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, tagsHeight);
             Widgets.BeginScrollView(rect, ref tagScroll, viewRect);
-
+            
+            DraggableTags(viewRect, tags);
+            
             foreach (var tag in tags) {
                 var tagIdx = tags.FindIndex(t => t == tag);
                 var tagHeight = UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
                 var tagRect = viewRect.PopTopPartPixels(tagHeight);
-
+                
                 var editButtonRect = tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT);
                 if (Widgets.ButtonImageFitted(editButtonRect, Textures.EditTex)) {
                     Find.WindowStack.Add(new Dialog_TagEditor(tag));
@@ -149,28 +155,6 @@ namespace Inventory {
 
                     var loadoutItems = tag.ThingsAcceptedInList(pawn.InventoryAndEquipment().ToList()).ToList();
                     component.Loadout.itemsToRemove.AddRange(loadoutItems.ToList());
-                }
-
-                if (tagIdx != 0) {
-                    if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT), TexButton.ReorderUp)) {
-                        var tmp = component.Loadout.tags[tagIdx - 1];
-                        component.Loadout.tags[tagIdx - 1] = tag;
-                        component.Loadout.tags[tagIdx] = tmp;
-                    }
-                }
-                else {
-                    tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT);
-                }
-
-                if (tagIdx != tags.Count - 1) {
-                    if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT), TexButton.ReorderDown)) {
-                        var tmp = component.Loadout.tags[tagIdx + 1];
-                        component.Loadout.tags[tagIdx + 1] = tag;
-                        component.Loadout.tags[tagIdx] = tmp;
-                    }
-                }
-                else {
-                    tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT);
                 }
 
                 Widgets.DrawBoxSolid(tagRect.PopLeftPartPixels(10.0f), Panel_ShowCoverage.GetColorForTagAtIndex(tagIdx));
@@ -199,6 +183,62 @@ namespace Inventory {
             }
 
             Widgets.EndScrollView();
+        }
+
+        private void DraggableTags(Rect viewRect, List<Tag> tags) {
+            viewRect.width -= 2 * UIC.SPACED_HEIGHT;
+            
+            Rect RectForTag(int tIdx) {
+                var offset = tags
+                    .GetRange(0, tIdx)
+                    .Sum(tag => UIC.SPACED_HEIGHT * Mathf.Max(1, Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
+                
+                return new Rect(viewRect.x, viewRect.y + offset, viewRect.width, UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tags[tIdx].requiredItems.Count / 4.0f))));
+            }
+            var cEvent = Event.current;
+
+            if (cEvent.rawType == EventType.MouseUp) {
+                dragging = false;
+            }
+
+            if (dragging) {
+                if (Mouse.IsOver(viewRect.ExpandedBy(25f))) {
+                    var tRect = RectForTag(curTagIdx);
+                    var mPos = cEvent.mousePosition;
+
+                    if (!tRect.ExpandedBy(5f).Contains(mPos)) {
+                        if (curTagIdx > 0 && mPos.y < tRect.y) {
+                            (component.Loadout.tags[curTagIdx], component.Loadout.tags[curTagIdx - 1]) = (component.Loadout.tags[curTagIdx - 1], component.Loadout.tags[curTagIdx]);
+                            curTagIdx -= 1;
+                        }
+                        else if (curTagIdx < tags.Count - 1 && mPos.y > tRect.y) {
+                            (component.Loadout.tags[curTagIdx], component.Loadout.tags[curTagIdx + 1]) = (component.Loadout.tags[curTagIdx + 1], component.Loadout.tags[curTagIdx]);
+                            curTagIdx += 1;
+                        }
+                        SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
+                    }
+                    GUI.color = ReorderableWidget.LineColor;
+                    Widgets.DrawLine(new Vector2(tRect.x, tRect.yMax), new Vector2(tRect.xMax, tRect.yMax), ReorderableWidget.LineColor, 2f);
+                    Widgets.DrawHighlight(tRect);
+                    GUI.color = Color.white;
+                } else {
+                    dragging = false;
+                    curTagIdx = -1;
+                }
+            }
+            
+            if (cEvent.rawType == EventType.MouseDown && Mouse.IsOver(viewRect)) {
+                dragging = true;
+                for (int i = 0; i < tags.Count; i++) {
+                    var rect = RectForTag(i);
+                    
+                    if (rect.Contains(cEvent.mousePosition)) {
+                        curTagIdx = i;
+                        break;
+                    }
+                }
+                Event.current.Use();
+            }
         }
 
         public void DrawHeaderButtons(ref Rect rect, List<Tag> tags) {
