@@ -6,63 +6,64 @@ using RimWorld;
 using UnityEngine;
 using UnityEngine.UI;
 using Verse;
+using Verse.Sound;
 using Text = Verse.Text;
 
-namespace Inventory
-{
-    public class Dialog_LoadoutEditor : Window
-    {
+namespace Inventory {
+
+    public class Dialog_LoadoutEditor : Window {
+
+        public const float WIDTH = 420f;
+        public const float HEIGHT = 640f;
+
         internal Pawn pawn;
         internal LoadoutComponent component;
         private Vector2 tagScroll;
         private float tagsHeight = 9999f;
-        
-        private Vector2 wearableApparelScroll;
-        
+
+
         private Vector2 statsScroll;
         private float statsHeight = 9999f;
 
         private Panel_ShowCoverage coveragePanel = null;
-        
-        public override Vector2 InitialSize
-        {
-            get
-            {
-                var width = 420;
-                if (drawPawnStats) width += 210;
-                return new Vector2(width, 640);
+        private Panel_PawnStats pawnStatPanel = null;
+
+        private bool dragging = false;
+        private int curTagIdx = -1;
+
+        public override Vector2 InitialSize {
+            get {
+                var width = WIDTH;
+                if (pawnStatPanel.ShouldDraw) width += Panel_PawnStats.WIDTH;
+                return new Vector2(width, HEIGHT);
             }
         }
 
-        private List<float> resizeReqs = new List<float>();
-        
-        private bool drawShowCoverage = false;
-        internal bool drawPawnStats = false;
         private Rect? fromOtherRect = null;
-        
-        public Dialog_LoadoutEditor(Pawn pawn)
-        {
+
+        public Dialog_LoadoutEditor(Pawn pawn) {
             this.pawn = pawn;
             this.component = pawn.GetComp<LoadoutComponent>();
-            absorbInputAroundWindow = true;
+            coveragePanel = new Panel_ShowCoverage(this);
+            pawnStatPanel = new Panel_PawnStats(this);
+
+            // parent fields
             doCloseX = true;
             draggable = true;
-            coveragePanel = new Panel_ShowCoverage(this);
         }
-        
-        public Dialog_LoadoutEditor(Pawn pawn, Dialog_LoadoutEditor old)
-        {
+
+        public Dialog_LoadoutEditor(Pawn pawn, Dialog_LoadoutEditor old) {
             this.pawn = pawn;
             this.component = pawn.GetComp<LoadoutComponent>();
-            this.drawShowCoverage = old.drawShowCoverage;
-            this.drawPawnStats = old.drawPawnStats;
-            absorbInputAroundWindow = true;
+            coveragePanel = new Panel_ShowCoverage(this, old.coveragePanel.ShouldDraw);
+            pawnStatPanel = new Panel_PawnStats(this, old.pawnStatPanel.ShouldDraw);
+
             doCloseX = true;
             draggable = true;
-            coveragePanel = new Panel_ShowCoverage(this);
+            
             fromOtherRect = new Rect(old.windowRect);
         }
-        
+
         // does nothing
         // public virtual void SetInitialSizeAndPosition()
         // {
@@ -71,9 +72,8 @@ namespace Inventory
         //         this.windowRect = this.windowRect.Rounded();
         //     }
         // }
-        
-        public override void DoWindowContents(Rect inRect)
-        {
+
+        public override void DoWindowContents(Rect inRect) {
             // hack because `SetInitialSizeAndPosition` wasn't playing ball
             if (fromOtherRect.HasValue) {
                 this.windowRect.x = fromOtherRect.Value.x;
@@ -85,149 +85,71 @@ namespace Inventory
                 if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.Comma)) {
                     ThingSelectionUtility.SelectPreviousColonist();
                     this.Close();
-                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this ));
+                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this));
                     Event.current.Use();
                     return;
                 }
+
                 if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.Period)) {
                     ThingSelectionUtility.SelectNextColonist();
                     this.Close();
-                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this ));
+                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this));
                     Event.current.Use();
                     return;
                 }
             }
-            
-            if (drawPawnStats)
-            {
-                var leftPanel = inRect.PopLeftPartPixels(210f);
-                if (DrawPawnStats(leftPanel)) // returns true if selected another pawn
-                {
+
+            if (pawnStatPanel.ShouldDraw) {
+                // returns true if we pressed the button which selects a new pawn, in which case, this window has been closed
+                // and drawing any further content is useless.
+                if (pawnStatPanel.Draw(inRect.PopLeftPartPixels(Panel_PawnStats.WIDTH))) {
                     return;
                 }
             }
-            
-            var middlePanel = inRect.PopLeftPartPixels(420f - 16f);
 
-            DrawTags(middlePanel.TopPartPixels(middlePanel.height / 2.0f));
-            DrawStatistics(middlePanel.BottomPartPixels((middlePanel.height - Mathf.Min(middlePanel.height/2.0f, tagsHeight + 10)) - GUIUtility.SPACED_HEIGHT * 2f));
+            var middlePanel = inRect.PopLeftPartPixels(WIDTH - Margin);
 
-            if (drawShowCoverage)
-            {
+            // 45 = 35 + 10, 35 = `ListSeperator` height, 10 = arbitrary buffer
+            var tagsRect = middlePanel.PopTopPartPixels(Mathf.Min(45 + UIC.SPACED_HEIGHT + tagsHeight, middlePanel.height/2.0f));
+            DrawTags(tagsRect);
+            DrawStatistics(middlePanel);
+
+            if (coveragePanel.ShouldDraw) {
                 coveragePanel.Draw(inRect);
             }
         }
 
-        public bool DrawPawnStats(Rect rect)
-        {
-            // header [ Prev ] [ Current Pawn Name ] [ Next ]
-            //          Render of Pawn with Clothes
-            var topPartRect = rect.PopTopPartPixels(GUIUtility.SPACED_HEIGHT);
-
-            var lhs = topPartRect.PopLeftPartPixels(GUIUtility.SPACED_HEIGHT);
-            var rhs = topPartRect.PopRightPartPixels(GUIUtility.SPACED_HEIGHT);
-            if (Widgets.ButtonImageFitted(lhs, Textures.PreviousTex)) {
-                ThingSelectionUtility.SelectPreviousColonist();
-                this.Close();
-                Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this ));
-                return true;
-            }
-            TooltipHandler.TipRegion(lhs, Strings.SelectPrevious);
-            if (Widgets.ButtonImageFitted(rhs, Textures.NextTex)) {
-                ThingSelectionUtility.SelectNextColonist();
-                this.Close();
-                Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this ));
-                return true;
-            }
-            TooltipHandler.TipRegion(rhs, Strings.SelectNext);
-            Text.Anchor = TextAnchor.MiddleCenter;
-            Widgets.Label(topPartRect, $"{pawn.LabelShort}");
-            Text.Anchor = TextAnchor.UpperLeft;
-            
-            rect.PopRightPartPixels(GenUI.GapTiny);
-            rect.PopTopPartPixels(GenUI.GapTiny);
-
-            GUIUtility.ListSeperator(ref rect, Strings.TopFourSkills);
-            
-            var skillList = pawn.skills.skills.OrderByDescending(skill => skill.Level).ToList();
-            for (int i = 0; i < 4; i++)
-            {
-                var skillRect = rect.PopTopPartPixels(GUIUtility.SPACED_HEIGHT);
-                var skill = skillList[i];
-                
-                if (skill.passion > Passion.None)
-                {
-                    Texture2D image = (skill.passion == Passion.Major) ? SkillUI.PassionMajorIcon : SkillUI.PassionMinorIcon;
-                    Widgets.DrawTextureFitted(skillRect.LeftPartPixels(24), image, 1);
-                }
-
-                float fillPercent = Mathf.Max(0.01f, (float)skill.Level / 20f);
-                Widgets.FillableBar(skillRect, fillPercent, SkillUI.SkillBarFillTex, null, false);
-
-                Text.Anchor = TextAnchor.MiddleRight;
-                GUI.color = Color.gray;
-                Widgets.Label(skillRect.LeftPart(0.95f), $"{skill.def.skillLabel.CapitalizeFirst()} ({skill.Level})");
-                GUI.color = Color.white;
-                Text.Anchor = TextAnchor.UpperLeft;
-                
-                TooltipHandler.TipRegion(skillRect, new TipSignal(SkillUI.GetSkillDescription(skill), skill.def.GetHashCode() * 397945));
-            }
-            
-            GUIUtility.ListSeperator(ref rect, Strings.ApparelWhichCanBeWorn);
-            
-            var wornApparel = component.Loadout.HypotheticalWornApparel(pawn.RaceProps.body).ToList();
-            var apparels = ApparelUtility.ApparelCanFitOnBody(pawn.RaceProps.body, wornApparel.Select(td => td.Def).ToList()).ToList();
-            var allocatedHeight = apparels.Count * GUIUtility.DEFAULT_HEIGHT;
-
-            var viewRect = new Rect(rect.x, rect.y, rect.width - 16f, allocatedHeight);
-            
-            Widgets.BeginScrollView(rect, ref wearableApparelScroll, viewRect);
-            int aIdx = 0;
-            foreach (var apparel in apparels)
-            {
-                var apparelRect = viewRect.PopTopPartPixels(GUIUtility.DEFAULT_HEIGHT);
-                if ( aIdx++ % 2 == 0 )
-                    Widgets.DrawLightHighlight(apparelRect);
-                Widgets.DefIcon(apparelRect.LeftPart(.15f), apparel);
-                Widgets.Label(apparelRect.RightPart(.85f), apparel.LabelCap);
-            }
-
-            Widgets.EndScrollView();
-            
-            return false;
-        }
-
-        public void DrawTags(Rect rect)
-        {
+        public void DrawTags(Rect rect) {
             var tags = component.Loadout.tags.ToList();
-            
+
             DrawHeaderButtons(ref rect, tags);
             rect.AdjVertBy(GenUI.GapTiny);
-            
+
             GUIUtility.ListSeperator(ref rect, Strings.AppliedTags);
-            
-            tagsHeight = tags.Sum(tag => GenUI.ListSpacing * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f))));
-            var viewRect = new Rect(rect.x, rect.y, rect.width - 16f, tagsHeight);
-            
+
+            rect.PopRightPartPixels(UIC.SCROLL_WIDTH);
+            tagsHeight = tags.Sum(tag => UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f))));
+            var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, tagsHeight);
             Widgets.BeginScrollView(rect, ref tagScroll, viewRect);
             
-            foreach (var tag in tags)
-            {
+            DraggableTags(viewRect, tags);
+            
+            foreach (var tag in tags) {
                 var tagIdx = tags.FindIndex(t => t == tag);
-                var tagHeight = GenUI.ListSpacing * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
-                var tagRect = viewRect.PopTopPartPixels(tagHeight );
-
-                var editButtonRect = tagRect.PopRightPartPixels(GenUI.ListSpacing).TopPartPixels(GenUI.ListSpacing);
+                var tagHeight = UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
+                var tagRect = viewRect.PopTopPartPixels(tagHeight);
+                
+                var editButtonRect = tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT);
                 if (Widgets.ButtonImageFitted(editButtonRect, Textures.EditTex)) {
                     Find.WindowStack.Add(new Dialog_TagEditor(tag));
                 }
+
                 TooltipHandler.TipRegion(editButtonRect, $"Edit {tag.name}");
-                
-                if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(GenUI.ListSpacing).TopPartPixels(GenUI.ListSpacing), TexButton.DeleteX)) {
+
+                if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT), TexButton.DeleteX)) {
                     component.Loadout.tags.Remove(tag);
-                    
-                    if ( LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList))
-                    {
+
+                    if (LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) {
                         pList.pawns.Remove(pawn);
                     }
 
@@ -235,124 +157,149 @@ namespace Inventory
                     component.Loadout.itemsToRemove.AddRange(loadoutItems.ToList());
                 }
 
-                if (tagIdx != 0) {
-                    if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(GenUI.ListSpacing).TopPartPixels(GenUI.ListSpacing), TexButton.ReorderUp))
-                    {
-                        var tmp = component.Loadout.tags[tagIdx - 1];
-                        component.Loadout.tags[tagIdx - 1] = tag;
-                        component.Loadout.tags[tagIdx] = tmp;
-                    }
-                }
-                else
-                {
-                    tagRect.PopRightPartPixels(GenUI.ListSpacing);
-                }
-
-                if (tagIdx != tags.Count - 1) {
-                    if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(GenUI.ListSpacing).TopPartPixels(GenUI.ListSpacing), TexButton.ReorderDown)) {
-                        var tmp = component.Loadout.tags[tagIdx + 1];
-                        component.Loadout.tags[tagIdx + 1] = tag;
-                        component.Loadout.tags[tagIdx] = tmp;
-                    }
-                }
-                else
-                {
-                    tagRect.PopRightPartPixels(GenUI.ListSpacing);
-                }
-                
                 Widgets.DrawBoxSolid(tagRect.PopLeftPartPixels(10.0f), Panel_ShowCoverage.GetColorForTagAtIndex(tagIdx));
                 tagRect.AdjHorzBy(3f);
                 Widgets.Label(tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + 10f), tag.name);
-                
+
                 var y = tagRect.y;
-                
+
                 // draw required items in blocks of 4
-                for (int i = 0; i < tag.requiredItems.Count; i+= 4) {
+                for (int i = 0; i < tag.requiredItems.Count; i += 4) {
                     for (int j = 0; j < 4; j++) {
-                        var drawRect = new Rect(tagRect.x + GenUI.ListSpacing * j, y + (i/4.0f) * GenUI.ListSpacing, GenUI.ListSpacing, GenUI.ListSpacing);
+                        var drawRect = new Rect(tagRect.x + UIC.SPACED_HEIGHT * j, y + (i / 4.0f) * UIC.SPACED_HEIGHT, UIC.SPACED_HEIGHT, UIC.SPACED_HEIGHT);
                         var idx = i + j;
                         if (idx >= tag.requiredItems.Count) break;
                         var item = tag.requiredItems[idx];
-                        if (item.Quantity > 1)
-                        {
+                        if (item.Quantity > 1) {
                             GUIUtility.FittedDefIconCount(drawRect, item.Def, item.RandomStuff, item.Quantity);
                         }
-                        else
-                        {
+                        else {
                             Widgets.DefIcon(drawRect, item.Def, item.RandomStuff);
                         }
+
                         TooltipHandler.TipRegion(drawRect, item.Def.LabelCap);
                     }
                 }
             }
-            
+
             Widgets.EndScrollView();
         }
 
-        public void DrawHeaderButtons(ref Rect rect, List<Tag> tags)
-        {
-            var buttonRect = rect.PopTopPartPixels(GenUI.ListSpacing);
-            buttonRect.PopRightPartPixels(16f);
+        private void DraggableTags(Rect viewRect, List<Tag> tags) {
+            viewRect.width -= 2 * UIC.SPACED_HEIGHT;
             
-            if (Widgets.ButtonText(buttonRect.PopLeftPartPixels(rect.width / 3f), Strings.PawnStats))
-            {
-                this.windowRect.x = this.windowRect.x + (drawPawnStats ? 210f : -210f);
-                this.windowRect.width = windowRect.width + (drawPawnStats ? -210f : 210f);
-                drawPawnStats = !drawPawnStats;
+            Rect RectForTag(int tIdx) {
+                var offset = tags
+                    .GetRange(0, tIdx)
+                    .Sum(tag => UIC.SPACED_HEIGHT * Mathf.Max(1, Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
+                
+                return new Rect(viewRect.x, viewRect.y + offset, viewRect.width, UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tags[tIdx].requiredItems.Count / 4.0f))));
             }
-            
-            if (Widgets.ButtonText(buttonRect.LeftHalf(), Strings.AddTag))
-            {
-                var opts = LoadoutManager.Tags.Except(tags).OrderBy(t => t.name).Select(tag =>
-                    new FloatMenuOption(tag.name, () =>
-                    {
-                        if ( !LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList))
-                        {
-                            pList = new SerializablePawnList(new List<Pawn>());
-                            LoadoutManager.PawnsWithTags.Add(tag, pList);
-                        }
-                        pList.pawns.Add(pawn);
-                        component.Loadout.tags.Add(tag);
-                    })).ToList();
-                
-                opts.Add(new FloatMenuOption(Strings.CreateNewTag, () => Find.WindowStack.Add(new Dialog_TagEditor())));   
-                
-                Find.WindowStack.Add(new FloatMenu(opts));
+            var cEvent = Event.current;
+
+            if (cEvent.rawType == EventType.MouseUp) {
+                dragging = false;
             }
 
-            if (Widgets.ButtonText(buttonRect.RightHalf(), drawShowCoverage ? Strings.HideCoverage : Strings.ShowCoverage))
-            {
-                if (drawShowCoverage) {
-                    this.windowRect.width = (drawPawnStats ? 210 : 0) + 420;
+            if (dragging) {
+                if (Mouse.IsOver(viewRect.ExpandedBy(25f))) {
+                    var tRect = RectForTag(curTagIdx);
+                    var mPos = cEvent.mousePosition;
+
+                    if (!tRect.ExpandedBy(5f).Contains(mPos)) {
+                        if (curTagIdx > 0 && mPos.y < tRect.y) {
+                            (component.Loadout.tags[curTagIdx], component.Loadout.tags[curTagIdx - 1]) = (component.Loadout.tags[curTagIdx - 1], component.Loadout.tags[curTagIdx]);
+                            curTagIdx -= 1;
+                        }
+                        else if (curTagIdx < tags.Count - 1 && mPos.y > tRect.y) {
+                            (component.Loadout.tags[curTagIdx], component.Loadout.tags[curTagIdx + 1]) = (component.Loadout.tags[curTagIdx + 1], component.Loadout.tags[curTagIdx]);
+                            curTagIdx += 1;
+                        }
+                        SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
+                    }
+                    GUI.color = ReorderableWidget.LineColor;
+                    Widgets.DrawLine(new Vector2(tRect.x, tRect.yMax), new Vector2(tRect.xMax, tRect.yMax), ReorderableWidget.LineColor, 2f);
+                    Widgets.DrawHighlight(tRect);
+                    GUI.color = Color.white;
+                } else {
+                    dragging = false;
+                    curTagIdx = -1;
                 }
-                drawShowCoverage = !drawShowCoverage;
+            }
+            
+            if (cEvent.rawType == EventType.MouseDown && Mouse.IsOver(viewRect)) {
+                dragging = true;
+                for (int i = 0; i < tags.Count; i++) {
+                    var rect = RectForTag(i);
+                    
+                    if (rect.Contains(cEvent.mousePosition)) {
+                        curTagIdx = i;
+                        break;
+                    }
+                }
+                Event.current.Use();
             }
         }
 
-        public void DrawStatistics(Rect rect)
-        {
-            var viewRect = new Rect(rect.x, rect.y, rect.width - 16f, statsHeight);
-            
+        public void DrawHeaderButtons(ref Rect rect, List<Tag> tags) {
+            var buttonRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
+            buttonRect.PopRightPartPixels(Margin);
+
+            if (Widgets.ButtonText(buttonRect.PopLeftPartPixels(rect.width / 3f), Strings.PawnStats)) {
+                // We pop back the panel's x value because we want the 'central' panel to stay in the same position
+                this.windowRect.x += Panel_PawnStats.WIDTH * (pawnStatPanel.ShouldDraw ? 1 : -1);
+                this.windowRect.width += Panel_PawnStats.WIDTH * (pawnStatPanel.ShouldDraw ? -1 : 1);
+                pawnStatPanel.ShouldDraw = !pawnStatPanel.ShouldDraw;
+            }
+
+            if (Widgets.ButtonText(buttonRect.LeftHalf(), Strings.AddTag)) {
+                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(tags).ToList(), tag => {
+                    if (!LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) {
+                        pList = new SerializablePawnList(new List<Pawn>());
+                        LoadoutManager.PawnsWithTags.Add(tag, pList);
+                    }
+                    
+                    pList.pawns.Add(pawn);
+                    component.Loadout.tags.Add(tag);
+                }));
+            }
+
+            if (Widgets.ButtonText(buttonRect.RightHalf(), coveragePanel.ShouldDraw ? Strings.HideCoverage : Strings.ShowCoverage)) {
+                // Active -> Inactive, reset back to default widths
+                if (coveragePanel.ShouldDraw) {
+                    this.windowRect.width = (pawnStatPanel.ShouldDraw ? Panel_PawnStats.WIDTH : 0) + WIDTH;
+                }
+
+                coveragePanel.ShouldDraw = !coveragePanel.ShouldDraw;
+            }
+        }
+
+        public void DrawStatistics(Rect rect) {
+            var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, statsHeight);
+
             //Widgets.DrawBoxSolid(rect, Color.green);
 
             var height = 0f;
             Widgets.BeginScrollView(rect, ref statsScroll, viewRect);
-            
+
             GUIUtility.ListSeperator(ref viewRect, Strings.LoadoutStatistics);
 
             viewRect.AdjVertBy(GenUI.GapTiny);
 
             var loadoutItems = component.Loadout.AllItems.ToList();
-            
+
             GUIUtility.BarWithOverlay(
-                viewRect.PopTopPartPixels(GUIUtility.SPACED_HEIGHT),
+                viewRect.PopTopPartPixels(UIC.SPACED_HEIGHT),
                 Utility.HypotheticalEncumberancePercent(pawn, loadoutItems),
-                Utility.HypotheticalUnboundedEncumberancePercent(pawn, loadoutItems) > 1f ? Textures.ValvetTex as Texture2D : Textures.RWPrimaryTex as Texture2D,
+                Utility.HypotheticalUnboundedEncumberancePercent(pawn, loadoutItems) > 1f
+                    ? Textures.ValvetTex as Texture2D
+                    : Textures.RWPrimaryTex as Texture2D,
                 Strings.Weight,
-                Utility.HypotheticalGearAndInventoryMass(pawn, loadoutItems).ToString("0.#") + "/" + MassUtility.Capacity(pawn).ToStringMass(),
+                Utility.HypotheticalGearAndInventoryMass(pawn, loadoutItems).ToString("0.#") + "/" +
+                MassUtility.Capacity(pawn).ToStringMass(),
                 Strings.WeightOverCapacity);
 
-            height += GenUI.GapTiny + GUIUtility.SPACED_HEIGHT;
+            height += GenUI.GapTiny + UIC.SPACED_HEIGHT;
 
             // var statBonuses = new Dictionary<StatDef, List<Item>>();
             // var wornApparel = component.Loadout.HypotheticalWornApparel(pawn.RaceProps.body).ToList();
@@ -384,28 +331,30 @@ namespace Inventory
             //     TryDrawSpoofStatCalculations(ref viewRect, statBonus.Key, statBonus.Value);
             //     height += GUIUtility.SPACED_HEIGHT;
             // }
-            
+
             Widgets.EndScrollView();
-            
+
             statsHeight = height;
         }
-        
-        private void TryDrawSpoofStatCalculations(ref Rect rect, StatDef stat, List<Item> items)
-        {
-            var statRect = rect.PopTopPartPixels(GUIUtility.SPACED_HEIGHT);
 
-            float statValue = stat.defaultBaseValue;
-            
-            
-            foreach (var thing in items) {
-                statValue += thing.MakeDummyThingNoId().GetStatValue(stat);
-                // statValue += StatWorker.StatOffsetFromGear(thing.MakeDummyThingNoId(), stat);
-            }
+        // private void TryDrawSpoofStatCalculations(ref Rect rect, StatDef stat, List<Item> items)
+        // {
+        //     var statRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
+        //
+        //     float statValue = stat.defaultBaseValue;
+        //     
+        //     
+        //     foreach (var thing in items) {
+        //         statValue += thing.MakeDummyThingNoId().GetStatValue(stat);
+        //         // statValue += StatWorker.StatOffsetFromGear(thing.MakeDummyThingNoId(), stat);
+        //     }
+        //
+        //     Widgets.Label(statRect, stat.LabelForFullStatList);
+        //     Text.Anchor = TextAnchor.UpperRight;
+        //     Widgets.Label(statRect, statValue.ToString());
+        //     Text.Anchor = TextAnchor.UpperLeft;
+        // }
 
-            Widgets.Label(statRect, stat.LabelForFullStatList);
-            Text.Anchor = TextAnchor.UpperRight;
-            Widgets.Label(statRect, statValue.ToString());
-            Text.Anchor = TextAnchor.UpperLeft;
-        }
     }
+
 }

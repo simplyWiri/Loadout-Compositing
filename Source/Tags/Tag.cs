@@ -5,48 +5,42 @@ using RimWorld;
 using UnityEngine;
 using Verse;
 
-namespace Inventory
-{
-    public class Tag : IComparable<Tag>, IExposable, ILoadReferenceable
-    {
+namespace Inventory {
+
+    public class Tag : IComparable<Tag>, IExposable, ILoadReferenceable {
+
         public List<Item> requiredItems = null;
         public string name = null;
         public int uniqueId = -1;
 
-        public Tag()
-        {
+        public Tag() {
             this.requiredItems = new List<Item>();
             this.uniqueId = -1;
             this.name = "";
         }
 
-        public Tag(string name)
-        {
+        public Tag(string name) {
             this.name = name;
             this.requiredItems = new List<Item>();
             this.uniqueId = LoadoutManager.GetNextTagId();
-            if (name == "")
-            {
+            if (name == "") {
                 this.name = "Placeholder-" + uniqueId;
             }
         }
 
-        public IEnumerable<Item> ItemsMatching(Thing thing)
-        {
+        public IEnumerable<Item> ItemsMatching(Thing thing) {
             return requiredItems.Where(item => thing.def == item.Def && item.Filter.Allows(thing));
         }
-        public IEnumerable<Item> ItemsMatching(Predicate<Item> pred)
-        {
+
+        public IEnumerable<Item> ItemsMatching(Predicate<Item> pred) {
             return requiredItems.Where(item => pred(item));
         }
-        
-        public IEnumerable<Tuple<Tag, Item>> ItemsWithTagMatching(Predicate<Item> pred)
-        {
+
+        public IEnumerable<Tuple<Tag, Item>> ItemsWithTagMatching(Predicate<Item> pred) {
             return requiredItems.Where(item => pred(item)).Select(item => new Tuple<Tag, Item>(this, item));
         }
 
-        public void Add(ThingDef thing)
-        {
+        public void Add(ThingDef thing) {
             requiredItems.Add(new Item(thing));
         }
 
@@ -59,9 +53,9 @@ namespace Inventory
             foreach (var thing in things) {
                 var items = ItemsMatching(thing).ToList();
                 if (items.Count == 0) continue;
-                
+
                 var expectedQuantity = items.Sum(i => i.Quantity);
-                
+
                 yield return new ThingCount(thing, Mathf.Max(thing.stackCount, thing.stackCount - expectedQuantity));
             }
         }
@@ -69,8 +63,7 @@ namespace Inventory
         public bool HasThingDef(ThingDef def, out Item item) {
             item = null;
             foreach (var i in requiredItems) {
-                if (i.Def == def)
-                {
+                if (i.Def == def) {
                     item = i;
                     return true;
                 }
@@ -78,17 +71,15 @@ namespace Inventory
 
             return false;
         }
-        
-        public int CompareTo(Tag other)
-        {
+
+        public int CompareTo(Tag other) {
             if (ReferenceEquals(this, other)) return 0;
             if (ReferenceEquals(null, other)) return 1;
-            
+
             return string.Compare(name, other.name, StringComparison.Ordinal);
         }
 
-        public void ExposeData()
-        {
+        public void ExposeData() {
             Scribe_Collections.Look(ref requiredItems, nameof(requiredItems));
             Scribe_Values.Look(ref name, nameof(name));
             Scribe_Values.Look(ref uniqueId, nameof(uniqueId));
@@ -99,9 +90,10 @@ namespace Inventory
             }
         }
 
-        public string GetUniqueLoadID()
-        {
+        public string GetUniqueLoadID() {
             return "Tag_" + uniqueId;
         }
+
     }
+
 }

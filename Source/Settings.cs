@@ -2,18 +2,14 @@
 using UnityEngine;
 using Verse;
 
-namespace Inventory
-{
-    public class Settings : ModSettings
-    {
-        public void DoSettingsWindow(Rect rect)
-        {
+namespace Inventory {
 
-        }
-        
-        public override void ExposeData()
-        {
-            
-        }
+    public class Settings : ModSettings {
+
+        public void DoSettingsWindow(Rect rect) { }
+
+        public override void ExposeData() { }
+
     }
+
 }

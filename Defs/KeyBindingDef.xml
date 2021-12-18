@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <KeyBindingDef>
+    <category>MainTabs</category>
+    <defName>CL_OpenLoadoutEditor</defName>
+    <label>Open Loadout Editor</label>
+    <defaultKeyCodeA></defaultKeyCodeA>
+  </KeyBindingDef>
+
+  <KeyBindingDef>
+    <category>MainTabs</category>
+    <defName>CL_OpenTagEditor</defName>
+    <label>Open Tag Editor</label>
+    <defaultKeyCodeA></defaultKeyCodeA>
+  </KeyBindingDef>
+
+</Defs>

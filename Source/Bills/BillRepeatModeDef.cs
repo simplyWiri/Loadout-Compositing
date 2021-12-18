@@ -1,10 +1,12 @@
 ﻿using RimWorld;
 
-namespace Inventory
-{
+namespace Inventory {
+
     [DefOf]
-    class InvBillRepeatModeDefOf
-    {
+    class InvBillRepeatModeDefOf {
+
         public static BillRepeatModeDef W_PerTag;
+
     }
+
 }

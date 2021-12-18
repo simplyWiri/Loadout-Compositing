@@ -1,9 +1,9 @@
 ﻿using Verse;
 
-namespace Inventory
-{
-    public static class Strings
-    {
+namespace Inventory {
+
+    public static class Strings {
+
         // P = Prefix
         public const string P = "CompositableLoadouts.";
 
@@ -18,7 +18,7 @@ namespace Inventory
         public static string SwitchTargetTag(string fromTag) => $"{P}SwitchTargetTag".Translate(fromTag);
         public static string CopyFromTag(string tagName, string defName) => $"{P}CopyFromTag".Translate(tagName, defName);
         public static string PickUpItems(string itemTag, string count) => $"{P}PickUpItems".Translate(itemTag, count);
-        
+
         public static string SelectTag => $"{P}SelectTag".TranslateSimple();
 
         public static string NoTagsYetWarning => $"{P}NoTagsYetWarning".TranslateSimple();
@@ -27,11 +27,11 @@ namespace Inventory
 
         public static string ChangeTagName => $"{P}ChangeTagName".TranslateSimple();
         public static string CopyPasteExplain => $"{P}CopyPasteExplain".TranslateSimple();
-        
+
         public static string SpecifyElementsToolTip => $"{P}SpecifyElementsToolTip".TranslateSimple();
         public static string EditQuantity => $"{P}EditQuantity".TranslateSimple();
         public static string RemoveItemFromTag => $"{P}RemoveItemFromTag".TranslateSimple();
-        
+
         public static string SelectPrevious => $"{P}SelectPrevious".TranslateSimple();
         public static string SelectNext => $"{P}SelectNext".TranslateSimple();
         public static string TopFourSkills => $"{P}TopFourSkills".TranslateSimple();
@@ -55,6 +55,8 @@ namespace Inventory
         public static string AddTag => $"{P}AddTag".TranslateSimple();
         public static string PreviewQuality => $"{P}PreviewQuality".TranslateSimple();
 
+        public static string CoverageExplanation => $"{P}CoverageExplanation".TranslateSimple();
 
     }
+
 }
