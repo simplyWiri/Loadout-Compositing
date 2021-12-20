@@ -104,9 +104,8 @@ namespace Inventory {
                     var loadoutHolders = pawns.Where(p => p.IsValidLoadoutHolder());
                     var pawn = loadoutHolders.FirstOrDefault();
                     if (pawn != null) {
-                        
+                        Find.WindowStack.Add(new Dialog_LoadoutEditor(pawn));
                     }
-                    Find.WindowStack.Add(new Dialog_LoadoutEditor(pawn));
                 }
                 else {
                     Find.WindowStack.RemoveWindowsOfType(typeof(Dialog_LoadoutEditor));
