@@ -44,6 +44,8 @@ namespace Inventory {
             var tag = TagFor(bill);
             if (tag == null) return 0;
 
+            instance.pawnTags[tag].pawns.RemoveAll(p => p is null || p.Dead || !p.IsValidLoadoutHolder());
+
             return instance.pawnTags[tag].Pawns.Count(p => p.Map == bill.Map);
         }
 
@@ -83,6 +85,7 @@ namespace Inventory {
         public override void ExposeData() {
             if (Scribe.mode == LoadSaveMode.Saving) {
                 billToTag.RemoveAll(kv => kv.Key.repeatMode != InvBillRepeatModeDefOf.W_PerTag);
+                pawnTags.Do(kv => pawnTags[kv.Key].pawns.RemoveAll(p => p is null || p.Dead || !p.IsValidLoadoutHolder()));
             }
 
             Scribe_Collections.Look(ref tags, nameof(tags), LookMode.Deep);
