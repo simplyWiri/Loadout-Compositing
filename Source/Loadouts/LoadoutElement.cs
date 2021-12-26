@@ -6,7 +6,7 @@ namespace Inventory {
     public class LoadoutElement : IExposable {
 
         private Tag tag;
-        private LoadoutState state;
+        internal LoadoutState state;
         // if switchValue is true, this element is only active when `currentState` == state, 
         // otherwise, it is only active when `currentState` != state
         private bool switchValue;

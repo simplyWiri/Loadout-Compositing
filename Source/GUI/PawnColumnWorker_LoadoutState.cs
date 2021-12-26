@@ -19,7 +19,7 @@ namespace Inventory {
             base.DoHeader(rect, table);
 
             if (Widgets.ButtonText(rect.PopTopPartPixels(HEADER_BUTTON_HEIGHT), Strings.ModifyStates)) {
-                LoadoutManager.States.Add(new LoadoutState("NewState-" + LoadoutManager.States.Count));
+                Find.WindowStack.Add(new Dialog_LoadoutStateEditor());
             }
         }
 

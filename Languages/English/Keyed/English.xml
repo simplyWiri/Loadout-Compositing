@@ -2,6 +2,7 @@
 <LanguageData>
 	<CompositableLoadouts.Modify>Modify</CompositableLoadouts.Modify>
 	<CompositableLoadouts.Generic>Generic</CompositableLoadouts.Generic>
+	<CompositableLoadouts.Create>Create</CompositableLoadouts.Create>
 
 	<CompositableLoadouts.TagLoadoutComposition>Tags and Loadout Composition</CompositableLoadouts.TagLoadoutComposition>
 	<CompositableLoadouts.EditXLoadout>Edit {0}'s Loadout</CompositableLoadouts.EditXLoadout>
@@ -63,7 +64,7 @@ A semi-transparent apparel will be drawn, showing the highest priority apparel w
 	<CompositableLoadouts.SelectState>Select State</CompositableLoadouts.SelectState>
 	<CompositableLoadouts.Map>map</CompositableLoadouts.Map>
 	<CompositableLoadouts.Caravan>caravan</CompositableLoadouts.Caravan>
-	<!-- Change all pawns in pawnLabel's (map/caravan) to the Loadout State (xxx) -->
+	<!-- Change all pawns loadout-states in Jeff's caravan to War -->
 	<CompositableLoadouts.MassChangeStates>Change all pawns loadout-states in {0}'s {1} to {2}</CompositableLoadouts.MassChangeStates>
 	<CompositableLoadouts.DefaultStateName>Default</CompositableLoadouts.DefaultStateName>
 
