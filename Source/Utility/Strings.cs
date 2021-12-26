@@ -13,6 +13,7 @@ namespace Inventory {
 
         public static string Generic => $"{P}Generic".TranslateSimple();
         public static string Modify => $"{P}Modify".TranslateSimple();
+        public static string Create => $"{P}Create".TranslateSimple();
 
         public static string PickTargetTag => $"{P}PickTargetTag".TranslateSimple();
         public static string SwitchTargetTag(string fromTag) => $"{P}SwitchTargetTag".Translate(fromTag);

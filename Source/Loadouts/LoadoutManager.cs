@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using RimWorld;
 using Verse;
 
@@ -64,12 +65,26 @@ namespace Inventory {
 
             instance.billToTag.RemoveAll(bill => bill.Value == tag);
 
-            foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.FreeColonists)
-                         .Where(p => !p.IsQuestLodger() && p.TryGetComp<LoadoutComponent>() != null)) {
+            foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.AllPawns).Where(p => p.IsValidLoadoutHolder())) {
                 var loadout = pawn.TryGetComp<LoadoutComponent>();
                 if (loadout == null) continue;
 
                 loadout.Loadout.elements.RemoveAll(elem => elem.Tag == tag);
+            }
+        }
+
+        public static void RemoveState(LoadoutState state) {
+            instance.states.Remove(state);
+            
+            foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.AllPawns).Where(p => p.IsValidLoadoutHolder())) {
+                var loadout = pawn.TryGetComp<LoadoutComponent>();
+                if (loadout == null) continue;
+
+                loadout.Loadout.elements.Do(elem => {
+                    if (state.Equals(elem.state)) {
+                        elem.state = null;
+                    }
+                });
             }
         }
 
