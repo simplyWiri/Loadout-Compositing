@@ -7,9 +7,7 @@ namespace Inventory {
 
         public string name;
         public int id = -1;
-
-        public bool IsDefault => id == 0;
-
+        
         // for creating instances when loading/saving
         public LoadoutState() { }
 
@@ -19,7 +17,7 @@ namespace Inventory {
         }
 
         public override bool Equals(object obj) {
-            return (obj is LoadoutState ls && ls.name == name && ls.id == id) || (obj is string s && s == name);
+            return (obj is LoadoutState ls && ls.name == name) || (obj is string s && s == name);
         }
 
         public override int GetHashCode() {

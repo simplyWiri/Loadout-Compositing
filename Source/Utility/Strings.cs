@@ -61,6 +61,15 @@ namespace Inventory {
 
         public static string CoverageExplanation => $"{P}CoverageExplanation".TranslateSimple();
 
+        public static string ModifyStates => $"{P}ModifyStates".TranslateSimple();
+        public static string SelectState => $"{P}SelectState".TranslateSimple();
+        public static string DefaultStateName => $"{P}DefaultStateName".TranslateSimple();
+        public static string Map => $"{P}Map".TranslateSimple();
+        public static string Caravan => $"{P}Caravan".TranslateSimple();
+        public static string MassChangeStates(Pawn pawn, string area, LoadoutState state) => $"{P}MassChangeStates".Translate(pawn.LabelShortCap, area, state?.name ?? DefaultStateName);
+        public static string StatesExplanation => $"{P}StatesExplanation".TranslateSimple();
+        public static string EditLoadoutDesc(Pawn p) => $"{P}EditLoadoutDesc".Translate(p.LabelShortCap);
+
     }
 
 }
