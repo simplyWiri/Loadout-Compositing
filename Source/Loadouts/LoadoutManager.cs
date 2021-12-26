@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using HarmonyLib;
 using RimWorld;
-using RimWorld.IO;
-using RimWorld.Planet;
 using Verse;
 
 namespace Inventory {
@@ -16,18 +12,23 @@ namespace Inventory {
 
         // Saving 
         private int nextTagId;
+        private int nextStateId;
         private List<SerializablePawnList> pPawnLoading = null;
         private List<Tag> pTagsLoading = null;
 
         // pseudo-static lists.
         private List<Tag> tags = new List<Tag>();
+        private List<LoadoutState> states = null;
         private Dictionary<Tag, SerializablePawnList> pawnTags = new Dictionary<Tag, SerializablePawnList>();
         private Dictionary<Bill_Production, Tag> billToTag = new Dictionary<Bill_Production, Tag>();
 
         public static List<Tag> Tags => instance.tags;
+        public static List<LoadoutState> States => instance.states;
+        public static LoadoutState DefaultState => States.First(s => s.IsDefault);
         public static Dictionary<Tag, SerializablePawnList> PawnsWithTags => instance.pawnTags;
 
         public static int GetNextTagId() => UniqueIDsManager.GetNextID(ref instance.nextTagId);
+        public static int GetNextStateId() => UniqueIDsManager.GetNextID(ref instance.nextStateId);
 
         public static Tag TagFor(Bill_Production billProduction) {
             if (instance.billToTag.TryGetValue(billProduction, out var tag)) return tag;
@@ -52,12 +53,13 @@ namespace Inventory {
         public LoadoutManager(Game game) { }
 
         public static void AddTag(Tag tag) {
-            Tags.Add(tag);
+            instance.tags.Add(tag);
             PawnsWithTags.Add(tag, new SerializablePawnList(new List<Pawn>()));
         }
 
         public static void RemoveTag(Tag tag) {
-            Tags.Remove(tag);
+            instance.tags.Remove(tag);
+
             if (PawnsWithTags.ContainsKey(tag))
                 PawnsWithTags.Remove(tag);
 
@@ -67,15 +69,9 @@ namespace Inventory {
                          .Where(p => !p.IsQuestLodger() && p.TryGetComp<LoadoutComponent>() != null)) {
                 var loadout = pawn.TryGetComp<LoadoutComponent>();
                 if (loadout == null) continue;
-                if (loadout.Loadout.tags.Contains(tag)) {
-                    loadout.Loadout.tags.Remove(tag);
-                }
-            }
-        }
 
-        public static List<FloatMenuOption> OptionPerTag(Func<Tag, string> labelGen, Action<Tag> onClick) {
-            return Tags.OrderBy(t => t.name).Select(tag => new FloatMenuOption(labelGen(tag), () => onClick(tag)))
-                .ToList();
+                loadout.Loadout.elements.RemoveAll(elem => elem.Tag == tag);
+            }
         }
 
         public override void FinalizeInit() {
@@ -97,10 +93,11 @@ namespace Inventory {
             }
 
             Scribe_Collections.Look(ref tags, nameof(tags), LookMode.Deep);
-            Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Deep, ref pTagsLoading,
-                ref pPawnLoading);
+            Scribe_Collections.Look(ref states, nameof(states), LookMode.Deep);
+            Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Deep, ref pTagsLoading, ref pPawnLoading);
             Scribe_Collections.Look(ref billToTag, nameof(billToTag), LookMode.Reference, LookMode.Reference);
             Scribe_Values.Look(ref nextTagId, nameof(nextTagId));
+            Scribe_Values.Look(ref nextStateId, nameof(nextStateId));
 
             tags ??= new List<Tag>();
             pawnTags ??= new Dictionary<Tag, SerializablePawnList>();
@@ -108,7 +105,6 @@ namespace Inventory {
         }
 
         public override void GameComponentOnGUI() {
-            
             if (InvKeyBindingDefOf.CL_OpenLoadoutEditor?.KeyDownEvent ?? false) {
                 if (Find.WindowStack.WindowOfType<Dialog_LoadoutEditor>() == null) {
                     var pawns = Find.Maps.SelectMany(m => m.mapPawns.AllPawns);
