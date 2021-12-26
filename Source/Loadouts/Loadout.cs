@@ -1,67 +1,69 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RimWorld;
 using UnityEngine;
 using Verse;
-using Verse.AI;
 
 namespace Inventory {
 
     public class Loadout : IExposable {
 
-        public List<Tag> tags;
+        // should never be used, exists for backwards compat
+        private List<Tag> tags = null;
+
+        public List<LoadoutElement> elements;
         public List<ThingCount> itemsToRemove;
+        public LoadoutState currentState;
+
+        public IEnumerable<Tag> AllTags => elements.Select(elem => elem.Tag);
+        public IEnumerable<Item> AllItems => AllTags.SelectMany(t => t.requiredItems);
+        public IEnumerable<Tag> Tags => TagsWith(currentState);
+        public IEnumerable<Tag> TagsWith(LoadoutState state) => elements.Where(e => e.Active(state)).Select(e => e.Tag);
+        public IEnumerable<Item> Items => Tags.SelectMany(t => t.requiredItems);
 
         public Loadout() {
-            tags = new List<Tag>();
+            elements = new List<LoadoutElement>();
             itemsToRemove = new List<ThingCount>();
         }
-
-        public IEnumerable<Item> AllItems => tags.SelectMany(t => t.requiredItems);
-
-        public IEnumerable<Tag> TagsMatching(Predicate<Item> predicate) {
-            return tags.Where(tag => tag.ItemsMatching(predicate).Any());
-        }
-
-        public IEnumerable<Item> ThingsMatching(Predicate<Item> predicate) {
-            return tags.SelectMany(tag => tag.ItemsMatching(predicate));
+        
+        public int IndexOf(Tag tag) {
+            return elements.FirstIndexOf(le => le.Tag == tag);
         }
 
         public float WeightAtWhichLoadoutDesires(Thing thing) {
             const float priorityMultiplier = 5;
 
-            var tag = tags.FirstOrDefault(t => t.ItemsMatching(thing).Any());
+            var tag = Tags.FirstOrDefault(t => t.ItemsMatching(thing).Any());
             if (tag == null) return 0;
 
-            var tagIndex = tags.IndexOf(tag);
-            var tagPriority = Mathf.Pow(priorityMultiplier, tags.Count - tagIndex);
+            var tagIndex = IndexOf(tag);
+            var tagPriority = Mathf.Pow(priorityMultiplier, elements.Count - tagIndex);
             return tagPriority;
         }
 
         public bool Desires(Thing thing) {
-            return tags.Any(t => t.ItemsMatching(item => item.Allows(thing)).Any());
+            return Tags.Any(t => t.ItemsMatching(item => item.Allows(thing)).Any());
         }
 
         public IEnumerable<Item> ItemsAccepting(Thing thing) {
-            return tags.SelectMany(t => t
+            return Tags.SelectMany(t => t
                 .ItemsMatching(item => item.Allows(thing)));
         }
 
-        public IEnumerable<Item> HypotheticalWornApparel(BodyDef def) {
-            var itemsWithPrios = tags.SelectMany(t => t
+        public IEnumerable<Item> HypotheticalWornApparel(LoadoutState state, BodyDef def) {
+            var itemsWithPrios = TagsWith(state).SelectMany(t => t
                     .ItemsWithTagMatching(item => item.Def.IsApparel)
-                    .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, tags.IndexOf(tuple.Item1))))
+                    .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, elements.FindIndex(e => e.Tag == tuple.Item1))))
                 .ToList();
 
             var wornApparel = ApparelUtility.WornApparelFor(def, itemsWithPrios) ?? new List<Tuple<Item, Tag>>();
             return wornApparel.Select(tuple => tuple.Item1);
         }
 
-        public IEnumerable<Tuple<Item, Tag>> HypotheticalWornApparelWithTag(BodyDef def) {
-            var itemsWithPrios = tags.SelectMany(t => t
+        public IEnumerable<Tuple<Item, Tag>> HypotheticalWornApparelWithTag(LoadoutState state, BodyDef def) {
+            var itemsWithPrios = TagsWith(state).SelectMany(t => t
                     .ItemsWithTagMatching(item => item.Def.IsApparel)
-                    .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, tags.IndexOf(tuple.Item1))))
+                    .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, elements.FindIndex(e => e.Tag == tuple.Item1))))
                 .ToList();
 
             var wornApparel = ApparelUtility.WornApparelFor(def, itemsWithPrios) ?? new List<Tuple<Item, Tag>>();
@@ -69,7 +71,7 @@ namespace Inventory {
         }
 
         public IEnumerable<Item> DesiredItems(List<Thing> heldThings) {
-            var desiredThings = AllItems.Where(t => !t.Def.IsApparel);
+            var desiredThings = Items.Where(t => !t.Def.IsApparel);
             foreach (var thing in desiredThings) {
                 var count = heldThings.Where(heldThing => thing.Allows(heldThing))
                     .Sum(heldThing => heldThing.stackCount);
@@ -82,11 +84,21 @@ namespace Inventory {
         }
 
         public void ExposeData() {
-            Scribe_Collections.Look(ref tags, nameof(tags), LookMode.Reference);
+            // backwards compatibility, todo remove
+            if (Scribe.mode != LoadSaveMode.Saving) {
+                Scribe_Collections.Look(ref tags, nameof(tags), LookMode.Reference);
+            
+                if (!tags.NullOrEmpty()) {
+                    elements = tags.Select(t => new LoadoutElement(t, null)).ToList();
+                }
+            }
+            
+            Scribe_Collections.Look(ref elements, nameof(elements), LookMode.Deep);
             Scribe_Collections.Look(ref itemsToRemove, nameof(itemsToRemove), LookMode.Deep);
-
+            Scribe_References.Look(ref currentState, nameof(currentState));
+            
             itemsToRemove ??= new List<ThingCount>();
-            tags ??= new List<Tag>();
+            elements ??= new List<LoadoutElement>();
         }
 
     }

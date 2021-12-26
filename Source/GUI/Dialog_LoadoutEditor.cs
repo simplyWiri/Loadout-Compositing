@@ -60,7 +60,7 @@ namespace Inventory {
 
             doCloseX = true;
             draggable = true;
-            
+
             fromOtherRect = new Rect(old.windowRect);
         }
 
@@ -110,7 +110,7 @@ namespace Inventory {
             var middlePanel = inRect.PopLeftPartPixels(WIDTH - Margin);
 
             // 45 = 35 + 10, 35 = `ListSeperator` height, 10 = arbitrary buffer
-            var tagsRect = middlePanel.PopTopPartPixels(Mathf.Min(45 + UIC.SPACED_HEIGHT + tagsHeight, middlePanel.height/2.0f));
+            var tagsRect = middlePanel.PopTopPartPixels(Mathf.Min(45 + UIC.SPACED_HEIGHT + tagsHeight, middlePanel.height / 2.0f));
             DrawTags(tagsRect);
             DrawStatistics(middlePanel);
 
@@ -120,7 +120,7 @@ namespace Inventory {
         }
 
         public void DrawTags(Rect rect) {
-            var tags = component.Loadout.tags.ToList();
+            var tags = component.Loadout.AllTags.ToList();
 
             DrawHeaderButtons(ref rect, tags);
             rect.AdjVertBy(GenUI.GapTiny);
@@ -131,14 +131,14 @@ namespace Inventory {
             tagsHeight = tags.Sum(tag => UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f))));
             var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, tagsHeight);
             Widgets.BeginScrollView(rect, ref tagScroll, viewRect);
-            
+
             DraggableTags(viewRect, tags);
-            
+
             foreach (var tag in tags) {
                 var tagIdx = tags.FindIndex(t => t == tag);
                 var tagHeight = UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
                 var tagRect = viewRect.PopTopPartPixels(tagHeight);
-                
+
                 var editButtonRect = tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT);
                 if (Widgets.ButtonImageFitted(editButtonRect, Textures.EditTex)) {
                     Find.WindowStack.Add(new Dialog_TagEditor(tag));
@@ -147,7 +147,7 @@ namespace Inventory {
                 TooltipHandler.TipRegion(editButtonRect, $"Edit {tag.name}");
 
                 if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT), TexButton.DeleteX)) {
-                    component.Loadout.tags.Remove(tag);
+                    component.Loadout.elements.RemoveAll(elem => elem.Tag == tag);
 
                     if (LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) {
                         pList.pawns.Remove(pawn);
@@ -187,14 +187,15 @@ namespace Inventory {
 
         private void DraggableTags(Rect viewRect, List<Tag> tags) {
             viewRect.width -= 2 * UIC.SPACED_HEIGHT;
-            
+
             Rect RectForTag(int tIdx) {
                 var offset = tags
                     .GetRange(0, tIdx)
                     .Sum(tag => UIC.SPACED_HEIGHT * Mathf.Max(1, Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
-                
+
                 return new Rect(viewRect.x, viewRect.y + offset, viewRect.width, UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tags[tIdx].requiredItems.Count / 4.0f))));
             }
+
             var cEvent = Event.current;
 
             if (cEvent.rawType == EventType.MouseUp) {
@@ -208,35 +209,39 @@ namespace Inventory {
 
                     if (!tRect.ExpandedBy(5f).Contains(mPos)) {
                         if (curTagIdx > 0 && mPos.y < tRect.y) {
-                            (component.Loadout.tags[curTagIdx], component.Loadout.tags[curTagIdx - 1]) = (component.Loadout.tags[curTagIdx - 1], component.Loadout.tags[curTagIdx]);
+                            (component.Loadout.elements[curTagIdx], component.Loadout.elements[curTagIdx - 1]) = (component.Loadout.elements[curTagIdx - 1], component.Loadout.elements[curTagIdx]);
                             curTagIdx -= 1;
                         }
                         else if (curTagIdx < tags.Count - 1 && mPos.y > tRect.y) {
-                            (component.Loadout.tags[curTagIdx], component.Loadout.tags[curTagIdx + 1]) = (component.Loadout.tags[curTagIdx + 1], component.Loadout.tags[curTagIdx]);
+                            (component.Loadout.elements[curTagIdx], component.Loadout.elements[curTagIdx + 1]) = (component.Loadout.elements[curTagIdx + 1], component.Loadout.elements[curTagIdx]);
                             curTagIdx += 1;
                         }
+
                         SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
                     }
+
                     GUI.color = ReorderableWidget.LineColor;
                     Widgets.DrawLine(new Vector2(tRect.x, tRect.yMax), new Vector2(tRect.xMax, tRect.yMax), ReorderableWidget.LineColor, 2f);
                     Widgets.DrawHighlight(tRect);
                     GUI.color = Color.white;
-                } else {
+                }
+                else {
                     dragging = false;
                     curTagIdx = -1;
                 }
             }
-            
+
             if (cEvent.rawType == EventType.MouseDown && Mouse.IsOver(viewRect)) {
                 dragging = true;
                 for (int i = 0; i < tags.Count; i++) {
                     var rect = RectForTag(i);
-                    
+
                     if (rect.Contains(cEvent.mousePosition)) {
                         curTagIdx = i;
                         break;
                     }
                 }
+
                 Event.current.Use();
             }
         }
@@ -258,9 +263,9 @@ namespace Inventory {
                         pList = new SerializablePawnList(new List<Pawn>());
                         LoadoutManager.PawnsWithTags.Add(tag, pList);
                     }
-                    
+
                     pList.pawns.Add(pawn);
-                    component.Loadout.tags.Add(tag);
+                    component.Loadout.elements.Add(new LoadoutElement(tag, null));
                 }));
             }
 
