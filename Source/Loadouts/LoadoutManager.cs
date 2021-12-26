@@ -18,13 +18,12 @@ namespace Inventory {
 
         // pseudo-static lists.
         private List<Tag> tags = new List<Tag>();
-        private List<LoadoutState> states = null;
+        private List<LoadoutState> states = new List<LoadoutState>();
         private Dictionary<Tag, SerializablePawnList> pawnTags = new Dictionary<Tag, SerializablePawnList>();
         private Dictionary<Bill_Production, Tag> billToTag = new Dictionary<Bill_Production, Tag>();
 
         public static List<Tag> Tags => instance.tags;
         public static List<LoadoutState> States => instance.states;
-        public static LoadoutState DefaultState => States.First(s => s.IsDefault);
         public static Dictionary<Tag, SerializablePawnList> PawnsWithTags => instance.pawnTags;
 
         public static int GetNextTagId() => UniqueIDsManager.GetNextID(ref instance.nextTagId);
@@ -102,6 +101,7 @@ namespace Inventory {
             tags ??= new List<Tag>();
             pawnTags ??= new Dictionary<Tag, SerializablePawnList>();
             billToTag ??= new Dictionary<Bill_Production, Tag>();
+            states ??= new List<LoadoutState>();
         }
 
         public override void GameComponentOnGUI() {

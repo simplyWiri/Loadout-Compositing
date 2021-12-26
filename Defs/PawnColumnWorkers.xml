@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+  <PawnColumnDef>
+    <defName>CL_EditLoadoutState</defName>
+    <label>current loadout</label>
+    <workerClass>Inventory.PawnColumnWorker_LoadoutState</workerClass>
+    <sortable>true</sortable>
+  </PawnColumnDef>
+
+</Defs>

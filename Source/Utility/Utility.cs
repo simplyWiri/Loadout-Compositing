@@ -97,9 +97,19 @@ namespace Inventory {
             return mass;
         }
 
+        public static LoadoutState GetActiveState(this Pawn p) {
+            var comp = p.TryGetComp<LoadoutComponent>();
+            return comp.Loadout.currentState;
+        }
+
+        public static void SetActiveState(this Pawn p, LoadoutState state) {
+            p.TryGetComp<LoadoutComponent>().Loadout.currentState = state;
+        }
+
         public static bool IsValidLoadoutHolder(this Pawn pawn) {
             return pawn.RaceProps.Humanlike
                    && pawn.IsColonist
+                   && !pawn.Dead
                    && !pawn.IsQuestLodger()
                    && !(pawn.apparel?.AnyApparelLocked ?? true);
         }
