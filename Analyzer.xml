@@ -1,0 +1,14 @@
+<Analyzer>
+    <LoadoutCompositing>
+        <Methods>
+            <li>Inventory.ThinkNode_LoadoutRealisation:SatisfyLoadoutClothingJob</li>
+            <li>Inventory.ThinkNode_LoadoutRealisation:SatisfyLoadoutItemsJob</li>
+            <li>Inventory.ThinkNode_LoadoutRealisation:SatisfyLoadoutClothingJob</li>
+            <li>Inventory.OptimizeApparel_ApparelScoreGain_Patch:Postfix</li>
+            <li>Inventory.BillUtility:Satisfied</li>
+            <li>Inventory.FirstUnloadableThing_Patch:ShouldDropThing</li>
+            <li>Inventory.Loadout:Desires</li>
+            <li>Inventory.Loadout:WeightAtWhichLoadoutDesires</li>
+        </Methods>
+    </LoadoutCompositing>
+</Analyzer>

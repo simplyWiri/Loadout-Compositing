@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+    <ThinkTreeDef>
+        <defName>CL_LoadoutRealisation</defName>
+        <insertTag>Humanlike_PostDuty</insertTag>
+        <insertPriority>100</insertPriority>
+        <thinkRoot Class="Inventory.ThinkNode_LoadoutRealisation"> 
+            <subNodes> </subNodes>
+        </thinkRoot>
+    </ThinkTreeDef>
+</Defs>
