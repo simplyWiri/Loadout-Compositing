@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RimWorld;
@@ -30,6 +31,7 @@ namespace Inventory {
         public string Label => Print();
 
         public bool Allows(Thing thing) => thing.def == Def && Filter.Allows(thing);
+        public int CountIn(List<Thing> things) => things.Where(Allows).Sum(s => s.stackCount);
 
         // Stuff? Def.LabelCap Quality-Range?
         public string Print() {
@@ -74,6 +76,16 @@ namespace Inventory {
             this.quantity = 1;
         }
 
+        // exists to make generic `Items` easier
+        public IEnumerable<Thing> ThingsOnMap(Map map) {
+            var things = map.listerThings.ThingsOfDef(this.def);
+            if (things.NullOrEmpty()) yield break;
+
+            foreach (var thing in things.Where(Allows)) {
+                yield return thing;
+            }
+        }
+        
         public void SetQuantity(int quantity) {
             this.quantity = quantity;
             if (quantity <= 0) {

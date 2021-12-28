@@ -7,7 +7,7 @@ using Verse;
 namespace Inventory {
 
     public class Loadout : IExposable {
-
+        
         // should never be used, exists for backwards compat
         private List<Tag> tags = null;
 
@@ -40,6 +40,22 @@ namespace Inventory {
             var tagPriority = Mathf.Pow(priorityMultiplier, elements.Count - tagIndex);
             return tagPriority;
         }
+        
+        public int DesiredCount(List<Thing> pawnGear, Item curItem) {
+            // list of things which our current item accepts
+            var acceptedThings = pawnGear.Where(curItem.Allows).ToList();
+            // all items besides our current item
+            var otherItems = Items.Except(curItem);
+            
+            var desiredCount = curItem.Quantity;
+
+            foreach (var item in otherItems) {
+                var potentiallyOwnedStackCount = acceptedThings.Where(item.Allows).Sum(thing => thing.stackCount);
+                desiredCount += Mathf.Min(item.Quantity, potentiallyOwnedStackCount);
+            }
+            
+            return desiredCount;
+        }
 
         public bool Desires(Thing thing) {
             return Tags.Any(t => t.ItemsMatching(item => item.Allows(thing)).Any());
@@ -69,7 +85,7 @@ namespace Inventory {
             var wornApparel = ApparelUtility.WornApparelFor(def, itemsWithPrios) ?? new List<Tuple<Item, Tag>>();
             return wornApparel;
         }
-
+        
         public IEnumerable<Item> DesiredItems(List<Thing> heldThings) {
             var desiredThings = Items.Where(t => !t.Def.IsApparel);
             foreach (var thing in desiredThings) {

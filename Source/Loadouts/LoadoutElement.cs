@@ -14,11 +14,11 @@ namespace Inventory {
         public Tag Tag => tag;
 
         public bool Active(LoadoutState currentState) {
-            if (switchValue && currentState == state) {
+            if (switchValue && Equals(currentState, state)) {
                 return true;
             }
 
-            return !switchValue && currentState != state;
+            return !switchValue && !Equals(currentState, state);
         }
 
         // for creating instances when loading/saving

@@ -5,6 +5,7 @@ using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace Inventory {
 
@@ -114,6 +115,11 @@ namespace Inventory {
                    && !(pawn.apparel?.AnyApparelLocked ?? true);
         }
 
+        public static IEnumerable<Thing> AllGear(this Pawn pawn) {
+            return pawn.apparel.WornApparel
+                .ConcatIfNotNull(pawn.inventory.innerContainer.InnerListForReading)
+                .ConcatIfNotNull(pawn.equipment.AllEquipmentListForReading);
+        }
         public static IEnumerable<Thing> InventoryAndEquipment(this Pawn pawn) {
             return pawn.inventory.innerContainer.InnerListForReading
                 .ConcatIfNotNull(pawn.equipment.AllEquipmentListForReading);
@@ -128,6 +134,26 @@ namespace Inventory {
             dictionary.Add(key, elements.ToHashSet());
         }
 
+        public static IEnumerable<Thing> ThingsOnMapMatching(this Item item, Pawn reservee) {
+            
+            var thingsOnMap = reservee.Map.listerThings.ThingsOfDef(item.Def);
+            if (thingsOnMap.NullOrEmpty()) {
+                yield break;
+            }
+            
+            thingsOnMap = thingsOnMap.Where(thing => item.Filter.Allows(thing)).ToList();
+            if (thingsOnMap.NullOrEmpty()) {
+                yield break;
+            }
+
+            foreach (var thing in thingsOnMap) {
+                if (!reservee.CanReserve(thing) || !reservee.CanReach(thing, PathEndMode.Touch, Danger.Unspecified) || thing.IsForbidden(reservee)) {
+                    continue;
+                }
+
+                yield return thing;
+            }
+        }
     }
 
 }
