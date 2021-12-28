@@ -117,33 +117,22 @@ namespace Inventory {
             var thing = inventory.innerContainer.innerList[thingIndex];
             var comp = inventory.pawn.GetComp<LoadoutComponent>();
 
-            var allOtherEqualThings = inventory.pawn.InventoryAndEquipment().ToList()
-                .Where(td => td.def == thing.def)
-                .ToList();
+            var item = comp.Loadout.ItemsAccepting(thing).FirstOrDefault();
 
-            var itemsAcceptingThing = comp.Loadout.ItemsAccepting(thing).ToList();
-            var desiredQuantity = itemsAcceptingThing.Sum(item => item.Quantity);
-            int currentQuantity = 0;
-
-            foreach (var otherThing in allOtherEqualThings) {
-                if (itemsAcceptingThing.Any(item => item.Allows(otherThing))) {
-                    currentQuantity += otherThing.stackCount;
-                }
-            }
-
-            if (currentQuantity > desiredQuantity) {
-                if (thing.stackCount == 1) {
-                    count = new ThingCount(thing, 1);
-                }
-                else {
-                    var dropCount = Mathf.Min(currentQuantity - desiredQuantity, thing.stackCount);
-                    count = new ThingCount(thing, dropCount);
-                }
-
+            if (item is null) {
+                count = new ThingCount(thing, thing.stackCount);
                 return true;
             }
+            
+            var allThings = inventory.pawn.InventoryAndEquipment().ToList();
+            var currentQuantity = item.CountIn(allThings);
+            var desiredQuantity = comp.Loadout.DesiredCount(allThings, item);
 
-            return false;
+            var difference = currentQuantity - desiredQuantity;
+            if (difference <= 0) return false;
+            
+            count = new ThingCount(thing, Mathf.Min(difference, thing.stackCount));
+            return true;
         }
 
     }

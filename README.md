@@ -49,6 +49,6 @@ I am happy to accept contributions which add features / fix bugs. I do reserve t
 `LoadoutManager` - A big basically global struct (GameComponent) which acts as the go-between for most things which require saving, for example Tags, extended data for bills (how does a bill know which tag it refers too).
 
 #### How does this mod actually influence pawns actions?
-Loadout resolution in this mod only touches vanilla in a single point, namely; [Source/AI/ThinkNode_LoadoutRealisation](Source/AI/ThinkNode_LoadoutRealisation.cs), and the more general patch which effects apparel scoring so that vanilla does not replace loadout-added items, [Source/Patches/OptimizeApparel_ApparelScoreGain_Patch.cs](Source/Patches/OptimizeApparel_ApparelScoreGain_Patch.cs).
+Loadout resolution in this mod only really touches pawn AI in a single point, namely; [Source/AI/ThinkNode_LoadoutRealisation](Source/AI/ThinkNode_LoadoutRealisation.cs), and the more general patch which effects apparel scoring so that vanilla does not replace loadout-added items, [Source/Patches/OptimizeApparel_ApparelScoreGain_Patch.cs](Source/Patches/OptimizeApparel_ApparelScoreGain_Patch.cs).
 
 This was originally designed to be as minimal as possible, however, with the addition of Hot-Swapping, this needed to become slightly more complex, and a lot more flexible/powerful to enable immediate loadout resolution with the press of a button.

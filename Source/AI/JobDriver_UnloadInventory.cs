@@ -20,55 +20,55 @@ namespace Inventory {
         public override bool TryMakePreToilReservations(bool errorOnFailed) => true;
 
         public override IEnumerable<Toil> MakeNewToils() {
+            var inven = pawn.inventory;
+            
             yield return Toils_General.Wait(10);
-
             yield return new Toil {
                 initAction = delegate() {
-                    if (!this.pawn.inventory.HasAnyUnloadableThing) {
+                    if (!inven.HasAnyUnloadableThing) {
                         EndJobWith(JobCondition.Succeeded);
                         return;
                     }
 
-                    var firstUnloadableThing = this.pawn.inventory.FirstUnloadableThing;
-                    if (!StoreUtility.TryFindStoreCellNearColonyDesperate(firstUnloadableThing.Thing, this.pawn,
+                    var firstUnloadableThing = inven.FirstUnloadableThing;
+                    if (!StoreUtility.TryFindStoreCellNearColonyDesperate(firstUnloadableThing.Thing, pawn,
                             out var cell)) {
-                        this.pawn.inventory.innerContainer.TryDrop(firstUnloadableThing.Thing, ThingPlaceMode.Near,
+                        inven.innerContainer.TryDrop(firstUnloadableThing.Thing, ThingPlaceMode.Near,
                             firstUnloadableThing.Count, out var _);
                         EndJobWith(JobCondition.Succeeded);
                         return;
                     }
 
-                    this.job.SetTarget(TargetIndex.A, firstUnloadableThing.Thing);
-                    this.job.SetTarget(TargetIndex.B, cell);
-                    this.countToDrop = firstUnloadableThing.Count;
+                    job.SetTarget(TargetIndex.A, firstUnloadableThing.Thing);
+                    job.SetTarget(TargetIndex.B, cell);
+                    countToDrop = firstUnloadableThing.Count;
                 }
             };
             yield return Toils_Reserve.Reserve(TargetIndex.B);
             yield return Toils_Goto.GotoCell(TargetIndex.B, PathEndMode.Touch);
             yield return new Toil {
                 initAction = delegate() {
-                    Thing thing = this.job.GetTarget(TargetIndex.A).Thing;
-                    if (thing == null || !this.pawn.inventory.innerContainer.Contains(thing)) {
+                    var thing = job.GetTarget(TargetIndex.A).Thing;
+                    if (thing == null || !inven.innerContainer.Contains(thing)) {
                         EndJobWith(JobCondition.Incompletable);
                         return;
                     }
 
-                    if (!this.pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) ||
+                    if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) ||
                         !thing.def.EverStorable(false)) {
-                        this.pawn.inventory.innerContainer.TryDrop(thing, ThingPlaceMode.Near, this.countToDrop, out _);
+                        inven.innerContainer.TryDrop(thing, ThingPlaceMode.Near, countToDrop, out _);
                         EndJobWith(JobCondition.Succeeded);
                     }
                     else {
-                        this.pawn.inventory.innerContainer.TryTransferToContainer(thing,
-                            this.pawn.carryTracker.innerContainer, this.countToDrop, out _);
-                        this.job.count = this.countToDrop;
-                        this.job.SetTarget(TargetIndex.A, thing);
+                        inven.innerContainer.TryTransferToContainer(thing, pawn.carryTracker.innerContainer, countToDrop, out _);
+                        job.count = countToDrop;
+                        job.SetTarget(TargetIndex.A, thing);
                     }
 
                     thing.SetForbidden(false, false);
                 }
             };
-            Toil carryToCell = Toils_Haul.CarryHauledThingToCell(TargetIndex.B);
+            var carryToCell = Toils_Haul.CarryHauledThingToCell(TargetIndex.B);
             yield return carryToCell;
             yield return Toils_Haul.PlaceHauledThingInCell(TargetIndex.B, carryToCell, true);
         }

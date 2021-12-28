@@ -8,13 +8,14 @@ using Verse;
 using Verse.AI;
 
 namespace Inventory {
+    
+    using OptimizeApparel = JobGiver_OptimizeApparel;
 
     public class ThinkNode_LoadoutRealisation : ThinkNode_ConditionalColonist {
 
         private Dictionary<Pawn, int> nextUpdateTick = new Dictionary<Pawn, int>();
 
         private static JobDef EquipApparel => JobDefOf.Wear;
-        private static JobDef RemoveApparel => JobDefOf.RemoveApparel;
         private static JobDef EquipItem => JobDefOf.TakeInventory;
         private static JobDef UnloadItem => InvJobDefOf.CL_UnloadInventory;
 
@@ -124,10 +125,10 @@ namespace Inventory {
                 return null;
             }
             
-            JobGiver_OptimizeApparel.neededWarmth = PawnApparelGenerator.CalculateNeededWarmth(pawn, pawn.Map.Tile, GenLocalDate.Twelfth(pawn));
-            JobGiver_OptimizeApparel.wornApparelScores.Clear();
+            OptimizeApparel.neededWarmth = PawnApparelGenerator.CalculateNeededWarmth(pawn, pawn.Map.Tile, GenLocalDate.Twelfth(pawn));
+            OptimizeApparel.wornApparelScores.Clear();
             foreach (var apparel in wornApparel) {
-                JobGiver_OptimizeApparel.wornApparelScores.Add(JobGiver_OptimizeApparel.ApparelScoreRaw(pawn, apparel));
+                OptimizeApparel.wornApparelScores.Add(OptimizeApparel.ApparelScoreRaw(pawn, apparel));
             }
 
             Apparel bestApparel = null;
@@ -138,7 +139,7 @@ namespace Inventory {
                     continue;
                 }
                 
-                var apparelScore = JobGiver_OptimizeApparel.ApparelScoreGain(pawn, apparel, JobGiver_OptimizeApparel.wornApparelScores);
+                var apparelScore = OptimizeApparel.ApparelScoreGain(pawn, apparel, OptimizeApparel.wornApparelScores);
 
                 if (apparelScore < 0.05f || apparelScore < bestApparelScore) continue;
                 if (!pawn.CanReserveAndReach(apparel, PathEndMode.OnCell, pawn.NormalMaxDanger())) continue; 
@@ -152,12 +153,8 @@ namespace Inventory {
 
         private bool ValidApparelFor(Apparel apparel, Pawn pawn) {
             if (!pawn.outfits.CurrentOutfit.filter.Allows(apparel)) return false;
-            if (apparel.IsForbidden(pawn)) return false;
-            if (apparel.IsBurning()) return false;
             if (apparel.def.apparel.gender != Gender.None && apparel.def.apparel.gender != pawn.gender) return false;
-            if (CompBiocodable.IsBiocoded(apparel) && !CompBiocodable.IsBiocodedFor(apparel, pawn)) return false;
-            if (!RimWorld.ApparelUtility.HasPartsToWear(pawn, apparel.def)) return false;
-            return true;
+            return Utility.ShouldAttemptToEquip(pawn, apparel);
         }
 
         private Job SatisfyLoadoutItemsJob(Pawn pawn, Loadout loadout) {
@@ -204,9 +201,9 @@ namespace Inventory {
             var things = item.ThingsOnMap(pawn.Map);
 
             foreach (var thing in things.OrderByDescending(t => t.stackCount)) {
-                if ( !pawn.CanReserve(thing) ) continue;
-                if ( !pawn.CanReach(thing, PathEndMode.Touch, Danger.Unspecified) ) continue;
-                if (!thing.IsForbidden(pawn)) continue;
+                if (!Utility.ShouldAttemptToEquip(pawn, thing, true)) {
+                    continue;
+                }
                 
                 var job = JobMaker.MakeJob(EquipItem, thing);
                 job.count = Mathf.Min(count, thing.stackCount);
