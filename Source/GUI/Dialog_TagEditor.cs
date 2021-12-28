@@ -164,6 +164,7 @@ namespace Inventory {
                 if (Widgets.ButtonInvisible(optionRect)) {
                     curState = state;
                     defFilter = string.Empty;
+                    GUI.FocusControl("Def List Filter");
                 }
 
                 topRect.x += UIC.SPACED_HEIGHT;
@@ -200,7 +201,7 @@ namespace Inventory {
 
         private void DrawDefList(Rect r, IReadOnlyList<ThingDef> defList) {
             var itms = curTag.requiredItems.Select(it => it.Def).ToHashSet();
-            List<ThingDef> defs = defList.Where(t => !itms.Contains(t)).ToList();
+            var defs = defList.Where(t => !itms.Contains(t)).ToList();
 
             if (defFilter != string.Empty) {
                 var filter = defFilter.ToLower();

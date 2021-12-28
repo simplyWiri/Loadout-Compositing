@@ -1,7 +1,6 @@
 <Analyzer>
     <LoadoutCompositing>
         <Methods>
-            <li>Inventory.ThinkNode_LoadoutRealisation:SatisfyLoadoutClothingJob</li>
             <li>Inventory.ThinkNode_LoadoutRealisation:SatisfyLoadoutItemsJob</li>
             <li>Inventory.ThinkNode_LoadoutRealisation:SatisfyLoadoutClothingJob</li>
             <li>Inventory.OptimizeApparel_ApparelScoreGain_Patch:Postfix</li>

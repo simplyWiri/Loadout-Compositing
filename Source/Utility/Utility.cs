@@ -31,41 +31,18 @@ namespace Inventory {
             meleeWeapons ??= items.Where(def => def.IsMeleeWeapon).ToList();
             rangedWeapons ??= items.Where(def => def.IsRangedWeapon && def.category != ThingCategory.Building).ToList();
             medicinalDefs ??= items.Where(def => def.IsMedicine || def.IsDrug).ToList();
-
-            items = items
-                .Except(apparelDefs)
-                .Except(meleeWeapons)
-                .Except(rangedWeapons)
-                .Except(medicinalDefs)
-                .ToList();
         }
 
         public static QualityCategory Next(this QualityCategory qc) {
-            switch (qc) {
-                case QualityCategory.Awful:     return QualityCategory.Poor;
-                case QualityCategory.Poor:      return QualityCategory.Normal;
-                case QualityCategory.Normal:    return QualityCategory.Good;
-                case QualityCategory.Good:      return QualityCategory.Excellent;
-                case QualityCategory.Excellent: return QualityCategory.Masterwork;
-                default:
-                    return QualityCategory.Legendary;
-            }
+            return (QualityCategory)Mathf.Min((int)qc + 1, (int)QualityCategory.Legendary);
         }
 
         public static QualityCategory Previous(this QualityCategory qc) {
-            switch (qc) {
-                case QualityCategory.Legendary:  return QualityCategory.Masterwork;
-                case QualityCategory.Masterwork: return QualityCategory.Excellent;
-                case QualityCategory.Excellent:  return QualityCategory.Good;
-                case QualityCategory.Good:       return QualityCategory.Normal;
-                case QualityCategory.Normal:     return QualityCategory.Poor;
-                default:
-                    return QualityCategory.Awful;
-            }
+            return (QualityCategory)Mathf.Max((int)qc - 1, (int)QualityCategory.Awful);
         }
 
         public static Thing MakeThingWithoutID(ThingDef def, ThingDef stuff, QualityCategory quality) {
-            Thing thing = (Thing)Activator.CreateInstance(def.thingClass);
+            var thing = (Thing)Activator.CreateInstance(def.thingClass);
             thing.def = def;
             if (def.MadeFromStuff)
                 thing.SetStuffDirect(stuff);
@@ -89,7 +66,7 @@ namespace Inventory {
         }
 
         public static float HypotheticalGearAndInventoryMass(Pawn p, List<Item> items) {
-            float mass = 0f;
+            var mass = 0f;
             foreach (var item in items) {
                 var thing = item.MakeDummyThingNoId();
                 mass += (thing.GetStatValue(StatDefOf.Mass) * item.Quantity);
@@ -115,11 +92,6 @@ namespace Inventory {
                    && !(pawn.apparel?.AnyApparelLocked ?? true);
         }
 
-        public static IEnumerable<Thing> AllGear(this Pawn pawn) {
-            return pawn.apparel.WornApparel
-                .ConcatIfNotNull(pawn.inventory.innerContainer.InnerListForReading)
-                .ConcatIfNotNull(pawn.equipment.AllEquipmentListForReading);
-        }
         public static IEnumerable<Thing> InventoryAndEquipment(this Pawn pawn) {
             return pawn.inventory.innerContainer.InnerListForReading
                 .ConcatIfNotNull(pawn.equipment.AllEquipmentListForReading);
@@ -133,26 +105,13 @@ namespace Inventory {
 
             dictionary.Add(key, elements.ToHashSet());
         }
-
-        public static IEnumerable<Thing> ThingsOnMapMatching(this Item item, Pawn reservee) {
+        public static bool ShouldAttemptToEquip(Pawn pawn, Thing thing, bool checkReach = false) {
+            if (thing.IsForbidden(pawn)) return false;
+            if (thing.IsBurning()) return false;
+            if (CompBiocodable.IsBiocoded(thing) && !CompBiocodable.IsBiocodedFor(thing, pawn)) return false;
+            if (checkReach && !pawn.CanReserveAndReach(thing, PathEndMode.OnCell, pawn.NormalMaxDanger())) return false;
             
-            var thingsOnMap = reservee.Map.listerThings.ThingsOfDef(item.Def);
-            if (thingsOnMap.NullOrEmpty()) {
-                yield break;
-            }
-            
-            thingsOnMap = thingsOnMap.Where(thing => item.Filter.Allows(thing)).ToList();
-            if (thingsOnMap.NullOrEmpty()) {
-                yield break;
-            }
-
-            foreach (var thing in thingsOnMap) {
-                if (!reservee.CanReserve(thing) || !reservee.CanReach(thing, PathEndMode.Touch, Danger.Unspecified) || thing.IsForbidden(reservee)) {
-                    continue;
-                }
-
-                yield return thing;
-            }
+            return true;
         }
     }
 
