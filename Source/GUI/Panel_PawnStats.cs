@@ -59,7 +59,7 @@ namespace Inventory {
 
             GUIUtility.ListSeperator(ref rect, Strings.ApparelWhichCanBeWorn);
 
-            var wornApparel = parent.component.Loadout.HypotheticalWornApparel(parent.component.Loadout.currentState, parent.pawn.RaceProps.body).ToList();
+            var wornApparel = parent.component.Loadout.HypotheticalWornApparel(parent.component.Loadout.CurrentState, parent.pawn.RaceProps.body).ToList();
             var apparels = ApparelUtility
                 .ApparelCanFitOnBody(parent.pawn.RaceProps.body, wornApparel.Select(td => td.Def).ToList()).ToList();
             var allocatedHeight = apparels.Count * UIC.DEFAULT_HEIGHT;

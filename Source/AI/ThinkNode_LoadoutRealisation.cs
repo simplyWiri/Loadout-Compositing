@@ -8,7 +8,7 @@ using Verse;
 using Verse.AI;
 
 namespace Inventory {
-    
+
     using OptimizeApparel = JobGiver_OptimizeApparel;
 
     public class ThinkNode_LoadoutRealisation : ThinkNode_ConditionalColonist {
@@ -46,7 +46,7 @@ namespace Inventory {
             if (!pawn.IsValidLoadoutHolder()) return true;
             // nothing to do on a caravan
             if (pawn.Map == null) return true;
-            
+
             return false;
         }
 
@@ -58,23 +58,23 @@ namespace Inventory {
             // - tag removed from loadout
             // - tag just disabled via hotswap mechanism
 
-            // if ( comp.RemoveThings ) {
-            //      var removeThingsJob = RemoveThingsJob();
-            //      if ( removeThingsJob != null) {
-            //          return new ThinkResult(removeThingsJob, this);
-            //      }
-            // }
+            if (comp.Loadout.ThingsToRemove.Count > 0) {
+                var removeThingsJob = RemoveThingsJob(pawn, comp.Loadout);
+                if (removeThingsJob != null) {
+                    return new ThinkResult(removeThingsJob, this);
+                }
+            }
 
             // 2. Does the pawn have any items which need to be equipped immediately? This can occur from:
             // - a tag has just been added to a pawns loadout
             // - a tag has just been enabled via hotswap mechanism
 
-            // if ( comp.EquipItems ) {
-            //      var equipItemsJob = EquipItemsJob();
-            //      if ( equipItemsJob != null) {
-            //          return new ThinkResult(equipItemsJob, this);
-            //      }
-            // }
+            if ( comp.Loadout.ThingsToAdd.Count > 0 ) {
+                 var equipItemsJob = EquipItemsJob(pawn, comp.Loadout);
+                 if ( equipItemsJob != null) {
+                     return new ThinkResult(equipItemsJob, this);
+                 }
+            }
 
             // 3. Is the pawns loadout fully satisfied, or does it still need to get some more things?
 
@@ -98,7 +98,6 @@ namespace Inventory {
             return ThinkResult.NoJob;
         }
 
-
         private bool PawnNeedsUpdate(Pawn pawn) {
             if (!nextUpdateTick.TryGetValue(pawn, out var nextTick)) {
                 nextTick = 0;
@@ -113,6 +112,37 @@ namespace Inventory {
             nextUpdateTick[pawn] = GenTicks.TicksAbs + Rand.Range(10_000, 15_000);
         }
 
+        private Job RemoveThingsJob(Pawn pawn, Loadout loadout) {
+
+            var pawnGear = pawn.InventoryAndEquipment().ToList();
+
+            foreach (var thing in loadout.ThingsToRemove.ToList()) {
+                var item = thing.First;
+                var count = thing.Second;
+
+                if (item.Def.IsApparel) continue; // todo
+
+                var itemCount = item.CountIn(pawnGear);
+                var loadoutDesiredCount = loadout.DesiredCount(pawnGear, item) - count;
+
+                if (itemCount > loadoutDesiredCount) {
+                    var job = RemoveItem(pawnGear, item, Mathf.Min(itemCount - loadoutDesiredCount, count));
+                    if (job != null) {
+                        loadout.ThingsToRemove.Remove(thing);
+                        return job;
+                    }
+                }
+
+                loadout.ThingsToRemove.Remove(thing);
+            }
+
+            return null;
+        }
+
+        private Job EquipItemsJob(Pawn pawn, Loadout loadout) {
+            return null;
+        }
+
         // a heavily modified version of JobGiver_OptimizeApparel:TryGiveJob
         private Job SatisfyLoadoutClothingJob(Pawn pawn, Loadout loadout) {
             var wornApparel = pawn.apparel.WornApparel;
@@ -120,11 +150,11 @@ namespace Inventory {
                 .OfType<Apparel>()
                 .Where(app => loadout.Items.Any(item => item.Allows(app)))
                 .ToList();
-            
+
             if (list.Count == 0) {
                 return null;
             }
-            
+
             OptimizeApparel.neededWarmth = PawnApparelGenerator.CalculateNeededWarmth(pawn, pawn.Map.Tile, GenLocalDate.Twelfth(pawn));
             OptimizeApparel.wornApparelScores.Clear();
             foreach (var apparel in wornApparel) {
@@ -138,11 +168,11 @@ namespace Inventory {
                 if (!ValidApparelFor(apparel, pawn)) {
                     continue;
                 }
-                
+
                 var apparelScore = OptimizeApparel.ApparelScoreGain(pawn, apparel, OptimizeApparel.wornApparelScores);
 
                 if (apparelScore < 0.05f || apparelScore < bestApparelScore) continue;
-                if (!pawn.CanReserveAndReach(apparel, PathEndMode.OnCell, pawn.NormalMaxDanger())) continue; 
+                if (!pawn.CanReserveAndReach(apparel, PathEndMode.OnCell, pawn.NormalMaxDanger())) continue;
 
                 bestApparel = apparel;
                 bestApparelScore = apparelScore;
@@ -169,7 +199,7 @@ namespace Inventory {
                 if (itemCount == loadoutDesiredCount) {
                     continue;
                 }
-                
+
                 // we need to pick up some more of this item to consider it satisfied
                 if (itemCount < loadoutDesiredCount) {
                     var job = FindItem(pawn, item, loadoutDesiredCount - itemCount);
@@ -204,7 +234,7 @@ namespace Inventory {
                 if (!Utility.ShouldAttemptToEquip(pawn, thing, true)) {
                     continue;
                 }
-                
+
                 var job = JobMaker.MakeJob(EquipItem, thing);
                 job.count = Mathf.Min(count, thing.stackCount);
 
@@ -215,6 +245,8 @@ namespace Inventory {
         }
 
         private Job RemoveItem(List<Thing> pawnGear, Item item, int count) {
+            if (count == 0) return null;
+            
             var gear = pawnGear.Where(item.Allows).OrderByDescending(thing => thing.stackCount).ToList();
 
             var thing = gear.FirstOrDefault();

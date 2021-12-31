@@ -31,7 +31,7 @@ namespace Inventory {
             editIconRect.AdjHorzBy(4);
             
             Widgets.Dropdown(buttonRect, pawn,
-                (p) => p.TryGetComp<LoadoutComponent>().Loadout.currentState,
+                (p) => p.TryGetComp<LoadoutComponent>().Loadout.CurrentState,
                 GenerateMenuFor, pawn.GetActiveState()?.name ?? Strings.SelectState,
                 paintable: true);
 
@@ -60,7 +60,7 @@ namespace Inventory {
         }
 
         public IEnumerable<Widgets.DropdownMenuElement<LoadoutState>> GenerateMenuFor(Pawn p) {
-            var pState = p.TryGetComp<LoadoutComponent>().Loadout.currentState;
+            var pState = p.TryGetComp<LoadoutComponent>().Loadout.CurrentState;
 
             yield return new Widgets.DropdownMenuElement<LoadoutState>() {
                 option = new FloatMenuOption(Strings.DefaultStateName, () => p.SetActiveState(null)),

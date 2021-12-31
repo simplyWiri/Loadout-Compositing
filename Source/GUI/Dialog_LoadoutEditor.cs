@@ -120,22 +120,23 @@ namespace Inventory {
         }
 
         public void DrawTags(Rect rect) {
-            var tags = component.Loadout.AllTags.ToList();
+            var elements = component.Loadout.AllElements.ToList();
 
-            DrawHeaderButtons(ref rect, tags);
+            DrawHeaderButtons(ref rect, elements);
             rect.AdjVertBy(GenUI.GapTiny);
 
             GUIUtility.ListSeperator(ref rect, Strings.AppliedTags);
 
             rect.PopRightPartPixels(UIC.SCROLL_WIDTH);
-            tagsHeight = tags.Sum(tag => UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f))));
+            tagsHeight = elements.Sum(elem => UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(elem.Tag.requiredItems.Count / 4.0f))));
             var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, tagsHeight);
             Widgets.BeginScrollView(rect, ref tagScroll, viewRect);
 
-            DraggableTags(viewRect, tags);
+            DraggableTags(viewRect, elements);
 
-            foreach (var tag in tags) {
-                var tagIdx = tags.FindIndex(t => t == tag);
+            foreach (var element in elements.ToList()) {
+                var tag = element.Tag;
+                var tagIdx = elements.FindIndex(t => t == element);
                 var tagHeight = UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
                 var tagRect = viewRect.PopTopPartPixels(tagHeight);
 
@@ -147,19 +148,20 @@ namespace Inventory {
                 TooltipHandler.TipRegion(editButtonRect, $"Edit {tag.name}");
 
                 if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT), TexButton.DeleteX)) {
-                    component.Loadout.elements.RemoveAll(elem => elem.Tag == tag);
+                    component.Loadout.elements.Remove(element);
 
                     if (LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) {
                         pList.pawns.Remove(pawn);
                     }
-
-                    var loadoutItems = tag.ThingsAcceptedInList(pawn.InventoryAndEquipment().ToList()).ToList();
-                    component.Loadout.itemsToRemove.AddRange(loadoutItems.ToList());
+                    
+                    component.Loadout.UpdateState(element, false);
                 }
 
                 Widgets.DrawBoxSolid(tagRect.PopLeftPartPixels(10.0f), Panel_ShowCoverage.GetColorForTagAtIndex(tagIdx));
                 tagRect.AdjHorzBy(3f);
                 Widgets.Label(tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + 10f), tag.name);
+                
+                Widgets.Dropdown(tagRect.PopRightPartPixels(60f), element, (elem) => element, GetElems, (element.Switch ? "" : "!") +(element.State?.name ?? Strings.DefaultStateName));
 
                 var y = tagRect.y;
 
@@ -185,15 +187,37 @@ namespace Inventory {
             Widgets.EndScrollView();
         }
 
-        private void DraggableTags(Rect viewRect, List<Tag> tags) {
+        private IEnumerable<Widgets.DropdownMenuElement<LoadoutElement>> GetElems(LoadoutElement element) {
+            var loadout = pawn.GetComp<LoadoutComponent>().Loadout;
+            if (element.State != null) {
+                yield return new Widgets.DropdownMenuElement<LoadoutElement>() {
+                    option = new FloatMenuOption(Strings.DefaultStateName, () => element.SetTo(loadout, null, true)),
+                    payload = element
+                };  
+            }
+
+            foreach (var state in LoadoutManager.States) {
+                yield return new Widgets.DropdownMenuElement<LoadoutElement>() {
+                    option = new FloatMenuOption($"Enable when {state.name} is active", () => element.SetTo(loadout, state, true)),
+                    payload = element
+                };
+                
+                yield return new Widgets.DropdownMenuElement<LoadoutElement>() {
+                    option = new FloatMenuOption($"Enable when {state.name} is inactive", () => element.SetTo(loadout, state, false)),
+                    payload = element
+                };
+            }
+        }
+
+        private void DraggableTags(Rect viewRect, List<LoadoutElement> elements) {
             viewRect.width -= 2 * UIC.SPACED_HEIGHT;
 
             Rect RectForTag(int tIdx) {
-                var offset = tags
+                var offset = elements
                     .GetRange(0, tIdx)
-                    .Sum(tag => UIC.SPACED_HEIGHT * Mathf.Max(1, Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
+                    .Sum(element => UIC.SPACED_HEIGHT * Mathf.Max(1, Mathf.CeilToInt(element.Tag.requiredItems.Count / 4.0f)));
 
-                return new Rect(viewRect.x, viewRect.y + offset, viewRect.width, UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tags[tIdx].requiredItems.Count / 4.0f))));
+                return new Rect(viewRect.x, viewRect.y + offset, viewRect.width, UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(elements[tIdx].Tag.requiredItems.Count / 4.0f))));
             }
 
             var cEvent = Event.current;
@@ -212,7 +236,7 @@ namespace Inventory {
                             (component.Loadout.elements[curTagIdx], component.Loadout.elements[curTagIdx - 1]) = (component.Loadout.elements[curTagIdx - 1], component.Loadout.elements[curTagIdx]);
                             curTagIdx -= 1;
                         }
-                        else if (curTagIdx < tags.Count - 1 && mPos.y > tRect.y) {
+                        else if (curTagIdx < elements.Count - 1 && mPos.y > tRect.y) {
                             (component.Loadout.elements[curTagIdx], component.Loadout.elements[curTagIdx + 1]) = (component.Loadout.elements[curTagIdx + 1], component.Loadout.elements[curTagIdx]);
                             curTagIdx += 1;
                         }
@@ -233,7 +257,7 @@ namespace Inventory {
 
             if (cEvent.rawType == EventType.MouseDown && Mouse.IsOver(viewRect)) {
                 dragging = true;
-                for (int i = 0; i < tags.Count; i++) {
+                for (int i = 0; i < elements.Count; i++) {
                     var rect = RectForTag(i);
 
                     if (rect.Contains(cEvent.mousePosition)) {
@@ -246,7 +270,7 @@ namespace Inventory {
             }
         }
 
-        public void DrawHeaderButtons(ref Rect rect, List<Tag> tags) {
+        public void DrawHeaderButtons(ref Rect rect, List<LoadoutElement> elements) {
             var buttonRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
             buttonRect.PopRightPartPixels(Margin);
 
@@ -258,7 +282,7 @@ namespace Inventory {
             }
 
             if (Widgets.ButtonText(buttonRect.LeftHalf(), Strings.AddTag)) {
-                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(tags).ToList(), tag => {
+                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(elements.Select(elem => elem.Tag)).ToList(), tag => {
                     if (!LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) {
                         pList = new SerializablePawnList(new List<Pawn>());
                         LoadoutManager.PawnsWithTags.Add(tag, pList);

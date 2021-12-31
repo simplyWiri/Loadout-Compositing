@@ -12,6 +12,8 @@ namespace Inventory {
         private bool switchValue;
 
         public Tag Tag => tag;
+        public LoadoutState State => state;
+        public bool Switch => switchValue;
 
         public bool Active(LoadoutState currentState) {
             if (switchValue && Equals(currentState, state)) {
@@ -19,6 +21,16 @@ namespace Inventory {
             }
 
             return !switchValue && !Equals(currentState, state);
+        }
+
+        public void SetTo(Loadout loadout, LoadoutState state, bool switchValue) {
+            var currentState = Active(loadout.CurrentState);
+            this.state = state;
+            this.switchValue = switchValue;
+            
+            if (currentState != Active(loadout.CurrentState)) {
+                loadout.UpdateState(this, this.Active(loadout.CurrentState));
+            }
         }
 
         // for creating instances when loading/saving
