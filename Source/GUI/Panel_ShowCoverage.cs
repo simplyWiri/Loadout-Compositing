@@ -74,7 +74,7 @@ namespace Inventory {
             float curY = rect.y + UIC.DEFAULT_HEIGHT;
             float beginY = curY;
 
-            var wornApparel = component.Loadout.HypotheticalWornApparelWithTag(component.Loadout.currentState, def).ToList();
+            var wornApparel = component.Loadout.HypotheticalWornApparelWithTag(component.Loadout.CurrentState, def).ToList();
 
             foreach (var category in ApparelUtility.GetBodyPartGroupFor(def).GetCategories()
                          .OrderByDescending(t => t.First().def.listOrder)) {

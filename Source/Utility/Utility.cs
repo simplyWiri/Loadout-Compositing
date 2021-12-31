@@ -77,11 +77,11 @@ namespace Inventory {
 
         public static LoadoutState GetActiveState(this Pawn p) {
             var comp = p.TryGetComp<LoadoutComponent>();
-            return comp.Loadout.currentState;
+            return comp.Loadout.CurrentState;
         }
 
         public static void SetActiveState(this Pawn p, LoadoutState state) {
-            p.TryGetComp<LoadoutComponent>().Loadout.currentState = state;
+            p.TryGetComp<LoadoutComponent>().Loadout.SetState(state);
         }
 
         public static bool IsValidLoadoutHolder(this Pawn pawn) {
