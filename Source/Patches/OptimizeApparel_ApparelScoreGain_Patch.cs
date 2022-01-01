@@ -14,8 +14,7 @@ namespace Inventory {
             if (multiplier != 0) {
                 __result += 0.24f; // flat bonus for being an apparel in the loadout
                 __result *= multiplier;
-            }
-            else if ( ModBase.settings.onlyItemsFromLoadout ) {
+            } else if ( ModBase.settings.onlyItemsFromLoadout ) {
                 __result = -1000f;
             }
         }

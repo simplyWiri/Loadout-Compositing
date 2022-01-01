@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -29,6 +30,37 @@ namespace Inventory {
 
             var nRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
             Widgets.CheckboxLabeled(nRect, Strings.OnlyLoadoutItems, ref onlyItemsFromLoadout);
+
+            foreach (var keyBind in new List<KeyBindingDef> { InvKeyBindingDefOf.CL_OpenLoadoutEditor, InvKeyBindingDefOf.CL_OpenTagEditor }) {
+                var keyBindRect = rect.PopTopPartPixels(34f).ContractedBy(3f);
+                GenUI.SetLabelAlign(TextAnchor.MiddleLeft);
+                Widgets.Label(keyBindRect, keyBind.LabelCap);
+                GenUI.ResetLabelAlign();
+
+                var vector = new Vector2(140f, 28f);
+                var rect2 = new Rect(keyBindRect.x + keyBindRect.width - vector.x * 2f - 4f, keyBindRect.y, vector.x, vector.y);
+                TooltipHandler.TipRegionByKey(rect2, "BindingButtonToolTip");
+
+                if (!Widgets.ButtonText(rect2, KeyPrefs.KeyPrefsData.GetBoundKeyCode(keyBind, KeyPrefs.BindingSlot.A).ToStringReadable())) {
+                    continue;
+                }
+                
+                if (Event.current.button == 0) {
+                    Find.WindowStack.Add(new Dialog_DefineBinding(KeyPrefs.KeyPrefsData, keyBind, KeyPrefs.BindingSlot.A));
+                    Event.current.Use();
+                } else if (Event.current.button == 1) {
+                    var list = new List<FloatMenuOption> {
+                        new FloatMenuOption("ResetBinding".Translate(), delegate() {
+                            KeyPrefs.KeyPrefsData.SetBinding(keyBind, KeyPrefs.BindingSlot.A, keyBind.defaultKeyCodeA);
+                        }),
+                        new FloatMenuOption("ClearBinding".Translate(), delegate()
+                        {
+                            KeyPrefs.KeyPrefsData.SetBinding(keyBind, KeyPrefs.BindingSlot.A, KeyCode.None);
+                        })
+                    };
+                    Find.WindowStack.Add(new FloatMenu(list));
+                }
+            }
         }
 
         public override void ExposeData() {
