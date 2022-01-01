@@ -91,8 +91,10 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.ViewAsIf>View stats as if</CompositableLoadouts.ViewAsIf>
 	<CompositableLoadouts.WereActive>were active</CompositableLoadouts.WereActive>
 
+	<CompositableLoadouts.SetDefault>Set as default</CompositableLoadouts.SetDefault>
+
 	<CompositableLoadouts.Settings.ImmediatelyResolveLoadout>Immediately resolve loadout when changed</CompositableLoadouts.Settings.ImmediatelyResolveLoadout>
 	<CompositableLoadouts.Settings.ImmediatelyResolveLoadoutDesc>Pawns will immediately attempt to update their loadout any time it has changed (tag removed from loadout, current loadoutstate changed, etc)</CompositableLoadouts.Settings.ImmediatelyResolveLoadoutDesc>
-
+	<CompositableLoadouts.Settings.ChangeDefaults>Change default HP-Range and Quality-Range for things in tags</CompositableLoadouts.Settings.ChangeDefaults>
 
 </LanguageData>

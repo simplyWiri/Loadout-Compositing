@@ -27,16 +27,16 @@ namespace Inventory {
             this.forThing = null;
             this.stuffs = new HashSet<ThingDef>();
 
-            this.allowedQualities = QualityRange.All;
-            this.allowedHpRange = FloatRange.ZeroToOne;
+            this.allowedQualities = ModBase.settings.defaultQualityRange;
+            this.allowedHpRange = ModBase.settings.defaultHitpoints;
         }
 
         public Filter(ThingDef thing) {
             this.forThing = thing;
             this.stuffs = new HashSet<ThingDef>();
 
-            this.allowedQualities = QualityRange.All;
-            this.allowedHpRange = FloatRange.ZeroToOne;
+            this.allowedQualities = ModBase.settings.defaultQualityRange;
+            this.allowedHpRange = ModBase.settings.defaultHitpoints;
         }
 
         public void SetQualityRange(QualityRange range) {
