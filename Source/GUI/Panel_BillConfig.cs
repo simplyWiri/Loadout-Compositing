@@ -19,7 +19,9 @@ namespace Inventory {
             
             var dropdownStrSize = Text.CalcHeight(dropdownStr, standard.ColumnWidth);
             var dropDownRect = standard.GetRect(Mathf.Max(30, dropdownStrSize + 5f));
-            Widgets.Dropdown(dropDownRect, bill, LoadoutManager.TagFor, GenerateTagOptions, dropdownStr);
+            if (Widgets.ButtonText(dropDownRect, dropdownStr)) {
+                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags, (tag) => LoadoutManager.SetTagForBill(bill, tag)));
+            }
             
             // How many do we currently have?
             
@@ -113,16 +115,7 @@ namespace Inventory {
             }
 
             if (producedThingDef.MadeFromStuff) {
-                standard.CheckboxLabeled("LimitToAllowedStuff".Translate(), ref bill.limitToAllowedStuff, null);
-            }
-        }
-
-        private static IEnumerable<Widgets.DropdownMenuElement<Tag>> GenerateTagOptions(Bill_Production bill) {
-            foreach (var tag in LoadoutManager.Tags.OrderBy(tag => tag.name)) {
-                yield return new Widgets.DropdownMenuElement<Tag> {
-                    option = new FloatMenuOption(tag.name, delegate() { LoadoutManager.SetTagForBill(bill, tag); }),
-                    payload = null
-                };
+                standard.CheckboxLabeled("LimitToAllowedStuff".Translate(), ref bill.limitToAllowedStuff);
             }
         }
 

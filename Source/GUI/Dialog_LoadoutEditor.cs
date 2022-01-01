@@ -205,6 +205,8 @@ namespace Inventory {
         }
         
         private void DraggableTags(Rect viewRect, List<LoadoutElement> elements) {
+            if (elements.Count == 1) return;
+            
             viewRect.width -= 2 * UIC.SPACED_HEIGHT;
 
             Rect RectForTag(int tIdx) {

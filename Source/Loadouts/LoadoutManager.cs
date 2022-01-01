@@ -133,7 +133,7 @@ namespace Inventory {
                 if (Find.WindowStack.WindowOfType<Dialog_LoadoutEditor>() == null) {
                     Pawn pawn = null;
 
-                    if (Find.Selector.SelectedPawns.Any()) {
+                    if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
                         pawn = Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder());
                     } else {
                         var pawns = Find.Maps.SelectMany(m => m.mapPawns.AllPawns);

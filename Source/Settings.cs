@@ -31,6 +31,7 @@ namespace Inventory {
             var nRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
             Widgets.CheckboxLabeled(nRect, Strings.OnlyLoadoutItems, ref onlyItemsFromLoadout);
 
+            // todo: cleanup
             foreach (var keyBind in new List<KeyBindingDef> { InvKeyBindingDefOf.CL_OpenLoadoutEditor, InvKeyBindingDefOf.CL_OpenTagEditor }) {
                 var keyBindRect = rect.PopTopPartPixels(34f).ContractedBy(3f);
                 GenUI.SetLabelAlign(TextAnchor.MiddleLeft);
