@@ -88,4 +88,9 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.StateActive>state is active</CompositableLoadouts.StateActive>
 	<CompositableLoadouts.ActiveWhen>Active when</CompositableLoadouts.ActiveWhen>
 
+
+	<CompositableLoadouts.Settings.ImmediatelyResolveLoadout>Immediately resolve loadout when changed</CompositableLoadouts.Settings.ImmediatelyResolveLoadout>
+	<CompositableLoadouts.Settings.ImmediatelyResolveLoadoutDesc>Pawns will immediately attempt to update their loadout any time it has changed (tag removed from loadout, current loadoutstate changed, etc)</CompositableLoadouts.Settings.ImmediatelyResolveLoadoutDesc>
+
+
 </LanguageData>

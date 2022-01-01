@@ -6,6 +6,7 @@ namespace Inventory {
 
         // P = Prefix
         public const string P = "CompositableLoadouts.";
+        public const string S = "Settings.";
 
         public static string TagLoadoutComposition => $"{P}TagLoadoutComposition".TranslateSimple();
         public static string EditXLoadout(string pawnName) => $"{P}EditXLoadout".Translate(pawnName);
@@ -82,6 +83,9 @@ namespace Inventory {
         public static string StateActive => $"{P}StateActive".TranslateSimple();
         public static string ActiveWhen => $"{P}ActiveWhen".TranslateSimple();
 
+        
+        public static string ImmediatelyResolveLoadout => $"{P}{S}ImmediatelyResolveLoadout".TranslateSimple();
+        public static string ImmediatelyResolveLoadoutDesc => $"{P}{S}ImmediatelyResolveLoadoutDesc".TranslateSimple();
 
     }
 

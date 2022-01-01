@@ -65,27 +65,23 @@ namespace Inventory {
         }
 
         // does nothing
-        // public virtual void SetInitialSizeAndPosition()
-        // {
-        //     if (fromOtherRect.HasValue) {
-        //         this.windowRect = fromOtherRect.Value;
-        //         this.windowRect = this.windowRect.Rounded();
-        //     }
-        // }
+        public override void SetInitialSizeAndPosition()
+        {
+            base.SetInitialSizeAndPosition();
+            if (!fromOtherRect.HasValue) return;
+            
+            windowRect.x = fromOtherRect.Value.x;
+            windowRect.y = fromOtherRect.Value.y;
+            fromOtherRect = null;
+        }
 
         public override void DoWindowContents(Rect inRect) {
             Text.Font = GameFont.Small;
-            // hack because `SetInitialSizeAndPosition` wasn't playing ball
-            if (fromOtherRect.HasValue) {
-                this.windowRect.x = fromOtherRect.Value.x;
-                this.windowRect.y = fromOtherRect.Value.y;
-                fromOtherRect = null;
-            }
 
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode != KeyCode.None) {
                 if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.Comma)) {
                     ThingSelectionUtility.SelectPreviousColonist();
-                    this.Close();
+                    Close();
                     Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this));
                     Event.current.Use();
                     return;
@@ -93,7 +89,7 @@ namespace Inventory {
 
                 if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.Period)) {
                     ThingSelectionUtility.SelectNextColonist();
-                    this.Close();
+                    Close();
                     Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this));
                     Event.current.Use();
                     return;

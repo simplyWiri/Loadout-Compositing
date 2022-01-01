@@ -60,7 +60,10 @@ namespace Inventory {
                     AddItemToRemove(item);
                 }
             }
-            needsUpdate = true;
+
+            if (ModBase.settings.immediatelyResolveLoadout) {
+                needsUpdate = true;
+            }
         }
 
         public void RequiresUpdate() {
