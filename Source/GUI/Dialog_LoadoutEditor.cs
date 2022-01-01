@@ -175,7 +175,8 @@ namespace Inventory {
                 Widgets.Label(tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + UIC.SMALL_GAP), tag.name);
 
                 var elemName = $" {element.StateName} ";
-                if (Widgets.ButtonText(tagRect.PopRightPartPixels(elemName.GetWidthCached() + 5).TopPartPixels(UIC.SPACED_HEIGHT), elemName)) {
+                var width = Mathf.Min(elemName.GetWidthCached() + 5, tagRect.width - UIC.SPACED_HEIGHT * 4);
+                if (Widgets.ButtonText(tagRect.PopRightPartPixels(width).TopPartPixels(UIC.SPACED_HEIGHT), elemName)) {
                     Find.WindowStack.Add(new Dialog_SetTagLoadoutState(pawn.GetComp<LoadoutComponent>().Loadout, element));
                 }
 
@@ -334,6 +335,11 @@ namespace Inventory {
         }   
 
         private static IEnumerable<Widgets.DropdownMenuElement<LoadoutState>> States(Dialog_LoadoutEditor editor) {
+            yield return new Widgets.DropdownMenuElement<LoadoutState>() {
+                option = new FloatMenuOption(Strings.Create, () => Find.WindowStack.Add(new Dialog_LoadoutStateEditor())),
+                payload = null,
+            };
+            
             if (editor.shownState != null) {
                 yield return new Widgets.DropdownMenuElement<LoadoutState>() {
                     option = new FloatMenuOption(Strings.DefaultStateNameInUse, () => editor.shownState = null),
