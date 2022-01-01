@@ -18,6 +18,7 @@ namespace Inventory {
 
         internal Pawn pawn;
         internal LoadoutComponent component;
+        internal LoadoutState shownState;
         private Vector2 tagScroll;
         private float tagsHeight = 9999f;
 
@@ -44,6 +45,7 @@ namespace Inventory {
         public Dialog_LoadoutEditor(Pawn pawn) {
             this.pawn = pawn;
             this.component = pawn.GetComp<LoadoutComponent>();
+            this.shownState = component.Loadout.CurrentState;
             coveragePanel = new Panel_ShowCoverage(this);
             pawnStatPanel = new Panel_PawnStats(this);
 
@@ -55,6 +57,7 @@ namespace Inventory {
         public Dialog_LoadoutEditor(Pawn pawn, Dialog_LoadoutEditor old) {
             this.pawn = pawn;
             this.component = pawn.GetComp<LoadoutComponent>();
+            this.shownState = component.Loadout.CurrentState;
             coveragePanel = new Panel_ShowCoverage(this, old.coveragePanel.ShouldDraw);
             pawnStatPanel = new Panel_PawnStats(this, old.pawnStatPanel.ShouldDraw);
 
@@ -107,7 +110,7 @@ namespace Inventory {
             var middlePanel = inRect.PopLeftPartPixels(WIDTH - Margin);
 
             // 45 = 35 + 10, 35 = `ListSeperator` height, 10 = arbitrary buffer
-            var tagsRect = middlePanel.PopTopPartPixels(Mathf.Min(45 + UIC.SPACED_HEIGHT + tagsHeight, middlePanel.height / 2.0f));
+            var tagsRect = middlePanel.PopTopPartPixels(Mathf.Min(45 + UIC.SPACED_HEIGHT * 2 + tagsHeight, middlePanel.height / 2.0f));
             DrawTags(tagsRect);
             DrawStatistics(middlePanel);
 
@@ -121,10 +124,10 @@ namespace Inventory {
 
             DrawHeaderButtons(ref rect, elements);
             rect.AdjVertBy(GenUI.GapTiny);
-
-            GUIUtility.ListSeperator(ref rect, Strings.AppliedTags);
-
             rect.PopRightPartPixels(UIC.SCROLL_WIDTH);
+
+            GUIUtility.ListSeperator(ref rect, Strings.AppliedTags); 
+            
             tagsHeight = elements.Sum(elem => UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(elem.Tag.requiredItems.Count / 4.0f))));
             var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, tagsHeight);
             Widgets.BeginScrollView(rect, ref tagScroll, viewRect);
@@ -306,6 +309,44 @@ namespace Inventory {
 
                 coveragePanel.ShouldDraw = !coveragePanel.ShouldDraw;
             }
+
+            var selectStateButtonRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
+            selectStateButtonRect.PopRightPartPixels(Margin);
+            selectStateButtonRect.PopTopPartPixels(5f);
+
+            var fStr = Strings.ViewAsIf;
+            var mStr = $" { (shownState == null ? Strings.DefaultStateNameInUse : shownState.name)} ";
+            var sStr = Strings.WereActive;
+            var sRect = selectStateButtonRect.PopRightPartPixels(sStr.GetWidthCached() + 5);
+            var mRect = selectStateButtonRect.PopRightPartPixels(mStr.GetWidthCached() + 5);
+            selectStateButtonRect.width -= 5f;
+            var fRect = selectStateButtonRect.PopRightPartPixels(fStr.GetWidthCached() + 5);
+
+            Text.Anchor = TextAnchor.MiddleRight;
+            Widgets.Dropdown(mRect.TopPartPixels(Text.LineHeight), this, (editor) => editor.shownState, States, mStr);
+
+            Text.Anchor = TextAnchor.UpperRight;
+            GUI.color = Color.gray;
+            Widgets.Label(sRect, sStr);
+            Widgets.Label(fRect, fStr);
+            GUI.color = Color.white;
+            Text.Anchor = TextAnchor.UpperLeft;
+        }   
+
+        private static IEnumerable<Widgets.DropdownMenuElement<LoadoutState>> States(Dialog_LoadoutEditor editor) {
+            if (editor.shownState != null) {
+                yield return new Widgets.DropdownMenuElement<LoadoutState>() {
+                    option = new FloatMenuOption(Strings.DefaultStateNameInUse, () => editor.shownState = null),
+                    payload = null
+                };
+            }
+
+            foreach (var state in LoadoutManager.States.Except(editor.shownState)) {
+                yield return new Widgets.DropdownMenuElement<LoadoutState>() {
+                    option = new FloatMenuOption(state.name, () => editor.shownState = state),
+                    payload = state
+                };
+            }
         }
 
         public void DrawStatistics(Rect rect) {
@@ -320,7 +361,7 @@ namespace Inventory {
 
             viewRect.AdjVertBy(GenUI.GapTiny);
 
-            var loadoutItems = component.Loadout.AllItems.ToList();
+            var loadoutItems = component.Loadout.ItemsWith(shownState).ToList();
 
             GUIUtility.BarWithOverlay(
                 viewRect.PopTopPartPixels(UIC.SPACED_HEIGHT),
