@@ -6,9 +6,17 @@ namespace Inventory {
 
     public class Settings : ModSettings {
 
-        public void DoSettingsWindow(Rect rect) { }
+        public bool immediatelyResolveLoadout = false;
 
-        public override void ExposeData() { }
+        public void DoSettingsWindow(Rect rect) {
+            var tRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
+            Widgets.CheckboxLabeled(tRect, Strings.ImmediatelyResolveLoadout, ref immediatelyResolveLoadout);
+            TooltipHandler.TipRegion(tRect, Strings.ImmediatelyResolveLoadoutDesc);
+        }
+
+        public override void ExposeData() {
+            Scribe_Values.Look(ref immediatelyResolveLoadout, nameof(immediatelyResolveLoadout), false);
+        }
 
     }
 

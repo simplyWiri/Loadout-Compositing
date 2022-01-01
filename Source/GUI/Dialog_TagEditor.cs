@@ -146,7 +146,6 @@ namespace Inventory {
 
             Widgets.EndScrollView();
 
-
             foreach (var item in toRemove) {
                 curTag.requiredItems.Remove(item);
             }
