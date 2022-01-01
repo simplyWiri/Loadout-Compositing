@@ -9,6 +9,8 @@ namespace Inventory {
     public static class Panel_GearTab {
 
         public static void DrawTags(Pawn p, ref float curY, float width) {
+            if (!p.IsValidLoadoutHolder()) return;
+            
             Widgets.ListSeparator(ref curY, width, Strings.TagLoadoutComposition);
             var rect = new Rect(0, curY, width, UIC.DEFAULT_HEIGHT);
             curY += UIC.DEFAULT_HEIGHT;
