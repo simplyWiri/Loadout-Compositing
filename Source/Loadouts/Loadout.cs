@@ -15,13 +15,14 @@ namespace Inventory {
         private List<Pair<Item, int>> itemsToRemove;
         private List<Pair<Item, int>> thingsToAdd;
         private LoadoutState currentState;
+        private bool needsUpdate = false;
 
         public IEnumerable<Tag> AllTags => elements.Select(elem => elem.Tag);
         public IEnumerable<Item> AllItems => AllTags.SelectMany(t => t.requiredItems);
         public IEnumerable<Tag> Tags => TagsWith(currentState);
 
+        public bool NeedsUpdate => needsUpdate;
         public LoadoutState CurrentState => currentState;
-        public List<Pair<Item, int>> ThingsToAdd => thingsToAdd;
         public List<Pair<Item, int>> ThingsToRemove => itemsToRemove;
 
         public IEnumerable<LoadoutElement> AllElements => elements;
@@ -37,48 +38,36 @@ namespace Inventory {
 
         public void SetState(LoadoutState state) {
             var changedElems = new List<LoadoutElement>();
+            var changedCount = 0;
             foreach (var elem in AllElements) {
-                if (elem.Active(currentState) != elem.Active(state)) {
+                if ( !elem.Active(CurrentState) && elem.Active(state)) {
                     changedElems.Add(elem);
                 }
+
+                changedCount++;
             }
 
             currentState = state;
             
             foreach (var elem in changedElems) {
-                UpdateState(elem, elem.Active(currentState));
+                UpdateState(elem, false);
             }
         }
 
         public void UpdateState(LoadoutElement element, bool active) {  
-            foreach (var item in element.Tag.requiredItems) {
-                if (active) {
-                    AddItemToEquip(item);
-                }
-                else {
+            foreach (var item in element.Tag.requiredItems.Where(item => !item.Def.IsApparel)) {
+                if (!active) {
                     AddItemToRemove(item);
                 }
             }
+            needsUpdate = true;
         }
 
-        private void AddItemToEquip(Item item) {
-            var quantity = item.Quantity;
-            for (var i = 0; i < ThingsToRemove.Count; i++) {
-                var pair = ThingsToRemove[i];
-                if (item != pair.first) continue;
-
-                if (pair.second > quantity) {
-                    pair.second -= quantity;
-                }
-                else {
-                    itemsToRemove.Remove(pair);
-                    quantity -= pair.second;
-                }
-            }
-
-            if (quantity > 0) {
-                thingsToAdd.Add(new Pair<Item, int>(item, quantity));
-            }
+        public void RequiresUpdate() {
+            needsUpdate = true;
+        }
+        public void Updated() {
+            needsUpdate = false;
         }
 
         private void AddItemToRemove(Item item) {
@@ -168,6 +157,7 @@ namespace Inventory {
                 }
             }
 
+            Scribe_Values.Look(ref needsUpdate, nameof(needsUpdate), false);
             Scribe_Collections.Look(ref elements, nameof(elements), LookMode.Deep);
             Scribe_Collections.Look(ref itemsToRemove, nameof(itemsToRemove), LookMode.Deep);
             Scribe_References.Look(ref currentState, nameof(currentState));

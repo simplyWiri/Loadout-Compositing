@@ -18,28 +18,7 @@ namespace Inventory {
         private static JobDef EquipApparel => JobDefOf.Wear;
         private static JobDef EquipItem => JobDefOf.TakeInventory;
         private static JobDef UnloadItem => InvJobDefOf.CL_UnloadInventory;
-
-        // Thoughts on how to do design this properly:
-        // 1. There should be only one point in the mod where AI is impacted, and
-        // all actions should be directly traceable to simple logic in that point
-        // 2. There should be multiple levels of priority, (pawn immediately
-        // equipping apparel they have just hot-swapped to / passive pawn-searching
-        // for items/apparel from their loadout)
-        // 3. This should utilise vanilla apparel-scoring such that mods which patch
-        // JobGiver_OptimiseApparel do not become defunct
-
-        // Current thoughts on how to actually do this
-        // 1. Make a High-Priority ThinkNode which has a couple methods, roughly
-        //      - RemovePawnExcessItems(Pawn), removes items held/equipped by a pawn
-        // from tag(s) which have just been disabled 
-        //      - PawnGetRequiredItems(Pawn), makes the pawn seek out items which 
-        // have just been enabled by adding a new tag/enabling a tag
-        //      - PawnSatisfyLoadout(Pawn), makes the pawn seek out items passively 
-        // which match their current loadout, and remove items which are in excess
-        // to that which they are looking for in their loadout.
-        // 2. Replace JobGiver_OptimiseApparel, but use their methods in order to score
-        // apparel to wear, hopefully maintaining compatibility with mods which bias
-        // which apparel should be worn
+        
         public ThinkNode_LoadoutRealisation() { }
 
         public override bool Satisfied(Pawn pawn) {
@@ -52,33 +31,16 @@ namespace Inventory {
 
         public override ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams) {
             var comp = pawn.TryGetComp<LoadoutComponent>();
-
-            // 1. Does the pawn have any things which need to be removed immediately? This can occur from:
-            // - tag has just been deleted
-            // - tag removed from loadout
-            // - tag just disabled via hotswap mechanism
-
-            if (comp.Loadout.ThingsToRemove.Count > 0) {
-                var removeThingsJob = RemoveThingsJob(pawn, comp.Loadout);
-                if (removeThingsJob != null) {
-                    return new ThinkResult(removeThingsJob, this);
+            
+            if (comp.Loadout.NeedsUpdate || PawnNeedsUpdate(pawn)) {
+                
+                if (comp.Loadout.ThingsToRemove.Count > 0) {
+                    var removeThingsJob = RemoveThingsJob(pawn, comp.Loadout);
+                    if (removeThingsJob != null) {
+                        return new ThinkResult(removeThingsJob, this);
+                    }
                 }
-            }
-
-            // 2. Does the pawn have any items which need to be equipped immediately? This can occur from:
-            // - a tag has just been added to a pawns loadout
-            // - a tag has just been enabled via hotswap mechanism
-
-            if ( comp.Loadout.ThingsToAdd.Count > 0 ) {
-                 var equipItemsJob = EquipItemsJob(pawn, comp.Loadout);
-                 if ( equipItemsJob != null) {
-                     return new ThinkResult(equipItemsJob, this);
-                 }
-            }
-
-            // 3. Is the pawns loadout fully satisfied, or does it still need to get some more things?
-
-            if (PawnNeedsUpdate(pawn)) {
+                
                 var job = SatisfyLoadoutItemsJob(pawn, comp.Loadout);
                 if (job != null) {
                     return new ThinkResult(job, this);
@@ -93,6 +55,7 @@ namespace Inventory {
                 // by the pawns loadout, or their loadout is fully satisfied, either way we do not need
                 // to re-check the pawns loadout status for a while (10-15k) ticks.
                 SetPawnLastUpdated(pawn);
+                comp.Loadout.Updated();
             }
 
             return ThinkResult.NoJob;
@@ -119,9 +82,7 @@ namespace Inventory {
             foreach (var thing in loadout.ThingsToRemove.ToList()) {
                 var item = thing.First;
                 var count = thing.Second;
-
-                if (item.Def.IsApparel) continue; // todo
-
+                
                 var itemCount = item.CountIn(pawnGear);
                 var loadoutDesiredCount = loadout.DesiredCount(pawnGear, item) - count;
 
@@ -129,6 +90,7 @@ namespace Inventory {
                     var job = RemoveItem(pawnGear, item, Mathf.Min(itemCount - loadoutDesiredCount, count));
                     if (job != null) {
                         loadout.ThingsToRemove.Remove(thing);
+                        
                         return job;
                     }
                 }
@@ -136,10 +98,6 @@ namespace Inventory {
                 loadout.ThingsToRemove.Remove(thing);
             }
 
-            return null;
-        }
-
-        private Job EquipItemsJob(Pawn pawn, Loadout loadout) {
             return null;
         }
 
