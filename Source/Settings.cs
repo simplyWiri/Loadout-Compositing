@@ -8,6 +8,7 @@ namespace Inventory {
     public class Settings : ModSettings {
 
         public bool immediatelyResolveLoadout = false;
+        public bool onlyItemsFromLoadout = false;
         public FloatRange defaultHitpoints = FloatRange.ZeroToOne;
         public QualityRange defaultQualityRange = QualityRange.All;
 
@@ -25,10 +26,15 @@ namespace Inventory {
             
             var qualRangeRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
             Widgets.QualityRange(qualRangeRect, Rand.Int, ref defaultQualityRange);
+
+            var nRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
+            Widgets.CheckboxLabeled(nRect, Strings.OnlyLoadoutItems, ref onlyItemsFromLoadout);
         }
 
         public override void ExposeData() {
             Scribe_Values.Look(ref immediatelyResolveLoadout, nameof(immediatelyResolveLoadout), false);
+            Scribe_Values.Look(ref onlyItemsFromLoadout, nameof(onlyItemsFromLoadout), false);
+
             Scribe_Values.Look(ref defaultHitpoints, nameof(defaultHitpoints), FloatRange.ZeroToOne);
             Scribe_Values.Look(ref defaultQualityRange, nameof(defaultQualityRange), QualityRange.All);
         }

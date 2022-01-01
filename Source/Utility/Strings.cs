@@ -90,6 +90,7 @@ namespace Inventory {
         public static string ImmediatelyResolveLoadout => $"{P}{S}ImmediatelyResolveLoadout".TranslateSimple();
         public static string ImmediatelyResolveLoadoutDesc => $"{P}{S}ImmediatelyResolveLoadoutDesc".TranslateSimple();       
         public static string ChangeDefaults => $"{P}{S}ChangeDefaults".TranslateSimple();
+        public static string OnlyLoadoutItems => $"{P}{S}OnlyLoadoutItems".TranslateSimple();
 
 
     }
