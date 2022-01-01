@@ -74,7 +74,7 @@ namespace Inventory {
             float curY = rect.y + UIC.DEFAULT_HEIGHT;
             float beginY = curY;
 
-            var wornApparel = component.Loadout.HypotheticalWornApparelWithTag(component.Loadout.CurrentState, def).ToList();
+            var wornApparel = component.Loadout.HypotheticalWornApparelWithTag(parent.shownState, def).ToList();
 
             foreach (var category in ApparelUtility.GetBodyPartGroupFor(def).GetCategories()
                          .OrderByDescending(t => t.First().def.listOrder)) {
@@ -174,7 +174,7 @@ namespace Inventory {
             foreach (var column in group.layers.OrderByDescending(d => d.drawOrder)) {
                 var idx = layers.FirstIndexOf(c => c == column) + 1;
                 var columnRect = new Rect(columns[idx].x, curY, columns[idx].width, UIC.SPACED_HEIGHT);
-                var loadoutTags = component.Loadout.elements;
+                var loadoutTags = component.Loadout.ElementsWith(parent.shownState).ToList();
 
                 var (overlappingApparel, overlappingTag) = wornApparel
                                                                .FirstOrDefault(item =>
@@ -197,7 +197,7 @@ namespace Inventory {
                 }
                 else {
                     if (overlappingApparel != null) {
-                        var col = GetColorForTagAtIndex(loadoutTags.FirstIndexOf(e => e.Tag == overlappingTag));
+                        var col = GetColorForTagAtIndex(component.Loadout.AllElements.FirstIndexOf(e => e.Tag == overlappingTag));
                         Widgets.DrawBoxSolidWithOutline(columnRect, Widgets.WindowBGFillColor, col);
                         Widgets.DefIcon(columnRect.ContractedBy(3f), overlappingApparel.Def,
                             overlappingApparel.RandomStuff);
@@ -213,7 +213,7 @@ namespace Inventory {
                         }
                     }
                     else {
-                        var nextHighestPrio = possibleDefs.OrderBy(tup => loadoutTags.FirstIndexOf(e => e.Tag == overlappingTag)).First().Item2;
+                        var nextHighestPrio = possibleDefs.OrderBy(tup => component.Loadout.ElementsWith(parent.shownState).FirstIndexOf(e => e.Tag == overlappingTag)).First().Item2;
                         Widgets.DrawBoxSolidWithOutline(columnRect, Widgets.WindowBGFillColor, Color.red);
                         Widgets.DefIcon(columnRect.ContractedBy(3f), nextHighestPrio.Def, color: new Color(0.5f, 0.5f, 0.5f, 0.3f));
 

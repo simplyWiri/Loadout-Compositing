@@ -18,6 +18,8 @@ namespace Inventory {
         public string StateName => State is null ? Strings.DefaultStateNameInUse : (Switch ? "" : "not ") + State.name;
         
         public bool Active(LoadoutState currentState) {
+            if (state == null) return true;
+            
             if (switchValue && Equals(currentState, state)) {
                 return true;
             }

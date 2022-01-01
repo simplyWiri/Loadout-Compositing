@@ -79,23 +79,21 @@ namespace Inventory {
 
             var pawnGear = pawn.InventoryAndEquipment().ToList();
 
-            foreach (var thing in loadout.ThingsToRemove.ToList()) {
-                var item = thing.First;
-                var count = thing.Second;
-                
+            foreach (var item in loadout.ThingsToRemove.ToList()) {
                 var itemCount = item.CountIn(pawnGear);
-                var loadoutDesiredCount = loadout.DesiredCount(pawnGear, item) - count;
+                var loadoutDesiredCount = loadout.DesiredCount(pawnGear, item) - item.Quantity;
 
                 if (itemCount > loadoutDesiredCount) {
-                    var job = RemoveItem(pawnGear, item, Mathf.Min(itemCount - loadoutDesiredCount, count));
+                    var job = RemoveItem(pawnGear, item, Mathf.Min(itemCount - loadoutDesiredCount, item.Quantity));
                     if (job != null) {
-                        loadout.ThingsToRemove.Remove(thing);
-                        
+                        if (job.count > item.Quantity) {
+                            loadout.ThingsToRemove.Remove(item);
+                        }
                         return job;
                     }
                 }
 
-                loadout.ThingsToRemove.Remove(thing);
+                loadout.ThingsToRemove.Remove(item);
             }
 
             return null;

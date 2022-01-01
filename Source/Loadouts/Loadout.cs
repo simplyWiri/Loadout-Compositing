@@ -12,8 +12,7 @@ namespace Inventory {
         private List<Tag> tags = null;
 
         public List<LoadoutElement> elements;
-        private List<Pair<Item, int>> itemsToRemove;
-        private List<Pair<Item, int>> thingsToAdd;
+        private List<Item> itemsToRemove;
         private LoadoutState currentState;
         private bool needsUpdate = false;
 
@@ -23,17 +22,19 @@ namespace Inventory {
 
         public bool NeedsUpdate => needsUpdate;
         public LoadoutState CurrentState => currentState;
-        public List<Pair<Item, int>> ThingsToRemove => itemsToRemove;
+        public List<Item> ThingsToRemove => itemsToRemove;
 
         public IEnumerable<LoadoutElement> AllElements => elements;
         public IEnumerable<LoadoutElement> Elements => elements.Where(e => e.Active(currentState));
+        public IEnumerable<LoadoutElement> ElementsWith(LoadoutState state) => elements.Where(e => e.Active(state));
+
         public IEnumerable<Tag> TagsWith(LoadoutState state) => elements.Where(e => e.Active(state)).Select(e => e.Tag);
         public IEnumerable<Item> Items => Tags.SelectMany(t => t.requiredItems);
+        public IEnumerable<Item> ItemsWith(LoadoutState state) => TagsWith(state).SelectMany(t => t.requiredItems);
 
         public Loadout() {
             elements = new List<LoadoutElement>();
-            itemsToRemove = new List<Pair<Item, int>>();
-            thingsToAdd = new List<Pair<Item, int>>();
+            itemsToRemove = new List<Item>();
         }
 
         public void SetState(LoadoutState state) {
@@ -74,7 +75,7 @@ namespace Inventory {
         }
 
         private void AddItemToRemove(Item item) {
-            itemsToRemove.Add(new Pair<Item, int>(item, item.Quantity));
+            itemsToRemove.Add(item);
         }
 
         public int IndexOf(Tag tag) {
@@ -165,8 +166,8 @@ namespace Inventory {
             Scribe_Collections.Look(ref itemsToRemove, nameof(itemsToRemove), LookMode.Deep);
             Scribe_References.Look(ref currentState, nameof(currentState));
 
-            itemsToRemove = new List<Pair<Item, int>>();
-            thingsToAdd = new List<Pair<Item, int>>();
+
+            itemsToRemove = new List<Item>();
             elements ??= new List<LoadoutElement>();
         }
 

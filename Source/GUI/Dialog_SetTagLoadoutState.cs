@@ -127,7 +127,7 @@ namespace Inventory {
         private IEnumerable<Widgets.DropdownMenuElement<LoadoutState>> GetElems(LoadoutElement element) {
             if (element.state != null) {
                 yield return new Widgets.DropdownMenuElement<LoadoutState>() {
-                    option = new FloatMenuOption(Strings.DefaultStateName, () => element.SetTo(loadout, null, element.Switch)),
+                    option = new FloatMenuOption(Strings.DefaultStateNameInUse, () => element.SetTo(loadout, null, element.Switch)),
                     payload = null
                 };
             }
