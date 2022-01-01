@@ -213,7 +213,7 @@ namespace Inventory {
                     .GetRange(0, tIdx)
                     .Sum(element => UIC.SPACED_HEIGHT * Mathf.Max(1, Mathf.CeilToInt(element.Tag.requiredItems.Count / 4.0f)));
 
-                return new Rect(viewRect.x, viewRect.y + offset, viewRect.width - $" {elem.StateName} ".GetWidthCached() + 8, UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(elem.Tag.requiredItems.Count / 4.0f))));
+                return new Rect(viewRect.x, viewRect.y + offset, viewRect.width - ($" {elem.StateName} ".GetWidthCached() + 5), UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(elem.Tag.requiredItems.Count / 4.0f))));
             }
 
             var cEvent = Event.current;

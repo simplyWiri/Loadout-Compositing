@@ -13,6 +13,7 @@ namespace Inventory {
         private Loadout loadout;
         private LoadoutElement element;
         private Color baseColor = Color.white;
+        private Vector2 center;
 
         public override float Margin => 6f;
         public override Vector2 InitialSize => new Vector2(GetWidth, UIC.SPACED_HEIGHT + 12f);
@@ -55,6 +56,7 @@ namespace Inventory {
             }
             
             windowRect = new Rect(vector.x, vector.y, InitialSize.x, InitialSize.y);
+            center = windowRect.center;
         }
         
         private bool UpdateBaseColor()
@@ -80,9 +82,8 @@ namespace Inventory {
         public override void DoWindowContents(Rect inRect) {
             var width = GetWidth;
             if (Math.Abs(width - windowRect.width) > 0.025) {
-                var delta = width - windowRect.width;
-                windowRect.width += delta;
-                windowRect.x -= delta / 2.0f;
+                windowRect.width = width;
+                windowRect.x = center.x - (width / 2.0f);
             }
 
             if (UpdateBaseColor()) {
