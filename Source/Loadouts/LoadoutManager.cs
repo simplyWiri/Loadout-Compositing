@@ -131,9 +131,16 @@ namespace Inventory {
         public override void GameComponentOnGUI() {
             if (InvKeyBindingDefOf.CL_OpenLoadoutEditor?.KeyDownEvent ?? false) {
                 if (Find.WindowStack.WindowOfType<Dialog_LoadoutEditor>() == null) {
-                    var pawns = Find.Maps.SelectMany(m => m.mapPawns.AllPawns);
-                    var loadoutHolders = pawns.Where(p => p.IsValidLoadoutHolder());
-                    var pawn = loadoutHolders.FirstOrDefault();
+                    Pawn pawn = null;
+
+                    if (Find.Selector.SelectedPawns.Any()) {
+                        pawn = Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder());
+                    } else {
+                        var pawns = Find.Maps.SelectMany(m => m.mapPawns.AllPawns);
+                        var loadoutHolders = pawns.Where(p => p.IsValidLoadoutHolder());
+                        pawn = loadoutHolders.FirstOrDefault();
+                    }
+
                     if (pawn != null) {
                         Find.WindowStack.Add(new Dialog_LoadoutEditor(pawn));
                     }
