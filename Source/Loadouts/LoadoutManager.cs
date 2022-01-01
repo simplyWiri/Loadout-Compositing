@@ -85,6 +85,15 @@ namespace Inventory {
                         elem.state = null;
                     }
                 });
+
+                if (state.Equals(loadout.Loadout.CurrentState)) {
+                    loadout.Loadout.SetState(null);
+                }
+
+                var window = Find.WindowStack.WindowOfType<Dialog_LoadoutEditor>();
+                if (window != null && state.Equals(window.shownState)) {
+                    window.shownState = null;
+                }
             }
         }
 

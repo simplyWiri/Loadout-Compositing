@@ -106,25 +106,23 @@ namespace Inventory {
                 Widgets.Label(rect.PopLeftPartPixels(FirstString.GetWidthCached() + 5), FirstString);
                 Widgets.Dropdown(rect.PopLeftPartPixels(StateName.GetWidthCached() + 5), element, (elem) => elem.state, GetElems, StateName);
                 Widgets.Label(rect.PopLeftPartPixels(ThirdString.GetWidthCached() + 5), ThirdString);
-                Widgets.Dropdown(rect.PopLeftPartPixels(SwitchName.GetWidthCached() + 5), element, (elem) => elem.Switch, GetSwitchValueOptions, SwitchName );
+                if (Widgets.ButtonText(rect.PopLeftPartPixels(SwitchName.GetWidthCached()), SwitchName)) {
+                    element.SetTo(loadout, element.state, !element.Switch);
+                }
             }
 
             Text.Anchor = TextAnchor.UpperLeft;
             
             GUI.color = Color.white;
         }
-
-        private IEnumerable<Widgets.DropdownMenuElement<bool>> GetSwitchValueOptions(LoadoutElement element) {
-            yield return new Widgets.DropdownMenuElement<bool>() {
-                option = new FloatMenuOption("Active", () => element.SetTo(loadout, element.state, true)),
-                payload = true
-            };
-            yield return new Widgets.DropdownMenuElement<bool>() {
-                option = new FloatMenuOption("Inactive", () => element.SetTo(loadout, element.state, false)),
-                payload = false
-            };
-        }
+        
         private IEnumerable<Widgets.DropdownMenuElement<LoadoutState>> GetElems(LoadoutElement element) {
+
+            yield return new Widgets.DropdownMenuElement<LoadoutState>() {
+                option = new FloatMenuOption(Strings.Create, () => Find.WindowStack.Add(new Dialog_LoadoutStateEditor())),
+                payload = null,
+            };
+
             if (element.state != null) {
                 yield return new Widgets.DropdownMenuElement<LoadoutState>() {
                     option = new FloatMenuOption(Strings.DefaultStateNameInUse, () => element.SetTo(loadout, null, element.Switch)),

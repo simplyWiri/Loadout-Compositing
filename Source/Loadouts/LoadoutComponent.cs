@@ -20,7 +20,8 @@ namespace Inventory {
                 defaultLabel = Strings.SatisfyLoadoutNow,
                 icon = Textures.EditTex,
                 disabled = Loadout.NeedsUpdate,
-                disabledReason = Strings.SatisfyLoadoutNowFail(parent)
+                disabledReason = Strings.SatisfyLoadoutNowFail(parent),
+                alsoClickIfOtherInGroupClicked = true
             };
             yield return action;
         }
