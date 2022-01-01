@@ -16,7 +16,11 @@ namespace Inventory {
 
         public static string PickTargetTag => $"{P}PickTargetTag".TranslateSimple();
         public static string SwitchTargetTag(string fromTag) => $"{P}SwitchTargetTag".Translate(fromTag);
-        public static string CopyFromTag(string tagName, string defName) => $"{P}CopyFromTag".Translate(tagName, defName);
+        public static string CopyFromTag(string defName) => $"{P}CopyFromTag".Translate(defName);
+        public static string NumTagsDesc => $"{P}NumTagsDesc".TranslateSimple();
+        public static string ExtraCopiesDesc => $"{P}ExtraCopiesDesc".TranslateSimple();
+        public static string ItemRepetitionDesc => $"{P}ItemRepetitionDesc".TranslateSimple();
+
         public static string PickUpItems(string itemTag, string count) => $"{P}PickUpItems".Translate(itemTag, count);
 
         public static string SelectTag => $"{P}SelectTag".TranslateSimple();

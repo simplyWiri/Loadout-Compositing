@@ -83,8 +83,10 @@ namespace Inventory {
 
             var method = AccessTools.Method("Sandy_Detailed_RPG_GearTab:FillTab");
             if (method != null) {
-                var hp = new HarmonyMethod(typeof(RPG_Inventory_Patch), nameof(RPG_Inventory_Patch.Transpiler));
-                ModBase.harmony.Patch(method, transpiler: hp);
+                if (Harmony.GetPatchInfo(method)?.Transpilers.All(p => p.owner != ModBase.harmony.Id) ?? true) {
+                    var hp = new HarmonyMethod(typeof(RPG_Inventory_Patch), nameof(RPG_Inventory_Patch.Transpiler));
+                    ModBase.harmony.Patch(method, transpiler: hp);
+                }
             }
         }
 

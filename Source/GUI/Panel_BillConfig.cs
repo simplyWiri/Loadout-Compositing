@@ -10,16 +10,20 @@ namespace Inventory {
 
         // called from a patch method, so must be static
         public static void Draw(Dialog_BillConfig window, Listing_Standard standard, Bill_Production bill) {
+            standard.Gap(6f);
+            
             // Drop down
             var dropdownStr = LoadoutManager.TagFor(bill) == null
                 ? Strings.PickTargetTag
                 : Strings.SwitchTargetTag(LoadoutManager.TagFor(bill).name);
+            
             var dropdownStrSize = Text.CalcHeight(dropdownStr, standard.ColumnWidth);
-            var dropDownRect = standard.GetRect(dropdownStrSize);
+            var dropDownRect = standard.GetRect(Mathf.Max(30, dropdownStrSize + 5f));
             Widgets.Dropdown(dropDownRect, bill, LoadoutManager.TagFor, GenerateTagOptions, dropdownStr);
-
+            
             // How many do we currently have?
-            var text = $"{"CurrentlyHave".Translate()}: {bill.recipe.WorkerCounter.CountProducts(bill)} / {bill.targetCount * LoadoutManager.ColonistCountFor(bill)}";
+            
+            var text = $"{"CurrentlyHave".Translate()}: {bill.recipe.WorkerCounter.CountProducts(bill)} / {bill.DesiredTargetCount()}";
             var str = bill.recipe.WorkerCounter.ProductsDescription(bill);
             if (!str.NullOrEmpty()) {
                 text += "\n" + "CountingProducts".Translate() + ": " + str.CapitalizeFirst();
@@ -27,19 +31,57 @@ namespace Inventory {
 
             standard.Label(text);
 
-            // integer input for the number of items to produce
-            var targetCount = bill.targetCount;
-            standard.IntEntry(ref bill.targetCount, ref window.targetCountEditBuffer, bill.recipe.targetCountAdjustment);
-            bill.unpauseWhenYouHave = Mathf.Max(0, bill.unpauseWhenYouHave + (bill.targetCount - targetCount));
+            var rect = standard.GetRect(30f);
+
+            Text.Anchor = TextAnchor.MiddleCenter;
+            // ( 3 + [ x ] ) * [ z ]
+
+            var firstString = $"( {LoadoutManager.ColonistCountFor(bill)}  + ";
+            var firstRect = rect.PopLeftPartPixels(firstString.GetWidthCached() + 5f).MiddlePartPixels(Text.LineHeight);
+            window.targetCountEditBuffer ??= bill.targetCount.ToString();
+            var secondRect = rect.PopLeftPartPixels(window.targetCountEditBuffer.GetWidthCached() + 17).MiddlePartPixels(Text.LineHeight);
+            var secondString = " )   *   ";
+            var thirdRect = rect.PopLeftPartPixels(secondString.GetWidthCached() + 5);
+            window.repeatCountEditBuffer ??= bill.repeatCount.ToString();
+            var fourthRect = rect.PopLeftPartPixels(window.repeatCountEditBuffer.GetWidthCached() + 17).MiddlePartPixels(Text.LineHeight);
+
+            // need to run this before the text inputs, so we can snipe the tab keypress.
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode != KeyCode.None) {
+                if (Event.current.keyCode == KeyCode.Tab) {
+                    string NameFor(Rect rect) {
+                        // this is how `TextFieldNumeric` is labelled according to vanilla, so we copy it.
+                        return "TextField" + rect.y.ToString("F0") + rect.x.ToString("F0");
+                    }
+                    
+                    if (!GUI.GetNameOfFocusedControl().Contains("TextField")) {
+                        GUI.FocusControl(NameFor(secondRect));
+                    } else if (GUI.GetNameOfFocusedControl() == NameFor(secondRect)) {
+                        GUI.FocusControl(NameFor(fourthRect));
+                    } else {
+                        GUI.FocusControl(NameFor(secondRect));
+                    }
+                    Event.current.Use();
+                }
+            }
+
+            Widgets.Label(firstRect, firstString);
+            Widgets.Label(thirdRect, secondString);
+            Widgets.DrawHighlightIfMouseover(firstRect);
+            TooltipHandler.TipRegion(firstRect, Strings.NumTagsDesc);
+            Widgets.TextFieldNumeric(secondRect, ref bill.repeatCount, ref window.repeatCountEditBuffer);
+            TooltipHandler.TipRegion(secondRect, Strings.ExtraCopiesDesc);
+            Widgets.TextFieldNumeric(fourthRect, ref bill.targetCount, ref window.targetCountEditBuffer);
+            TooltipHandler.TipRegion(fourthRect, Strings.ItemRepetitionDesc);
+
+            Text.Anchor = TextAnchor.UpperLeft;
+
             var producedThingDef = bill.recipe.ProducedThingDef;
             if (producedThingDef == null) return;
 
             var tag = LoadoutManager.TagFor(bill);
             if (tag != null && tag.HasThingDef(producedThingDef, out var item)) {
-                var copyTagStr = Strings.CopyFromTag(tag.name, item.Def.LabelCap);
-                var size = Text.CalcHeight(copyTagStr, standard.ColumnWidth - 80f);
-                var rect = standard.GetRect(size);
-                if (Widgets.ButtonText(rect, copyTagStr)) {
+                var copyTagStr = Strings.CopyFromTag(item.Def.LabelCap);
+                if (standard.ButtonText(copyTagStr)) {
                     item.Filter.CopyTo(bill.ingredientFilter);
 
                     bill.limitToAllowedStuff = !item.Filter.Generic;

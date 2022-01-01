@@ -14,8 +14,8 @@ namespace Inventory {
 
         public static bool Prefix(ref string __result, Bill_Production __instance) {
             if (__instance.repeatMode != InvBillRepeatModeDefOf.W_PerTag) return true;
-
-            __result = $"{__instance.recipe.WorkerCounter.CountProducts(__instance)}/{__instance.DesiredTargetCount()} ({__instance.targetCount})";
+            
+            __result = $"{__instance.recipe.WorkerCounter.CountProducts(__instance)}/{__instance.DesiredTargetCount()}";
             return false;
         }
 

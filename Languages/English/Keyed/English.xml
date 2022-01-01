@@ -8,7 +8,11 @@
 	<CompositableLoadouts.EditOrCreateTags>Create / Edit Tags</CompositableLoadouts.EditOrCreateTags>
 	<CompositableLoadouts.PickTargetTag>Pick tag to Target</CompositableLoadouts.PickTargetTag>
 	<CompositableLoadouts.SwitchTargetTag>Change tag from: {0}</CompositableLoadouts.SwitchTargetTag>
-	<CompositableLoadouts.CopyFromTag>Copy {1}'s filter settings in {0}</CompositableLoadouts.CopyFromTag>
+	<CompositableLoadouts.CopyFromTag>Copy thing settings from tag</CompositableLoadouts.CopyFromTag>
+	<CompositableLoadouts.NumTagsDesc>The number of colonists who have the tag in their loadout</CompositableLoadouts.NumTagsDesc>
+	<CompositableLoadouts.ExtraCopiesDesc>The number of extra copies to make</CompositableLoadouts.ExtraCopiesDesc>
+	<CompositableLoadouts.ItemRepetitionDesc>The number of items to make per tag</CompositableLoadouts.ItemRepetitionDesc>
+
 	<!-- Pickup Steel x32 -->
 	<CompositableLoadouts.PickUpItems>Pickup {0} x{1}</CompositableLoadouts.PickUpItems>
 	<CompositableLoadouts.SelectTag>Select Tag</CompositableLoadouts.SelectTag>

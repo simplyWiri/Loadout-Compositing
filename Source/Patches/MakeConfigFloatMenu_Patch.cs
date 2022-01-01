@@ -46,6 +46,7 @@ namespace Inventory {
                 // some qol for common use cases
                 bill.repeatMode = InvBillRepeatModeDefOf.W_PerTag;
                 bill.targetCount = 1;
+                bill.repeatCount = 0;
                 bill.includeEquipped = true;
             }));
         }
