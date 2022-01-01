@@ -65,11 +65,23 @@ namespace Inventory {
         public static string ModifyStates => $"{P}ModifyStates".TranslateSimple();
         public static string SelectState => $"{P}SelectState".TranslateSimple();
         public static string DefaultStateName => $"{P}DefaultStateName".TranslateSimple();
+        public static string DefaultStateNameInUse => $"{P}DefaultStateNameInUse".TranslateSimple();
+
         public static string Map => $"{P}Map".TranslateSimple();
         public static string Caravan => $"{P}Caravan".TranslateSimple();
         public static string MassChangeStates(Pawn pawn, string area, LoadoutState state) => $"{P}MassChangeStates".Translate(pawn.LabelShortCap, area, state?.name ?? DefaultStateName);
         public static string StatesExplanation => $"{P}StatesExplanation".TranslateSimple();
         public static string EditLoadoutDesc(Pawn p) => $"{P}EditLoadoutDesc".Translate(p.LabelShortCap);
+
+        public static string SatisfyLoadoutNow => $"{P}SatisfyLoadoutNow".TranslateSimple();
+        public static string SatisfyLoadoutNowFail(ThingWithComps p) => $"{P}SatisfyLoadoutNowFail".Translate(p.LabelCap);
+
+        public static string Active => $"{P}Active".TranslateSimple();
+        public static string Inactive => $"{P}Inactive".TranslateSimple();
+        public static string Is => $"{P}Is".TranslateSimple();
+        public static string StateActive => $"{P}StateActive".TranslateSimple();
+        public static string ActiveWhen => $"{P}ActiveWhen".TranslateSimple();
+
 
     }
 

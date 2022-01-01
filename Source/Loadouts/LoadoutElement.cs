@@ -15,6 +15,8 @@ namespace Inventory {
         public LoadoutState State => state;
         public bool Switch => switchValue;
 
+        public string StateName => State is null ? Strings.DefaultStateNameInUse : (Switch ? "" : "not ") + State.name;
+        
         public bool Active(LoadoutState currentState) {
             if (switchValue && Equals(currentState, state)) {
                 return true;
@@ -29,7 +31,7 @@ namespace Inventory {
             this.switchValue = switchValue;
             
             if (currentState != Active(loadout.CurrentState)) {
-                loadout.UpdateState(this, this.Active(loadout.CurrentState));
+                loadout.UpdateState(this, Active(loadout.CurrentState));
             }
         }
 

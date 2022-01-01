@@ -67,10 +67,25 @@ A semi-transparent apparel will be drawn, showing the highest priority apparel w
 	<!-- Change all pawns loadout-states in Jeff's caravan to War -->
 	<CompositableLoadouts.MassChangeStates>Change all pawns loadout-states in {0}'s {1} to {2}</CompositableLoadouts.MassChangeStates>
 	<CompositableLoadouts.DefaultStateName>Default</CompositableLoadouts.DefaultStateName>
+	<CompositableLoadouts.DefaultStateNameInUse>any</CompositableLoadouts.DefaultStateNameInUse>
 
 	<CompositableLoadouts.StatesExplanation>Loadout states are used for swapping between tags immediately after an action by a player, without modifying a pawns loadout. You are able to enable or disable certain tags in a pawns loadout depending on which state the pawn currently has active. 
 
 Right click a button in the below column to mass assign all pawns on the same Map/Caravan as the selected pawn to the same loadout state (this is useful for mass-assignment to states you may create such as 'War' when a raid is fired on a particular map).</CompositableLoadouts.StatesExplanation> 
 	<CompositableLoadouts.EditLoadoutDesc>Edit {0}'s current loadout</CompositableLoadouts.EditLoadoutDesc>
+
+	<CompositableLoadouts.SatisfyLoadoutNow>Satisfy Loadout Now</CompositableLoadouts.SatisfyLoadoutNow>
+	<CompositableLoadouts.SatisfyLoadoutNowFail>{0} is already attempting to satisfy loadout</CompositableLoadouts.SatisfyLoadoutNowFail>
+
+	<!-- used to compose the sentences:
+	
+	    "Active when { LoadoutState } is ( Active / Inactive )"
+        "Active when { Any } state is active";
+		  -->
+	<CompositableLoadouts.Active>Active</CompositableLoadouts.Active>
+	<CompositableLoadouts.Inactive>Inactive</CompositableLoadouts.Inactive>
+	<CompositableLoadouts.Is>is</CompositableLoadouts.Is>
+	<CompositableLoadouts.StateActive>state is active</CompositableLoadouts.StateActive>
+	<CompositableLoadouts.ActiveWhen>Active when</CompositableLoadouts.ActiveWhen>
 
 </LanguageData>

@@ -74,6 +74,7 @@ namespace Inventory {
         // }
 
         public override void DoWindowContents(Rect inRect) {
+            Text.Font = GameFont.Small;
             // hack because `SetInitialSizeAndPosition` wasn't playing ball
             if (fromOtherRect.HasValue) {
                 this.windowRect.x = fromOtherRect.Value.x;
@@ -139,6 +140,7 @@ namespace Inventory {
                 var tagIdx = elements.FindIndex(t => t == element);
                 var tagHeight = UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
                 var tagRect = viewRect.PopTopPartPixels(tagHeight);
+                var hovering = Mouse.IsOver(tagRect);
 
                 var editButtonRect = tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT);
                 if (Widgets.ButtonImageFitted(editButtonRect, Textures.EditTex)) {
@@ -157,11 +159,26 @@ namespace Inventory {
                     component.Loadout.UpdateState(element, false);
                 }
 
-                Widgets.DrawBoxSolid(tagRect.PopLeftPartPixels(10.0f), Panel_ShowCoverage.GetColorForTagAtIndex(tagIdx));
-                tagRect.AdjHorzBy(3f);
-                Widgets.Label(tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + 10f), tag.name);
+                var dRect = tagRect.PopLeftPartPixels(UIC.SMALL_GAP);
+                Widgets.DrawBoxSolid(dRect, Panel_ShowCoverage.GetColorForTagAtIndex(tagIdx));
+                if (hovering) {
+                    var center = dRect.center;
+                    var hRect = new Rect(center.x - dRect.width / 2.0f, center.y - UIC.SPACED_HEIGHT / 2.0f, UIC.SMALL_GAP, UIC.SPACED_HEIGHT);
+                    var alpha = Mathf.Sin((Time.time % 2)/2.0f * Mathf.PI) * 0.3f;
+                    var col = Color.black;
+                    col.a = 0.7f + alpha;
+                    GUI.color = col;
+                    Widgets.DrawTexturePart(hRect, new Rect(1/4f, 0, 1/2f, 1), Textures.DraggableTex);
+                    GUI.color = Color.white;
+                }
                 
-                Widgets.Dropdown(tagRect.PopRightPartPixels(60f), element, (elem) => element, GetElems, (element.Switch ? "" : "!") +(element.State?.name ?? Strings.DefaultStateName));
+                tagRect.AdjHorzBy(3f);
+                Widgets.Label(tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + UIC.SMALL_GAP), tag.name);
+
+                var elemName = $" {element.StateName} ";
+                if (Widgets.ButtonText(tagRect.PopRightPartPixels(elemName.GetWidthCached() + 5).TopPartPixels(UIC.SPACED_HEIGHT), elemName)) {
+                    Find.WindowStack.Add(new Dialog_SetTagLoadoutState(pawn.GetComp<LoadoutComponent>().Loadout, element));
+                }
 
                 var y = tagRect.y;
 
@@ -186,44 +203,30 @@ namespace Inventory {
 
             Widgets.EndScrollView();
         }
-
-        private IEnumerable<Widgets.DropdownMenuElement<LoadoutElement>> GetElems(LoadoutElement element) {
-            var loadout = pawn.GetComp<LoadoutComponent>().Loadout;
-            if (element.State != null) {
-                yield return new Widgets.DropdownMenuElement<LoadoutElement>() {
-                    option = new FloatMenuOption(Strings.DefaultStateName, () => element.SetTo(loadout, null, true)),
-                    payload = element
-                };  
-            }
-
-            foreach (var state in LoadoutManager.States) {
-                yield return new Widgets.DropdownMenuElement<LoadoutElement>() {
-                    option = new FloatMenuOption($"Enable when {state.name} is active", () => element.SetTo(loadout, state, true)),
-                    payload = element
-                };
-                
-                yield return new Widgets.DropdownMenuElement<LoadoutElement>() {
-                    option = new FloatMenuOption($"Enable when {state.name} is inactive", () => element.SetTo(loadout, state, false)),
-                    payload = element
-                };
-            }
-        }
-
+        
         private void DraggableTags(Rect viewRect, List<LoadoutElement> elements) {
             viewRect.width -= 2 * UIC.SPACED_HEIGHT;
 
             Rect RectForTag(int tIdx) {
+                var elem = elements[tIdx];
                 var offset = elements
                     .GetRange(0, tIdx)
                     .Sum(element => UIC.SPACED_HEIGHT * Mathf.Max(1, Mathf.CeilToInt(element.Tag.requiredItems.Count / 4.0f)));
 
-                return new Rect(viewRect.x, viewRect.y + offset, viewRect.width, UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(elements[tIdx].Tag.requiredItems.Count / 4.0f))));
+                return new Rect(viewRect.x, viewRect.y + offset, viewRect.width - $" {elem.StateName} ".GetWidthCached() + 8, UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(elem.Tag.requiredItems.Count / 4.0f))));
             }
 
             var cEvent = Event.current;
 
             if (cEvent.rawType == EventType.MouseUp) {
+                if (Prefs.data.customCursorEnabled) {
+                    Cursor.SetCursor(CustomCursor.CursorTex, CustomCursor.CursorHotspot, CursorMode.Auto);
+                } else {
+                    Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+                }
+                
                 dragging = false;
+                curTagIdx = -1;
             }
 
             if (dragging) {
@@ -250,23 +253,29 @@ namespace Inventory {
                     GUI.color = Color.white;
                 }
                 else {
+                    if (Prefs.data.customCursorEnabled) {
+                        Cursor.SetCursor(CustomCursor.CursorTex, CustomCursor.CursorHotspot, CursorMode.Auto);
+                    } else {
+                        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+                    }
+
                     dragging = false;
                     curTagIdx = -1;
                 }
             }
 
-            if (cEvent.rawType == EventType.MouseDown && Mouse.IsOver(viewRect)) {
-                dragging = true;
-                for (int i = 0; i < elements.Count; i++) {
-                    var rect = RectForTag(i);
+            if (cEvent.rawType != EventType.MouseDown || !Mouse.IsOver(viewRect)) return;
+            
+            for (int i = 0; i < elements.Count; i++) {
+                var rect = RectForTag(i);
 
-                    if (rect.Contains(cEvent.mousePosition)) {
-                        curTagIdx = i;
-                        break;
-                    }
+                if (rect.Contains(cEvent.mousePosition)) {
+                    curTagIdx = i;
+                    dragging = true;
+                    Cursor.SetCursor(Textures.DragCursorTex, CustomCursor.CursorHotspot, CursorMode.ForceSoftware);
+                    Event.current.Use();
+                    break;
                 }
-
-                Event.current.Use();
             }
         }
 
