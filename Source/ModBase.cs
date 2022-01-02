@@ -35,15 +35,15 @@ namespace Inventory {
             harmony.PatchAll();
         }
 
-        // public override void DoSettingsWindowContents(Rect inRect)
-        // {
-        //     settings.DoSettingsWindow(inRect);
-        // }
-        //
-        // public override string SettingsCategory()
-        // {
-        //     return "Compositable Loadouts";
-        // }
+        public override void DoSettingsWindowContents(Rect inRect)
+        {
+            settings.DoSettingsWindow(inRect);
+        }
+        
+        public override string SettingsCategory()
+        {
+            return "Compositable Loadouts";
+        }
 
     }
 

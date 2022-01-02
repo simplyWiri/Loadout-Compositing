@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+    <!-- todo just add after the `MedicalCare` item in the list instead of replacing + re-inserting -->
+    <Operation Class="PatchOperationReplace">
+		<xpath>Defs/PawnTableDef[defName="Assign"]/columns/li[text() = 'MedicalCare']</xpath>
+		<value>
+			<li>MedicalCare</li>
+            <li>GapSmall</li>
+			<li>CL_EditLoadoutState</li>
+        </value>
+	</Operation>
+
+</Patch>

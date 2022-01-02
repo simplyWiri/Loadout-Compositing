@@ -26,6 +26,8 @@ namespace Inventory {
 
         private State curState = State.Apparel;
         private string defFilter = string.Empty;
+        private string lastDefFilter = string.Empty;
+        private List<ThingDef> lastDefList = null;
 
         public Tag curTag = null;
 
@@ -146,7 +148,6 @@ namespace Inventory {
 
             Widgets.EndScrollView();
 
-
             foreach (var item in toRemove) {
                 curTag.requiredItems.Remove(item);
             }
@@ -164,6 +165,9 @@ namespace Inventory {
                 if (Widgets.ButtonInvisible(optionRect)) {
                     curState = state;
                     defFilter = string.Empty;
+                    lastDefFilter = defFilter;
+                    lastDefList = null;
+                    GUI.FocusControl("Def List Filter");
                 }
 
                 topRect.x += UIC.SPACED_HEIGHT;
@@ -179,9 +183,7 @@ namespace Inventory {
 
             switch (curState) {
                 case State.Apparel:
-                    DrawDefList(r,
-                        ApparelUtility.ApparelCanFitOnBody(BodyDefOf.Human,
-                            curTag.requiredItems.Select(s => s.Def).Where(def => def.IsApparel).ToList()).ToList());
+                    DrawDefList(r, Utility.apparelDefs);
                     break;
                 case State.Melee:
                     DrawDefList(r, Utility.meleeWeapons);
@@ -200,25 +202,39 @@ namespace Inventory {
 
         private void DrawDefList(Rect r, IReadOnlyList<ThingDef> defList) {
             var itms = curTag.requiredItems.Select(it => it.Def).ToHashSet();
-            List<ThingDef> defs = defList.Where(t => !itms.Contains(t)).ToList();
+            List<ThingDef> defs = null;
+
+            // todo: cleanup
+            var slotsUsed = ApparelSlotMaker.Create(BodyDefOf.Human, curTag.requiredItems.Select(s => s.Def).Where(def => def.IsApparel).ToList());
 
             if (defFilter != string.Empty) {
-                var filter = defFilter.ToLower();
-                var acceptedLayers = DefDatabase<ApparelLayerDef>.AllDefsListForReading
-                    .Where(l => l.LabelCap.ToString().ToLower().Contains(filter));
 
-                defs.RemoveAll(td => {
-                    if (td.IsApparel) {
-                        if (td.apparel.layers.Intersect(acceptedLayers).Any())
-                            return false;
-                    }
+                if (defFilter == lastDefFilter) {
+                    defs = lastDefList.Where(t => !itms.Contains(t)).ToList();
+                    defs = defs.Where(t => (t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel)).ToList();
+                } else {
+                    var filter = defFilter.ToLower();
+                    var acceptedLayers = DefDatabase<ApparelLayerDef>.AllDefsListForReading.Where(l => l.LabelCap.ToString().ToLower().Contains(filter));
+                    var stats = DefDatabase<StatDef>.AllDefsListForReading.Where(s => s.LabelCap.ToString().ToLowerInvariant().Contains(filter)).ToHashSet();
 
-                    return !td.LabelCap.ToString().ToLowerInvariant().Contains(filter);
-                });
+                    defs = defList.Where(t => !itms.Contains(t)).ToList();
+                    defs = defs.Where(t => (t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel)).ToList();
+                    defs.RemoveAll(td => {
+                        return !(td.LabelCap.ToString().ToLowerInvariant().Contains(filter)
+                                 || (td.IsApparel || td.IsWeapon) && (td.statBases?.Any(s => stats.Contains(s.stat)) ?? false)
+                                 || (td.IsApparel || td.IsWeapon) && (td.equippedStatOffsets?.Any(s => stats.Contains(s.stat)) ?? false)
+                                 || td.IsApparel && td.apparel.layers.Intersect(acceptedLayers).Any());
+                    });
+
+                    lastDefFilter = defFilter;
+                    lastDefList = defs;
+                }
+            } else {
+                defs = defList.Where(t => !itms.Contains(t)).ToList();
+                defs = defs.Where(t => (t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel)).ToList();
             }
 
-            GUIUtility.InputField(r.PopTopPartPixels(UIC.SPACED_HEIGHT).ContractedBy(2f), "Def List Filter",
-                ref defFilter);
+            GUIUtility.InputField(r.PopTopPartPixels(UIC.SPACED_HEIGHT).ContractedBy(2f), "Def List Filter", ref defFilter);
 
             var viewRect = new Rect(r.x, r.y, r.width - UIC.SCROLL_WIDTH, (defs.Count * UIC.DEFAULT_HEIGHT));
             Widgets.BeginScrollView(r, ref curScroll, viewRect);

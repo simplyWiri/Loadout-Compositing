@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace Inventory {
 
     public static class Utility {
 
         public static List<ThingDef> apparelDefs = null;
+        public static Dictionary<ThingDef, Func<Thing, float>> massBoostingClothes = null;
         public static List<ThingDef> meleeWeapons = null;
         public static List<ThingDef> rangedWeapons = null;
         public static List<ThingDef> medicinalDefs = null;
@@ -27,44 +30,49 @@ namespace Inventory {
                 || td.IsCorpse)).ToList();
 
             apparelDefs ??= items.Where(def => def.IsApparel).ToList();
+            massBoostingClothes = new Dictionary<ThingDef, Func<Thing, float>>();
             meleeWeapons ??= items.Where(def => def.IsMeleeWeapon).ToList();
             rangedWeapons ??= items.Where(def => def.IsRangedWeapon && def.category != ThingCategory.Building).ToList();
             medicinalDefs ??= items.Where(def => def.IsMedicine || def.IsDrug).ToList();
 
-            items = items
-                .Except(apparelDefs)
-                .Except(meleeWeapons)
-                .Except(rangedWeapons)
-                .Except(medicinalDefs)
-                .ToList();
+            if (ModLister.HasActiveModWithName("Vanilla Apparel Expanded — Accessories")) {
+                var type = AccessTools.TypeByName("VAE_Accessories.CaravanCapacityApparelDef");
+                var field = type.GetField("carryingCapacity", BindingFlags.Instance | BindingFlags.Public);
+                
+                foreach (var def in apparelDefs) {
+                    if (def.GetType() == type) {
+                        var carryingCapacity = (float)field.GetValue(def);
+                        massBoostingClothes.Add(def, (thing) => {
+                            if (thing.TryGetQuality(out var qc)) {
+                                return carryingCapacity * qc switch {
+                                    QualityCategory.Awful      => 0.5f,
+                                    QualityCategory.Poor       => 0.8f,
+                                    QualityCategory.Normal     => 1.0f,
+                                    QualityCategory.Good       => 1.2f,
+                                    QualityCategory.Excellent  => 1.5f,
+                                    QualityCategory.Masterwork => 1.7f,
+                                    QualityCategory.Legendary  => 2.0f,
+                                    _                          => 0
+                                };
+                            }
+
+                            return carryingCapacity;
+                        });
+                    }
+                }
+            }
         }
 
         public static QualityCategory Next(this QualityCategory qc) {
-            switch (qc) {
-                case QualityCategory.Awful:     return QualityCategory.Poor;
-                case QualityCategory.Poor:      return QualityCategory.Normal;
-                case QualityCategory.Normal:    return QualityCategory.Good;
-                case QualityCategory.Good:      return QualityCategory.Excellent;
-                case QualityCategory.Excellent: return QualityCategory.Masterwork;
-                default:
-                    return QualityCategory.Legendary;
-            }
+            return (QualityCategory)Mathf.Min((int)qc + 1, (int)QualityCategory.Legendary);
         }
 
         public static QualityCategory Previous(this QualityCategory qc) {
-            switch (qc) {
-                case QualityCategory.Legendary:  return QualityCategory.Masterwork;
-                case QualityCategory.Masterwork: return QualityCategory.Excellent;
-                case QualityCategory.Excellent:  return QualityCategory.Good;
-                case QualityCategory.Good:       return QualityCategory.Normal;
-                case QualityCategory.Normal:     return QualityCategory.Poor;
-                default:
-                    return QualityCategory.Awful;
-            }
+            return (QualityCategory)Mathf.Max((int)qc - 1, (int)QualityCategory.Awful);
         }
 
         public static Thing MakeThingWithoutID(ThingDef def, ThingDef stuff, QualityCategory quality) {
-            Thing thing = (Thing)Activator.CreateInstance(def.thingClass);
+            var thing = (Thing)Activator.CreateInstance(def.thingClass);
             thing.def = def;
             if (def.MadeFromStuff)
                 thing.SetStuffDirect(stuff);
@@ -84,11 +92,11 @@ namespace Inventory {
         }
 
         public static float HypotheticalUnboundedEncumberancePercent(Pawn p, List<Item> items) {
-            return HypotheticalGearAndInventoryMass(p, items) / MassUtility.Capacity(p);
+            return HypotheticalGearAndInventoryMass(p, items) / HypotheticalCapacity(p, items);
         }
 
         public static float HypotheticalGearAndInventoryMass(Pawn p, List<Item> items) {
-            float mass = 0f;
+            var mass = 0f;
             foreach (var item in items) {
                 var thing = item.MakeDummyThingNoId();
                 mass += (thing.GetStatValue(StatDefOf.Mass) * item.Quantity);
@@ -97,9 +105,39 @@ namespace Inventory {
             return mass;
         }
 
+        public static float HypotheticalCapacity(Pawn p, List<Item> items) {
+            if (!MassUtility.CanEverCarryAnything(p)) {
+                return 0f;
+            }
+
+            var massCapacity = p.BodySize * 35f;
+
+            if (massBoostingClothes.Count == 0) {
+                return massCapacity;
+            }
+            
+            foreach (var item in items.Where(item => massBoostingClothes.ContainsKey(item.Def))) {
+                var dummyItem = item.MakeDummyThingNoId();
+                massCapacity += massBoostingClothes[item.Def](dummyItem);
+            }
+
+            return massCapacity;
+        }
+
+
+        public static LoadoutState GetActiveState(this Pawn p) {
+            var comp = p.TryGetComp<LoadoutComponent>();
+            return comp.Loadout.CurrentState;
+        }
+
+        public static void SetActiveState(this Pawn p, LoadoutState state) {
+            p.TryGetComp<LoadoutComponent>().Loadout.SetState(state);
+        }
+
         public static bool IsValidLoadoutHolder(this Pawn pawn) {
             return pawn.RaceProps.Humanlike
                    && pawn.IsColonist
+                   && !pawn.Dead
                    && !pawn.IsQuestLodger()
                    && !(pawn.apparel?.AnyApparelLocked ?? true);
         }
@@ -117,7 +155,14 @@ namespace Inventory {
 
             dictionary.Add(key, elements.ToHashSet());
         }
-
+        public static bool ShouldAttemptToEquip(Pawn pawn, Thing thing, bool checkReach = false) {
+            if (thing.IsForbidden(pawn)) return false;
+            if (thing.IsBurning()) return false;
+            if (CompBiocodable.IsBiocoded(thing) && !CompBiocodable.IsBiocodedFor(thing, pawn)) return false;
+            if (checkReach && !pawn.CanReserveAndReach(thing, PathEndMode.OnCell, pawn.NormalMaxDanger())) return false;
+            
+            return true;
+        }
     }
 
 }

@@ -49,8 +49,6 @@ I am happy to accept contributions which add features / fix bugs. I do reserve t
 `LoadoutManager` - A big basically global struct (GameComponent) which acts as the go-between for most things which require saving, for example Tags, extended data for bills (how does a bill know which tag it refers too).
 
 #### How does this mod actually influence pawns actions?
-There are two main features added by this mod, namely; pawns searching out items which are included in their tags, and pawns being more likely to equip apparel that are inside their tags. These features only communicate to vanilla through two files, namely:
+Loadout resolution in this mod only really touches pawn AI in a single point, namely; [Source/AI/ThinkNode_LoadoutRealisation](Source/AI/ThinkNode_LoadoutRealisation.cs), and the more general patch which effects apparel scoring so that vanilla does not replace loadout-added items, [Source/Patches/OptimizeApparel_ApparelScoreGain_Patch.cs](Source/Patches/OptimizeApparel_ApparelScoreGain_Patch.cs).
 
-Searching for items: [Source/AI/JobGiver_OptimizeItems.cs](Source/AI/JobGiver_OptimizeItems.cs)
-
-Biasing apparel in tags: [Source/Patches/OptimizeApparel_ApparelScoreGain_Patch.cs](Source/Patches/OptimizeApparel_ApparelScoreGain_Patch.cs) 
+This was originally designed to be as minimal as possible, however, with the addition of Hot-Swapping, this needed to become slightly more complex, and a lot more flexible/powerful to enable immediate loadout resolution with the press of a button.

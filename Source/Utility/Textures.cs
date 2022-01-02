@@ -22,7 +22,9 @@ namespace Inventory {
         public static readonly Texture2D NextTex = ContentFinder<Texture2D>.Get("Next");
         public static readonly Texture2D PreviousTex = ContentFinder<Texture2D>.Get("Previous");
         public static readonly Texture2D RangedTex = ContentFinder<Texture2D>.Get("Ranged");
-
+        public static readonly Texture2D DraggableTex = ContentFinder<Texture2D>.Get("Draggable");
+        public static readonly Texture2D DragCursorTex = ContentFinder<Texture2D>.Get("DragCursor");
+        public static readonly Texture2D HotSwapGizmoTex = ContentFinder<Texture2D>.Get("HotSwapGizmo");
     }
 
 }

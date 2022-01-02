@@ -71,6 +71,13 @@ namespace Inventory {
             return ret;
         }
 
+        public static Rect MiddlePartPixels(this Rect rect, float numPixels) {
+            var center = rect.center;
+            rect.y = center.y - numPixels/2.0f;
+            rect.height = numPixels;
+            return rect;
+        }
+        
         public static bool DraggableCheckbox(Rect draggableRect, Rect checkBoxRect, ref bool state) {
             bool changed = false;
             // Draggable checkbox

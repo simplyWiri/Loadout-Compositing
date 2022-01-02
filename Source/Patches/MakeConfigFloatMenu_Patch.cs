@@ -13,14 +13,19 @@ namespace Inventory {
     [HarmonyPatch(typeof(BillRepeatModeUtility), nameof(BillRepeatModeUtility.MakeConfigFloatMenu))]
     public class MakeConfigFloatMenu_Patch {
 
-        private static ConstructorInfo ctor = AccessTools.Constructor(typeof(List<>).MakeGenericType(typeof(FloatMenuOption)));
+        private static FieldInfo repeatCount = AccessTools.Field(typeof(BillRepeatModeDefOf), nameof(BillRepeatModeDefOf.RepeatCount));
         private static MethodInfo getOptions = AccessTools.Method(typeof(MakeConfigFloatMenu_Patch), nameof(MakeConfigFloatMenu_Patch.GetOptions));
 
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+        
+        public static IEnumerable<CodeInstruction> Transpiler(MethodBase __originalMethod, IEnumerable<CodeInstruction> instructions) {
             var insts = instructions.ToList();
+
+            var locs = __originalMethod.GetMethodBody()?.LocalVariables ?? new List<LocalVariableInfo>();
+            var targetLoc = locs.First(loc => loc.LocalType == typeof(List<>).MakeGenericType(typeof(FloatMenuOption)));
+            
             for (int i = 0; i < insts.Count; i++) {
                 if (Matches(insts, i)) {
-                    yield return new CodeInstruction(insts[i]); // ldloc
+                    yield return new CodeInstruction(OpCodes.Ldloc, targetLoc.LocalIndex); // ldloc
                     yield return new CodeInstruction(OpCodes.Ldarg_0); // bill_production
                     yield return new CodeInstruction(OpCodes.Call, getOptions);
                 }
@@ -30,10 +35,7 @@ namespace Inventory {
         }
 
         public static bool Matches(List<CodeInstruction> instructions, int i) {
-            return i > 1
-                   && instructions[i - 2].opcode == OpCodes.Newobj
-                   && instructions[i - 2].operand.Equals(ctor)
-                   && instructions[i - 1].IsStloc();
+            return instructions[i].LoadsField(repeatCount);
         }
 
         public static void GetOptions(List<FloatMenuOption> options, Bill_Production bill) {
@@ -46,6 +48,7 @@ namespace Inventory {
                 // some qol for common use cases
                 bill.repeatMode = InvBillRepeatModeDefOf.W_PerTag;
                 bill.targetCount = 1;
+                bill.repeatCount = 0;
                 bill.includeEquipped = true;
             }));
         }

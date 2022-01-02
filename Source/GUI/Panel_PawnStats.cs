@@ -33,7 +33,7 @@ namespace Inventory {
             GUIUtility.ListSeperator(ref rect, Strings.TopFourSkills);
 
             var skillList = parent.pawn.skills.skills.OrderByDescending(skill => skill.Level).ToList();
-            for (int i = 0; i < 4; i++) {
+            for (var i = 0; i < 4; i++) {
                 var skillRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
                 var skill = skillList[i];
 
@@ -44,7 +44,7 @@ namespace Inventory {
                     Widgets.DrawTextureFitted(skillRect.LeftPartPixels(24), image, 1);
                 }
 
-                float fillPercent = Mathf.Max(0.01f, (float)skill.Level / 20f);
+                var fillPercent = Mathf.Max(0.01f, skill.Level / 20f);
                 Widgets.FillableBar(skillRect, fillPercent, SkillUI.SkillBarFillTex, null, false);
 
                 Text.Anchor = TextAnchor.MiddleRight;
@@ -59,7 +59,7 @@ namespace Inventory {
 
             GUIUtility.ListSeperator(ref rect, Strings.ApparelWhichCanBeWorn);
 
-            var wornApparel = parent.component.Loadout.HypotheticalWornApparel(parent.pawn.RaceProps.body).ToList();
+            var wornApparel = parent.component.Loadout.HypotheticalWornApparel(parent.shownState, parent.pawn.RaceProps.body).ToList();
             var apparels = ApparelUtility
                 .ApparelCanFitOnBody(parent.pawn.RaceProps.body, wornApparel.Select(td => td.Def).ToList()).ToList();
             var allocatedHeight = apparels.Count * UIC.DEFAULT_HEIGHT;
@@ -88,17 +88,25 @@ namespace Inventory {
             TooltipHandler.TipRegion(lhs, Strings.SelectPrevious);
             if (Widgets.ButtonImageFitted(lhs, Textures.PreviousTex)) {
                 ThingSelectionUtility.SelectPreviousColonist();
-                parent.Close();
-                Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), parent));
-                return true;
+                if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
+                    parent.Close();
+                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), parent));
+                    return true;
+                } else {
+                    Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
+                }
             }
 
             TooltipHandler.TipRegion(rhs, Strings.SelectNext);
             if (Widgets.ButtonImageFitted(rhs, Textures.NextTex)) {
                 ThingSelectionUtility.SelectNextColonist();
-                parent.Close();
-                Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), parent));
-                return true;
+                if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
+                    parent.Close();
+                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), parent));
+                    return true;
+                } else {
+                    Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
+                }
             }
 
             Text.Anchor = TextAnchor.MiddleCenter;

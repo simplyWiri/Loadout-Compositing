@@ -12,8 +12,9 @@ namespace Inventory {
             // there are actually no pawns on the map using the tag.
             var numPawnsWithTag = LoadoutManager.ColonistCountFor(productionBill);
             var numRepetitionsPerTag = productionBill.targetCount;
+            var numOffset = productionBill.repeatCount;
 
-            return numPawnsWithTag * numRepetitionsPerTag;
+            return (numPawnsWithTag + numOffset) * numRepetitionsPerTag;
         }
 
         // precondition: the productionBill.repeatMode MUST be W_PerTag

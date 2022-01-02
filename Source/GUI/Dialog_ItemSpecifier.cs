@@ -106,13 +106,12 @@ namespace Inventory {
 
             // Draw stats
             Rect statRect = new Rect(canvas.x, rollingY + UIC.SPACED_HEIGHT, canvas.width,
-                canvas.height - rollingY - UIC.SPACED_HEIGHT * 3);
+                canvas.height - rollingY - UIC.SPACED_HEIGHT * 4);
             GUIUtility.ListSeperator(ref statRect, "Statistics");
             this.DrawStats(statRect);
 
             // // Draw sliders
-            this.DrawSliders(
-                new Rect(statRect.x, statRect.yMax, statRect.width / 2, UIC.SMALL_ICON).CenteredOnXIn(canvas));
+            this.DrawSliders(new Rect(statRect.x, statRect.yMax, statRect.width / 2, UIC.SMALL_ICON).CenteredOnXIn(canvas));
         }
 
         protected virtual void DoWindowContentsGeneral(Rect canvas) {
@@ -147,8 +146,7 @@ namespace Inventory {
             DrawStats(rect.TopPart(0.8f));
 
             // Draw sliders
-            this.DrawSliders(new Rect(rect.x, (rect.y + rect.height * 0.8f) + GenUI.GapTiny, rect.width * 0.6f,
-                UIC.SMALL_ICON).CenteredOnXIn(rect));
+            this.DrawSliders(new Rect(rect.x, (rect.y + rect.height * 0.8f) + GenUI.GapTiny, rect.width * 0.6f, UIC.SMALL_ICON).CenteredOnXIn(rect));
         }
 
         protected virtual Rect DrawTitle(Vector2 position, string title, ref float rollingY) {
@@ -168,24 +166,31 @@ namespace Inventory {
 
             if (filter.Thing.useHitPoints) {
                 this.DrawHitPointsSlider(drawRect, dragID);
-                drawRect = new Rect(drawRect.x, drawRect.y + drawRect.height + GenUI.GapTiny, drawRect.width,
-                    drawRect.height);
+                drawRect = new Rect(drawRect.x, drawRect.y + drawRect.height + GenUI.GapTiny, drawRect.width, drawRect.height);
             }
 
             // Draw quality slider
             if (filter.Thing.HasComp(typeof(CompQuality))) {
                 this.DrawQualitySlider(drawRect, ++dragID);
             }
+
+            if (filter.Thing.useHitPoints && filter.Thing.HasComp(typeof(CompQuality))) {
+                if (Widgets.ButtonText(new Rect(drawRect.x, drawRect.y + drawRect.height + GenUI.GapTiny, drawRect.width, drawRect.height), Strings.SetDefault)) {
+                    ModBase.settings.defaultHitpoints = filter.HpRange;
+                    ModBase.settings.defaultQualityRange = filter.QualityRange;
+                    ModBase.settings.Write();
+                }
+            }
         }
 
         protected virtual void DrawQualitySlider(Rect qualityRect, int dragID) {
-            QualityRange qualityRange = filter.QualityRange;
+            var qualityRange = filter.QualityRange;
             Widgets.QualityRange(qualityRect, dragID, ref qualityRange);
             filter.SetQualityRange(qualityRange);
         }
 
         protected virtual void DrawHitPointsSlider(Rect hitpointRect, int dragID) {
-            FloatRange hitpointRange = filter.HpRange;
+            var hitpointRange = filter.HpRange;
             Widgets.FloatRange(hitpointRect, dragID, ref hitpointRange, 0f, 1f, Strings.HitPointsAmount,
                 ToStringStyle.PercentZero);
             filter.SetHpRange(hitpointRange);

@@ -27,16 +27,16 @@ namespace Inventory {
             this.forThing = null;
             this.stuffs = new HashSet<ThingDef>();
 
-            this.allowedQualities = QualityRange.All;
-            this.allowedHpRange = FloatRange.ZeroToOne;
+            this.allowedQualities = ModBase.settings.defaultQualityRange;
+            this.allowedHpRange = ModBase.settings.defaultHitpoints;
         }
 
         public Filter(ThingDef thing) {
             this.forThing = thing;
             this.stuffs = new HashSet<ThingDef>();
 
-            this.allowedQualities = QualityRange.All;
-            this.allowedHpRange = FloatRange.ZeroToOne;
+            this.allowedQualities = ModBase.settings.defaultQualityRange;
+            this.allowedHpRange = ModBase.settings.defaultHitpoints;
         }
 
         public void SetQualityRange(QualityRange range) {
@@ -95,11 +95,11 @@ namespace Inventory {
             // Check the thing is equal to `forThing`
             if (thing.def != forThing) return false;
             // is it made from the correct stuff
-            if (!stuffs.EnumerableNullOrEmpty() && !stuffs.Contains(thing.Stuff)) return false;
+            if (thing.def.MadeFromStuff && (!stuffs.EnumerableNullOrEmpty() && !stuffs.Contains(thing.Stuff))) return false;
             // does it have the correct number of hit points
-            if (!allowedHpRange.IncludesEpsilon(Mathf.Clamp01(thing.HitPoints / (float)thing.MaxHitPoints))) return false;
+            if (thing.def.useHitPoints && (!allowedHpRange.IncludesEpsilon(Mathf.Clamp01(thing.HitPoints / (float)thing.MaxHitPoints)))) return false;
             // does it fall within the quality range?
-            if (allowedQualities != QualityRange.All && !allowedQualities.Includes(GetQuality(thing))) return false;
+            if (thing.def.HasComp(typeof(CompQuality)) && allowedQualities != QualityRange.All && !allowedQualities.Includes(GetQuality(thing))) return false;
 
             return true;
         }

@@ -17,9 +17,9 @@ namespace Inventory {
         private static MethodInfo showOverallArmour = AccessTools.Method(typeof(ITab_Pawn_Gear), nameof(ITab_Pawn_Gear.TryDrawOverallArmor));
         private static MethodInfo getPawn = AccessTools.PropertyGetter(typeof(ITab_Pawn_Gear), nameof(ITab_Pawn_Gear.SelPawnForGear));
         private static MethodInfo rectWidth = AccessTools.PropertyGetter(typeof(Rect), nameof(Rect.width));
-        private static MethodInfo drawTags = AccessTools.Method(typeof(PawnGear_FillTab_Patch), nameof(DrawTags));
+        private static MethodInfo drawTags = AccessTools.Method(typeof(Panel_GearTab), nameof(Panel_GearTab.DrawTags));
 
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGen) {
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
             var insts = instructions.ToList();
             for (int i = 0; i < insts.Count; i++) {
                 if (Matches(insts, i)) {
@@ -34,12 +34,7 @@ namespace Inventory {
                 yield return insts[i];
             }
         }
-
-        public static void DrawTags(Pawn p, ref float curY, float width) {
-            if (!p.IsValidLoadoutHolder()) return;
-
-            Panel_GearTab.DrawTags(p, ref curY, width);
-        }
+        
 
         private static bool Matches(List<CodeInstruction> insts, int i) {
             return i >= 1 && i <= insts.Count - 1

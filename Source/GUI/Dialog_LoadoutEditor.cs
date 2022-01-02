@@ -18,6 +18,7 @@ namespace Inventory {
 
         internal Pawn pawn;
         internal LoadoutComponent component;
+        internal LoadoutState shownState;
         private Vector2 tagScroll;
         private float tagsHeight = 9999f;
 
@@ -44,6 +45,7 @@ namespace Inventory {
         public Dialog_LoadoutEditor(Pawn pawn) {
             this.pawn = pawn;
             this.component = pawn.GetComp<LoadoutComponent>();
+            this.shownState = component.Loadout.CurrentState;
             coveragePanel = new Panel_ShowCoverage(this);
             pawnStatPanel = new Panel_PawnStats(this);
 
@@ -55,46 +57,54 @@ namespace Inventory {
         public Dialog_LoadoutEditor(Pawn pawn, Dialog_LoadoutEditor old) {
             this.pawn = pawn;
             this.component = pawn.GetComp<LoadoutComponent>();
+            this.shownState = component.Loadout.CurrentState;
             coveragePanel = new Panel_ShowCoverage(this, old.coveragePanel.ShouldDraw);
             pawnStatPanel = new Panel_PawnStats(this, old.pawnStatPanel.ShouldDraw);
 
             doCloseX = true;
             draggable = true;
-            
+
             fromOtherRect = new Rect(old.windowRect);
         }
 
         // does nothing
-        // public virtual void SetInitialSizeAndPosition()
-        // {
-        //     if (fromOtherRect.HasValue) {
-        //         this.windowRect = fromOtherRect.Value;
-        //         this.windowRect = this.windowRect.Rounded();
-        //     }
-        // }
+        public override void SetInitialSizeAndPosition()
+        {
+            base.SetInitialSizeAndPosition();
+            if (!fromOtherRect.HasValue) return;
+            
+            windowRect.x = fromOtherRect.Value.x;
+            windowRect.y = fromOtherRect.Value.y;
+            fromOtherRect = null;
+        }
 
         public override void DoWindowContents(Rect inRect) {
-            // hack because `SetInitialSizeAndPosition` wasn't playing ball
-            if (fromOtherRect.HasValue) {
-                this.windowRect.x = fromOtherRect.Value.x;
-                this.windowRect.y = fromOtherRect.Value.y;
-                fromOtherRect = null;
-            }
+            Text.Font = GameFont.Small;
 
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode != KeyCode.None) {
                 if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.Comma)) {
                     ThingSelectionUtility.SelectPreviousColonist();
-                    this.Close();
-                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this));
-                    Event.current.Use();
-                    return;
+                    if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
+                        Close();
+                        Event.current.Use();
+                        Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), this));
+                        return;
+                    } else {
+                        Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
+                    }
                 }
 
                 if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.Period)) {
                     ThingSelectionUtility.SelectNextColonist();
-                    this.Close();
-                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this));
-                    Event.current.Use();
+                    if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
+                        Close();
+                        Event.current.Use();
+                        Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), this));
+                        return;
+                    } else {
+                        Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
+                    }
+
                     return;
                 }
             }
@@ -110,7 +120,7 @@ namespace Inventory {
             var middlePanel = inRect.PopLeftPartPixels(WIDTH - Margin);
 
             // 45 = 35 + 10, 35 = `ListSeperator` height, 10 = arbitrary buffer
-            var tagsRect = middlePanel.PopTopPartPixels(Mathf.Min(45 + UIC.SPACED_HEIGHT + tagsHeight, middlePanel.height/2.0f));
+            var tagsRect = middlePanel.PopTopPartPixels(Mathf.Min(45 + UIC.SPACED_HEIGHT * 2 + tagsHeight, middlePanel.height / 2.0f));
             DrawTags(tagsRect);
             DrawStatistics(middlePanel);
 
@@ -120,25 +130,27 @@ namespace Inventory {
         }
 
         public void DrawTags(Rect rect) {
-            var tags = component.Loadout.tags.ToList();
+            var elements = component.Loadout.AllElements.ToList();
 
-            DrawHeaderButtons(ref rect, tags);
+            DrawHeaderButtons(ref rect, elements);
             rect.AdjVertBy(GenUI.GapTiny);
-
-            GUIUtility.ListSeperator(ref rect, Strings.AppliedTags);
-
             rect.PopRightPartPixels(UIC.SCROLL_WIDTH);
-            tagsHeight = tags.Sum(tag => UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f))));
+
+            GUIUtility.ListSeperator(ref rect, Strings.AppliedTags); 
+            
+            tagsHeight = elements.Sum(elem => UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(elem.Tag.requiredItems.Count / 4.0f))));
             var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, tagsHeight);
             Widgets.BeginScrollView(rect, ref tagScroll, viewRect);
-            
-            DraggableTags(viewRect, tags);
-            
-            foreach (var tag in tags) {
-                var tagIdx = tags.FindIndex(t => t == tag);
+
+            DraggableTags(viewRect, elements);
+
+            foreach (var element in elements.ToList()) {
+                var tag = element.Tag;
+                var tagIdx = elements.FindIndex(t => t == element);
                 var tagHeight = UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
                 var tagRect = viewRect.PopTopPartPixels(tagHeight);
-                
+                var hovering = Mouse.IsOver(tagRect);
+
                 var editButtonRect = tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT);
                 if (Widgets.ButtonImageFitted(editButtonRect, Textures.EditTex)) {
                     Find.WindowStack.Add(new Dialog_TagEditor(tag));
@@ -147,19 +159,36 @@ namespace Inventory {
                 TooltipHandler.TipRegion(editButtonRect, $"Edit {tag.name}");
 
                 if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT), TexButton.DeleteX)) {
-                    component.Loadout.tags.Remove(tag);
+                    component.Loadout.elements.Remove(element);
 
                     if (LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) {
                         pList.pawns.Remove(pawn);
                     }
-
-                    var loadoutItems = tag.ThingsAcceptedInList(pawn.InventoryAndEquipment().ToList()).ToList();
-                    component.Loadout.itemsToRemove.AddRange(loadoutItems.ToList());
+                    
+                    component.Loadout.UpdateState(element, false);
                 }
 
-                Widgets.DrawBoxSolid(tagRect.PopLeftPartPixels(10.0f), Panel_ShowCoverage.GetColorForTagAtIndex(tagIdx));
+                var dRect = tagRect.PopLeftPartPixels(UIC.SMALL_GAP);
+                Widgets.DrawBoxSolid(dRect, Panel_ShowCoverage.GetColorForTagAtIndex(tagIdx));
+                if (hovering) {
+                    var center = dRect.center;
+                    var hRect = new Rect(center.x - dRect.width / 2.0f, center.y - UIC.SPACED_HEIGHT / 2.0f, UIC.SMALL_GAP, UIC.SPACED_HEIGHT);
+                    var alpha = Mathf.Sin((Time.time % 2)/2.0f * Mathf.PI) * 0.3f;
+                    var col = Color.black;
+                    col.a = 0.7f + alpha;
+                    GUI.color = col;
+                    Widgets.DrawTexturePart(hRect, new Rect(1/4f, 0, 1/2f, 1), Textures.DraggableTex);
+                    GUI.color = Color.white;
+                }
+                
                 tagRect.AdjHorzBy(3f);
-                Widgets.Label(tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + 10f), tag.name);
+                Widgets.Label(tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + UIC.SMALL_GAP), tag.name);
+
+                var elemName = $" {element.StateName} ";
+                var width = Mathf.Min(elemName.GetWidthCached() + 5, tagRect.width - UIC.SPACED_HEIGHT * 4);
+                if (Widgets.ButtonText(tagRect.PopRightPartPixels(width).TopPartPixels(UIC.SPACED_HEIGHT), elemName)) {
+                    Find.WindowStack.Add(new Dialog_SetTagLoadoutState(pawn.GetComp<LoadoutComponent>().Loadout, element));
+                }
 
                 var y = tagRect.y;
 
@@ -184,21 +213,32 @@ namespace Inventory {
 
             Widgets.EndScrollView();
         }
-
-        private void DraggableTags(Rect viewRect, List<Tag> tags) {
-            viewRect.width -= 2 * UIC.SPACED_HEIGHT;
+        
+        private void DraggableTags(Rect viewRect, List<LoadoutElement> elements) {
+            if (elements.Count == 1) return;
             
+            viewRect.width -= 2 * UIC.SPACED_HEIGHT;
+
             Rect RectForTag(int tIdx) {
-                var offset = tags
+                var elem = elements[tIdx];
+                var offset = elements
                     .GetRange(0, tIdx)
-                    .Sum(tag => UIC.SPACED_HEIGHT * Mathf.Max(1, Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
-                
-                return new Rect(viewRect.x, viewRect.y + offset, viewRect.width, UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tags[tIdx].requiredItems.Count / 4.0f))));
+                    .Sum(element => UIC.SPACED_HEIGHT * Mathf.Max(1, Mathf.CeilToInt(element.Tag.requiredItems.Count / 4.0f)));
+
+                return new Rect(viewRect.x, viewRect.y + offset, viewRect.width - ($" {elem.StateName} ".GetWidthCached() + 5), UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(elem.Tag.requiredItems.Count / 4.0f))));
             }
+
             var cEvent = Event.current;
 
             if (cEvent.rawType == EventType.MouseUp) {
+                if (Prefs.data.customCursorEnabled) {
+                    Cursor.SetCursor(CustomCursor.CursorTex, CustomCursor.CursorHotspot, CursorMode.Auto);
+                } else {
+                    Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+                }
+                
                 dragging = false;
+                curTagIdx = -1;
             }
 
             if (dragging) {
@@ -208,40 +248,50 @@ namespace Inventory {
 
                     if (!tRect.ExpandedBy(5f).Contains(mPos)) {
                         if (curTagIdx > 0 && mPos.y < tRect.y) {
-                            (component.Loadout.tags[curTagIdx], component.Loadout.tags[curTagIdx - 1]) = (component.Loadout.tags[curTagIdx - 1], component.Loadout.tags[curTagIdx]);
+                            (component.Loadout.elements[curTagIdx], component.Loadout.elements[curTagIdx - 1]) = (component.Loadout.elements[curTagIdx - 1], component.Loadout.elements[curTagIdx]);
                             curTagIdx -= 1;
                         }
-                        else if (curTagIdx < tags.Count - 1 && mPos.y > tRect.y) {
-                            (component.Loadout.tags[curTagIdx], component.Loadout.tags[curTagIdx + 1]) = (component.Loadout.tags[curTagIdx + 1], component.Loadout.tags[curTagIdx]);
+                        else if (curTagIdx < elements.Count - 1 && mPos.y > tRect.y) {
+                            (component.Loadout.elements[curTagIdx], component.Loadout.elements[curTagIdx + 1]) = (component.Loadout.elements[curTagIdx + 1], component.Loadout.elements[curTagIdx]);
                             curTagIdx += 1;
                         }
+
                         SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
                     }
+
                     GUI.color = ReorderableWidget.LineColor;
                     Widgets.DrawLine(new Vector2(tRect.x, tRect.yMax), new Vector2(tRect.xMax, tRect.yMax), ReorderableWidget.LineColor, 2f);
                     Widgets.DrawHighlight(tRect);
                     GUI.color = Color.white;
-                } else {
+                }
+                else {
+                    if (Prefs.data.customCursorEnabled) {
+                        Cursor.SetCursor(CustomCursor.CursorTex, CustomCursor.CursorHotspot, CursorMode.Auto);
+                    } else {
+                        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+                    }
+
                     dragging = false;
                     curTagIdx = -1;
                 }
             }
+
+            if (cEvent.rawType != EventType.MouseDown || !Mouse.IsOver(viewRect)) return;
             
-            if (cEvent.rawType == EventType.MouseDown && Mouse.IsOver(viewRect)) {
-                dragging = true;
-                for (int i = 0; i < tags.Count; i++) {
-                    var rect = RectForTag(i);
-                    
-                    if (rect.Contains(cEvent.mousePosition)) {
-                        curTagIdx = i;
-                        break;
-                    }
+            for (int i = 0; i < elements.Count; i++) {
+                var rect = RectForTag(i);
+
+                if (rect.Contains(cEvent.mousePosition)) {
+                    curTagIdx = i;
+                    dragging = true;
+                    Cursor.SetCursor(Textures.DragCursorTex, CustomCursor.CursorHotspot, CursorMode.ForceSoftware);
+                    Event.current.Use();
+                    break;
                 }
-                Event.current.Use();
             }
         }
 
-        public void DrawHeaderButtons(ref Rect rect, List<Tag> tags) {
+        public void DrawHeaderButtons(ref Rect rect, List<LoadoutElement> elements) {
             var buttonRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
             buttonRect.PopRightPartPixels(Margin);
 
@@ -253,14 +303,14 @@ namespace Inventory {
             }
 
             if (Widgets.ButtonText(buttonRect.LeftHalf(), Strings.AddTag)) {
-                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(tags).ToList(), tag => {
+                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(elements.Select(elem => elem.Tag)).ToList(), tag => {
                     if (!LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) {
                         pList = new SerializablePawnList(new List<Pawn>());
                         LoadoutManager.PawnsWithTags.Add(tag, pList);
                     }
-                    
+
                     pList.pawns.Add(pawn);
-                    component.Loadout.tags.Add(tag);
+                    component.Loadout.elements.Add(new LoadoutElement(tag, null));
                 }));
             }
 
@@ -272,12 +322,53 @@ namespace Inventory {
 
                 coveragePanel.ShouldDraw = !coveragePanel.ShouldDraw;
             }
+
+            var selectStateButtonRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
+            selectStateButtonRect.PopRightPartPixels(Margin);
+            selectStateButtonRect.PopTopPartPixels(5f);
+
+            var fStr = Strings.ViewAsIf;
+            var mStr = $" { (shownState == null ? Strings.DefaultStateNameInUse : shownState.name)} ";
+            var sStr = Strings.WereActive;
+            var sRect = selectStateButtonRect.PopRightPartPixels(sStr.GetWidthCached() + 5);
+            var mRect = selectStateButtonRect.PopRightPartPixels(mStr.GetWidthCached() + 5);
+            selectStateButtonRect.width -= 5f;
+            var fRect = selectStateButtonRect.PopRightPartPixels(fStr.GetWidthCached() + 5);
+
+            Text.Anchor = TextAnchor.MiddleRight;
+            Widgets.Dropdown(mRect.TopPartPixels(Text.LineHeight), this, (editor) => editor.shownState, States, mStr);
+
+            Text.Anchor = TextAnchor.UpperRight;
+            GUI.color = Color.gray;
+            Widgets.Label(sRect, sStr);
+            Widgets.Label(fRect, fStr);
+            GUI.color = Color.white;
+            Text.Anchor = TextAnchor.UpperLeft;
+        }   
+
+        private static IEnumerable<Widgets.DropdownMenuElement<LoadoutState>> States(Dialog_LoadoutEditor editor) {
+            yield return new Widgets.DropdownMenuElement<LoadoutState>() {
+                option = new FloatMenuOption(Strings.Create, () => Find.WindowStack.Add(new Dialog_LoadoutStateEditor())),
+                payload = null,
+            };
+            
+            if (editor.shownState != null) {
+                yield return new Widgets.DropdownMenuElement<LoadoutState>() {
+                    option = new FloatMenuOption(Strings.DefaultStateNameInUse, () => editor.shownState = null),
+                    payload = null
+                };
+            }
+
+            foreach (var state in LoadoutManager.States.Except(editor.shownState)) {
+                yield return new Widgets.DropdownMenuElement<LoadoutState>() {
+                    option = new FloatMenuOption(state.name, () => editor.shownState = state),
+                    payload = state
+                };
+            }
         }
 
         public void DrawStatistics(Rect rect) {
             var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, statsHeight);
-
-            //Widgets.DrawBoxSolid(rect, Color.green);
 
             var height = 0f;
             Widgets.BeginScrollView(rect, ref statsScroll, viewRect);
@@ -286,7 +377,7 @@ namespace Inventory {
 
             viewRect.AdjVertBy(GenUI.GapTiny);
 
-            var loadoutItems = component.Loadout.AllItems.ToList();
+            var loadoutItems = component.Loadout.ItemsWith(shownState).ToList();
 
             GUIUtility.BarWithOverlay(
                 viewRect.PopTopPartPixels(UIC.SPACED_HEIGHT),
@@ -296,7 +387,7 @@ namespace Inventory {
                     : Textures.RWPrimaryTex as Texture2D,
                 Strings.Weight,
                 Utility.HypotheticalGearAndInventoryMass(pawn, loadoutItems).ToString("0.#") + "/" +
-                MassUtility.Capacity(pawn).ToStringMass(),
+                Utility.HypotheticalCapacity(pawn, loadoutItems).ToStringMass(),
                 Strings.WeightOverCapacity);
 
             height += GenUI.GapTiny + UIC.SPACED_HEIGHT;
