@@ -125,6 +125,7 @@ namespace Inventory {
             tags ??= new List<Tag>();
             pawnTags ??= new Dictionary<Tag, SerializablePawnList>();
             billToTag ??= new Dictionary<Bill_Production, Tag>();
+            billToTag.RemoveAll(kv => kv.Key == null || kv.Key.repeatMode != InvBillRepeatModeDefOf.W_PerTag);
             states ??= new List<LoadoutState>();
         }
 
