@@ -41,12 +41,12 @@ namespace Inventory {
                     }
                 }
                 
-                var job = SatisfyLoadoutItemsJob(pawn, comp.Loadout);
+                var job = SatisfyLoadoutClothingJob(pawn, comp.Loadout);
                 if (job != null) {
                     return new ThinkResult(job, this);
                 }
-
-                job = SatisfyLoadoutClothingJob(pawn, comp.Loadout);
+                
+                job = SatisfyLoadoutItemsJob(pawn, comp.Loadout);
                 if (job != null) {
                     return new ThinkResult(job, this);
                 }

@@ -10,6 +10,7 @@ namespace Inventory {
 
         public bool immediatelyResolveLoadout = false;
         public bool onlyItemsFromLoadout = false;
+        public bool biasLoadBearingItems = false;
         public FloatRange defaultHitpoints = FloatRange.ZeroToOne;
         public QualityRange defaultQualityRange = QualityRange.All;
 
@@ -18,7 +19,9 @@ namespace Inventory {
             Widgets.CheckboxLabeled(tRect, Strings.ImmediatelyResolveLoadout, ref immediatelyResolveLoadout);
             TooltipHandler.TipRegion(tRect, Strings.ImmediatelyResolveLoadoutDesc);
 
-
+            var bRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
+            Widgets.CheckboxLabeled(bRect, Strings.BiasLoadBearingItems, ref biasLoadBearingItems);
+            
             var strRect = rect.PopTopPartPixels(UIC.DEFAULT_HEIGHT);
             Widgets.Label(strRect, Strings.ChangeDefaults);
             
@@ -66,6 +69,7 @@ namespace Inventory {
 
         public override void ExposeData() {
             Scribe_Values.Look(ref immediatelyResolveLoadout, nameof(immediatelyResolveLoadout), false);
+            Scribe_Values.Look(ref biasLoadBearingItems, nameof(biasLoadBearingItems), false);
             Scribe_Values.Look(ref onlyItemsFromLoadout, nameof(onlyItemsFromLoadout), false);
 
             Scribe_Values.Look(ref defaultHitpoints, nameof(defaultHitpoints), FloatRange.ZeroToOne);

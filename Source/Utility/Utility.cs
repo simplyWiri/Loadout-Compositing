@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace Inventory {
     public static class Utility {
 
         public static List<ThingDef> apparelDefs = null;
+        public static Dictionary<ThingDef, Func<Thing, float>> massBoostingClothes = null;
         public static List<ThingDef> meleeWeapons = null;
         public static List<ThingDef> rangedWeapons = null;
         public static List<ThingDef> medicinalDefs = null;
@@ -28,9 +30,37 @@ namespace Inventory {
                 || td.IsCorpse)).ToList();
 
             apparelDefs ??= items.Where(def => def.IsApparel).ToList();
+            massBoostingClothes = new Dictionary<ThingDef, Func<Thing, float>>();
             meleeWeapons ??= items.Where(def => def.IsMeleeWeapon).ToList();
             rangedWeapons ??= items.Where(def => def.IsRangedWeapon && def.category != ThingCategory.Building).ToList();
             medicinalDefs ??= items.Where(def => def.IsMedicine || def.IsDrug).ToList();
+
+            if (ModLister.HasActiveModWithName("Vanilla Apparel Expanded — Accessories")) {
+                var type = AccessTools.TypeByName("VAE_Accessories.CaravanCapacityApparelDef");
+                var field = type.GetField("carryingCapacity", BindingFlags.Instance | BindingFlags.Public);
+                
+                foreach (var def in apparelDefs) {
+                    if (def.GetType() == type) {
+                        var carryingCapacity = (float)field.GetValue(def);
+                        massBoostingClothes.Add(def, (thing) => {
+                            if (thing.TryGetQuality(out var qc)) {
+                                return carryingCapacity * qc switch {
+                                    QualityCategory.Awful      => 0.5f,
+                                    QualityCategory.Poor       => 0.8f,
+                                    QualityCategory.Normal     => 1.0f,
+                                    QualityCategory.Good       => 1.2f,
+                                    QualityCategory.Excellent  => 1.5f,
+                                    QualityCategory.Masterwork => 1.7f,
+                                    QualityCategory.Legendary  => 2.0f,
+                                    _                          => 0
+                                };
+                            }
+
+                            return carryingCapacity;
+                        });
+                    }
+                }
+            }
         }
 
         public static QualityCategory Next(this QualityCategory qc) {
@@ -62,7 +92,7 @@ namespace Inventory {
         }
 
         public static float HypotheticalUnboundedEncumberancePercent(Pawn p, List<Item> items) {
-            return HypotheticalGearAndInventoryMass(p, items) / MassUtility.Capacity(p);
+            return HypotheticalGearAndInventoryMass(p, items) / HypotheticalCapacity(p, items);
         }
 
         public static float HypotheticalGearAndInventoryMass(Pawn p, List<Item> items) {
@@ -74,6 +104,26 @@ namespace Inventory {
 
             return mass;
         }
+
+        public static float HypotheticalCapacity(Pawn p, List<Item> items) {
+            if (!MassUtility.CanEverCarryAnything(p)) {
+                return 0f;
+            }
+
+            var massCapacity = p.BodySize * 35f;
+
+            if (massBoostingClothes.Count == 0) {
+                return massCapacity;
+            }
+            
+            foreach (var item in items.Where(item => massBoostingClothes.ContainsKey(item.Def))) {
+                var dummyItem = item.MakeDummyThingNoId();
+                massCapacity += massBoostingClothes[item.Def](dummyItem);
+            }
+
+            return massCapacity;
+        }
+
 
         public static LoadoutState GetActiveState(this Pawn p) {
             var comp = p.TryGetComp<LoadoutComponent>();

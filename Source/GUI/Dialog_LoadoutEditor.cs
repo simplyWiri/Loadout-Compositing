@@ -370,8 +370,6 @@ namespace Inventory {
         public void DrawStatistics(Rect rect) {
             var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, statsHeight);
 
-            //Widgets.DrawBoxSolid(rect, Color.green);
-
             var height = 0f;
             Widgets.BeginScrollView(rect, ref statsScroll, viewRect);
 
@@ -389,7 +387,7 @@ namespace Inventory {
                     : Textures.RWPrimaryTex as Texture2D,
                 Strings.Weight,
                 Utility.HypotheticalGearAndInventoryMass(pawn, loadoutItems).ToString("0.#") + "/" +
-                MassUtility.Capacity(pawn).ToStringMass(),
+                Utility.HypotheticalCapacity(pawn, loadoutItems).ToStringMass(),
                 Strings.WeightOverCapacity);
 
             height += GenUI.GapTiny + UIC.SPACED_HEIGHT;

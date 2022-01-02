@@ -80,7 +80,6 @@ namespace Inventory {
         public IEnumerable<Thing> ThingsOnMap(Map map) {
             var things = map.listerThings.ThingsOfDef(this.def);
             if (things.NullOrEmpty()) yield break;
-
             foreach (var thing in things.Where(Allows)) {
                 yield return thing;
             }
