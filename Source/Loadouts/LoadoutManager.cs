@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -9,9 +10,11 @@ namespace Inventory {
     // Loadout manager is responsible for deep saving all tags and bill extra data
     public class LoadoutManager : GameComponent {
 
+        public const int CURRENT_BACK_COMPAT_VERSION = 1;
         public static LoadoutManager instance = null;
 
         // Saving 
+        private int backCompat = CURRENT_BACK_COMPAT_VERSION;
         private int nextTagId;
         private int nextStateId;
         private List<SerializablePawnList> pPawnLoading = null;
@@ -63,7 +66,7 @@ namespace Inventory {
             if (PawnsWithTags.ContainsKey(tag))
                 PawnsWithTags.Remove(tag);
 
-            instance.billToTag.RemoveAll(bill => bill.Value == tag);
+            instance.billToTag.RemoveAll((pair) => pair.Value == tag);
 
             foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.AllPawns).Where(p => p.IsValidLoadoutHolder())) {
                 var loadout = pawn.TryGetComp<LoadoutComponent>();
@@ -111,7 +114,7 @@ namespace Inventory {
 
         public override void ExposeData() {
             if (Scribe.mode == LoadSaveMode.Saving) {
-                billToTag.RemoveAll(kv => kv.Key == null || kv.Key.repeatMode != InvBillRepeatModeDefOf.W_PerTag);
+                billToTag.RemoveAll(kv => kv.Key == null || kv.Key.repeatMode != InvBillRepeatModeDefOf.W_PerTag || kv.Key.DeletedOrDereferenced);
                 pawnTags.Do(kv => pawnTags[kv.Key].pawns.RemoveAll(p => p is null || p.Dead || !p.IsValidLoadoutHolder()));
             }
 
@@ -121,11 +124,21 @@ namespace Inventory {
             Scribe_Collections.Look(ref billToTag, nameof(billToTag), LookMode.Reference, LookMode.Reference);
             Scribe_Values.Look(ref nextTagId, nameof(nextTagId));
             Scribe_Values.Look(ref nextStateId, nameof(nextStateId));
+            Scribe_Values.Look(ref backCompat, nameof(backCompat));
+
+            if (Scribe.mode != LoadSaveMode.Saving && backCompat != CURRENT_BACK_COMPAT_VERSION) {
+                
+                if (backCompat == 0 && CURRENT_BACK_COMPAT_VERSION == 1) {
+                    billToTag.Do(kv => kv.Key.repeatCount = 0);
+                    backCompat = 1;
+                    Log.Message("[Loadout Compositing] Successfully migrated save data from version v1.1 to v1.2");
+                }
+                 
+            }
 
             tags ??= new List<Tag>();
             pawnTags ??= new Dictionary<Tag, SerializablePawnList>();
             billToTag ??= new Dictionary<Bill_Production, Tag>();
-            billToTag.RemoveAll(kv => kv.Key == null || kv.Key.repeatMode != InvBillRepeatModeDefOf.W_PerTag);
             states ??= new List<LoadoutState>();
         }
 
