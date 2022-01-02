@@ -86,6 +86,7 @@ namespace Inventory {
         public static string ViewAsIf => $"{P}ViewAsIf".TranslateSimple();
         public static string WereActive => $"{P}WereActive".TranslateSimple();
         public static string SetDefault => $"{P}SetDefault".TranslateSimple();
+        public static string CouldNotFindPawn => $"{P}CouldNotFindPawn".TranslateSimple();
 
         public static string ImmediatelyResolveLoadout => $"{P}{S}ImmediatelyResolveLoadout".TranslateSimple();
         public static string ImmediatelyResolveLoadoutDesc => $"{P}{S}ImmediatelyResolveLoadoutDesc".TranslateSimple();       

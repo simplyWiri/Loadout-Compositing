@@ -18,7 +18,7 @@ namespace Inventory {
             var action = new Command_Action {
                 action = () => Loadout.RequiresUpdate(),
                 defaultLabel = Strings.SatisfyLoadoutNow,
-                icon = Textures.EditTex,
+                icon = Textures.HotSwapGizmoTex,
                 disabled = Loadout.NeedsUpdate,
                 disabledReason = Strings.SatisfyLoadoutNowFail(parent),
                 alsoClickIfOtherInGroupClicked = true

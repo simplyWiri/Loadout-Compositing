@@ -84,17 +84,27 @@ namespace Inventory {
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode != KeyCode.None) {
                 if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.Comma)) {
                     ThingSelectionUtility.SelectPreviousColonist();
-                    Close();
-                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this));
-                    Event.current.Use();
-                    return;
+                    if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
+                        Close();
+                        Event.current.Use();
+                        Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), this));
+                        return;
+                    } else {
+                        Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
+                    }
                 }
 
                 if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.Period)) {
                     ThingSelectionUtility.SelectNextColonist();
-                    Close();
-                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), this));
-                    Event.current.Use();
+                    if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
+                        Close();
+                        Event.current.Use();
+                        Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), this));
+                        return;
+                    } else {
+                        Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
+                    }
+
                     return;
                 }
             }

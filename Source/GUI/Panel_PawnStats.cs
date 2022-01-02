@@ -88,17 +88,25 @@ namespace Inventory {
             TooltipHandler.TipRegion(lhs, Strings.SelectPrevious);
             if (Widgets.ButtonImageFitted(lhs, Textures.PreviousTex)) {
                 ThingSelectionUtility.SelectPreviousColonist();
-                parent.Close();
-                Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), parent));
-                return true;
+                if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
+                    parent.Close();
+                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), parent));
+                    return true;
+                } else {
+                    Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
+                }
             }
 
             TooltipHandler.TipRegion(rhs, Strings.SelectNext);
             if (Widgets.ButtonImageFitted(rhs, Textures.NextTex)) {
                 ThingSelectionUtility.SelectNextColonist();
-                parent.Close();
-                Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(), parent));
-                return true;
+                if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
+                    parent.Close();
+                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), parent));
+                    return true;
+                } else {
+                    Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
+                }
             }
 
             Text.Anchor = TextAnchor.MiddleCenter;
