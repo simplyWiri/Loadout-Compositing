@@ -88,11 +88,18 @@ namespace Inventory {
         public static string SetDefault => $"{P}SetDefault".TranslateSimple();
         public static string CouldNotFindPawn => $"{P}CouldNotFindPawn".TranslateSimple();
 
+        public static string Options => $"{P}{S}Options".TranslateSimple();
+        public static string Keybinds => $"{P}{S}Keybinds".TranslateSimple();
+        public static string ItemFilterDefaults => $"{P}{S}ItemFilterDefaults".TranslateSimple();
+
+        
         public static string ImmediatelyResolveLoadout => $"{P}{S}ImmediatelyResolveLoadout".TranslateSimple();
         public static string ImmediatelyResolveLoadoutDesc => $"{P}{S}ImmediatelyResolveLoadoutDesc".TranslateSimple();
         public static string BiasLoadBearingItems => $"{P}{S}BiasLoadBearingItems".TranslateSimple();
-        public static string ChangeDefaults => $"{P}{S}ChangeDefaults".TranslateSimple();
+        public static string BiasLoadBearingItemsDesc => $"{P}{S}BiasLoadBearingItemsDesc".TranslateSimple();
+
         public static string OnlyLoadoutItems => $"{P}{S}OnlyLoadoutItems".TranslateSimple();
+        public static string OnlyLoadoutItemsDesc => $"{P}{S}OnlyLoadoutItemsDesc".TranslateSimple();
 
 
     }

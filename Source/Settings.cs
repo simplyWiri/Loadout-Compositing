@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using RimWorld;
 using UnityEngine;
@@ -15,53 +16,81 @@ namespace Inventory {
         public QualityRange defaultQualityRange = QualityRange.All;
 
         public void DoSettingsWindow(Rect rect) {
-            var tRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
-            Widgets.CheckboxLabeled(tRect, Strings.ImmediatelyResolveLoadout, ref immediatelyResolveLoadout);
-            TooltipHandler.TipRegion(tRect, Strings.ImmediatelyResolveLoadoutDesc);
 
-            var bRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
-            Widgets.CheckboxLabeled(bRect, Strings.BiasLoadBearingItems, ref biasLoadBearingItems);
+            var leftColumn = rect.LeftHalf();
+            var rightColumn = rect.RightHalf();
+
+            GUI.color = Widgets.SeparatorLineColor;
+            Widgets.DrawLineVertical(rightColumn.x, rightColumn.y, rightColumn.height);
+            GUI.color = Color.white;
+
+            leftColumn.width -= UIC.SMALL_GAP / 2.0f;
+            rightColumn.AdjHorzBy(UIC.SMALL_GAP / 2.0f);
             
-            var strRect = rect.PopTopPartPixels(UIC.DEFAULT_HEIGHT);
-            Widgets.Label(strRect, Strings.ChangeDefaults);
+            GUIUtility.ListSeperator(ref leftColumn, $"{Strings.Options}", true);
+            DrawOptions(leftColumn);
+
+            GUIUtility.ListSeperator(ref rightColumn, $"{Strings.Keybinds}", true);
+            DrawKeybinds(ref rightColumn);
+
+            rightColumn.AdjVertBy(UIC.SMALL_GAP);
             
-            var defaultHpRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
+            GUIUtility.ListSeperator(ref rightColumn, $"{Strings.ItemFilterDefaults}", true);
+            DrawDefaults(ref rightColumn);
+        }
+        
+        private void DrawOptions(Rect rect) {
+            void DrawOption(string label, ref bool option, string tooltip = null) {
+                var optionRect = rect.PopTopPartPixels(Text.CalcHeight(label, rect.width - UIC.SCROLL_WIDTH));
+                Widgets.CheckboxLabeled(optionRect, label, ref option);
+                if (tooltip != null) {
+                    TooltipHandler.TipRegion(optionRect, tooltip);
+                }
+            }
+
+            DrawOption(Strings.ImmediatelyResolveLoadout, ref immediatelyResolveLoadout, Strings.ImmediatelyResolveLoadoutDesc);
+            DrawOption(Strings.BiasLoadBearingItems, ref biasLoadBearingItems, Strings.BiasLoadBearingItemsDesc);
+            DrawOption(Strings.OnlyLoadoutItems, ref onlyItemsFromLoadout, Strings.OnlyLoadoutItemsDesc);
+        }
+
+        private void DrawDefaults(ref Rect rect) {
+            var defaultHpRect = rect.PopTopPartPixels(30f);
+            defaultHpRect.CenterWithWidth(2 * rect.width / 3.0f);
             Widgets.FloatRange(defaultHpRect, Rand.Int, ref defaultHitpoints, 0f, 1f, Strings.HitPointsAmount, ToStringStyle.PercentZero);
             
-            var qualRangeRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
+            rect.AdjVertBy(UIC.SMALL_GAP);
+            
+            var qualRangeRect = rect.PopTopPartPixels(30f);
+            qualRangeRect.CenterWithWidth( 2 * rect.width / 3.0f);
             Widgets.QualityRange(qualRangeRect, Rand.Int, ref defaultQualityRange);
+        }
 
-            var nRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
-            Widgets.CheckboxLabeled(nRect, Strings.OnlyLoadoutItems, ref onlyItemsFromLoadout);
-
-            // todo: cleanup
+        private void DrawKeybinds(ref Rect rect) {
+            
             foreach (var keyBind in new List<KeyBindingDef> { InvKeyBindingDefOf.CL_OpenLoadoutEditor, InvKeyBindingDefOf.CL_OpenTagEditor }) {
-                var keyBindRect = rect.PopTopPartPixels(34f).ContractedBy(3f);
-                GenUI.SetLabelAlign(TextAnchor.MiddleLeft);
-                Widgets.Label(keyBindRect, keyBind.LabelCap);
-                GenUI.ResetLabelAlign();
-
-                var vector = new Vector2(140f, 28f);
-                var rect2 = new Rect(keyBindRect.x + keyBindRect.width - vector.x * 2f - 4f, keyBindRect.y, vector.x, vector.y);
-                TooltipHandler.TipRegionByKey(rect2, "BindingButtonToolTip");
-
-                if (!Widgets.ButtonText(rect2, KeyPrefs.KeyPrefsData.GetBoundKeyCode(keyBind, KeyPrefs.BindingSlot.A).ToStringReadable())) {
-                    continue;
+                var keyCode = KeyPrefs.KeyPrefsData.GetBoundKeyCode(keyBind, KeyPrefs.BindingSlot.A);
+                void SetBinding(KeyCode code) {
+                    KeyPrefs.KeyPrefsData.SetBinding(keyBind, KeyPrefs.BindingSlot.A, code);
                 }
+                
+                var keyBindRect = rect.PopTopPartPixels(UIC.DEFAULT_HEIGHT);
+
+                var labelRect = keyBindRect.PopLeftPartPixels(keyBind.LabelCap.GetWidthCached() + 5);
+                Widgets.Label(labelRect, keyBind.LabelCap);
+
+                var keyRect = keyBindRect.RightPartPixels(Mathf.Max(UIC.SPACED_HEIGHT * 3, keyCode.ToStringReadable().GetWidthCached() + 5f));
+                TooltipHandler.TipRegionByKey(keyRect, "BindingButtonToolTip");
+                
+                if (!Widgets.ButtonText(keyRect, keyCode.ToStringReadable())) continue;
                 
                 if (Event.current.button == 0) {
                     Find.WindowStack.Add(new Dialog_DefineBinding(KeyPrefs.KeyPrefsData, keyBind, KeyPrefs.BindingSlot.A));
-                    Event.current.Use();
                 } else if (Event.current.button == 1) {
                     var list = new List<FloatMenuOption> {
-                        new FloatMenuOption("ResetBinding".Translate(), delegate() {
-                            KeyPrefs.KeyPrefsData.SetBinding(keyBind, KeyPrefs.BindingSlot.A, keyBind.defaultKeyCodeA);
-                        }),
-                        new FloatMenuOption("ClearBinding".Translate(), delegate()
-                        {
-                            KeyPrefs.KeyPrefsData.SetBinding(keyBind, KeyPrefs.BindingSlot.A, KeyCode.None);
-                        })
+                        new ("ResetBinding".Translate(), () => SetBinding(keyBind.defaultKeyCodeA)),
+                        new ("ClearBinding".Translate(), () => SetBinding(KeyCode.None))
                     };
+                        
                     Find.WindowStack.Add(new FloatMenu(list));
                 }
             }

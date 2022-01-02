@@ -104,15 +104,22 @@ namespace Inventory {
             return changed;
         }
 
-        public static void ListSeperator(ref Rect rect, string label) {
+        public static void ListSeperator(ref Rect rect, string label, bool heading = false) {
+            
             rect.AdjVertBy(3f);
             GUI.color = Widgets.SeparatorLabelColor;
-            Rect seperatorRect = new Rect(rect.x, rect.y, rect.width, 30f);
-            Text.Anchor = TextAnchor.UpperLeft;
-            Widgets.Label(seperatorRect, label);
-            rect.AdjVertBy(20f);
+            if (heading) {
+                Text.Font = GameFont.Medium;
+            }
+            
+            var height = Text.CalcHeight(label, rect.width);
+            Widgets.Label(rect.PopTopPartPixels(height), label);
+            
+            Text.Font = GameFont.Small;
+            
             GUI.color = Widgets.SeparatorLineColor;
-            Widgets.DrawLineHorizontal(rect.x, rect.y, rect.width);
+            Widgets.DrawLineHorizontal(rect.x, rect.y - 2f, rect.width);
+            
             rect.AdjVertBy(12f);
             GUI.color = Color.white;
         }
@@ -169,6 +176,26 @@ namespace Inventory {
             Text.Anchor = TextAnchor.MiddleCenter;
             Widgets.Label(rect, overlayText);
             Text.Anchor = TextAnchor.UpperLeft;
+        }
+        
+        public static void DrawBoxAroundAndShrink(this ref Rect rect) {
+            GUI.color = Widgets.SeparatorLineColor;
+            
+            Widgets.DrawLineHorizontal(rect.x, rect.y, rect.width);
+            Widgets.DrawLineHorizontal(rect.x, rect.yMax, rect.width);
+            
+            Widgets.DrawLineVertical(rect.x, rect.y, rect.height);
+            Widgets.DrawLineVertical(rect.xMax, rect.y, rect.height);
+
+            rect = rect.ContractedBy(UIC.SMALL_GAP);
+
+            GUI.color = Color.white;
+        }
+
+        public static void CenterWithWidth(this ref Rect rect, float width) {
+            var c = rect.center;
+            rect.x = c.x - width / 2.0f;
+            rect.width = width;
         }
 
     }

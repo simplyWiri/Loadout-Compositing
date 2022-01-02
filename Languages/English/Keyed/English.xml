@@ -94,11 +94,17 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.SetDefault>Set as default</CompositableLoadouts.SetDefault>
 	<CompositableLoadouts.CouldNotFindPawn>could not find a pawn to select</CompositableLoadouts.CouldNotFindPawn>
 
+	<CompositableLoadouts.Settings.Options>Options</CompositableLoadouts.Settings.Options>
+	<CompositableLoadouts.Settings.Keybinds>Keybinds</CompositableLoadouts.Settings.Keybinds>
+	<CompositableLoadouts.Settings.ItemFilterDefaults>Tag-item filter defaults</CompositableLoadouts.Settings.ItemFilterDefaults>
+
 	<CompositableLoadouts.Settings.ImmediatelyResolveLoadout>Immediately resolve loadout when changed</CompositableLoadouts.Settings.ImmediatelyResolveLoadout>
 	<CompositableLoadouts.Settings.ImmediatelyResolveLoadoutDesc>Pawns will immediately attempt to update their loadout any time it has changed (tag removed from loadout, current loadoutstate changed, etc)</CompositableLoadouts.Settings.ImmediatelyResolveLoadoutDesc>
-	<CompositableLoadouts.Settings.BiasLoadBearingItems>Pawns will seek to equip load bearing items at a high priority (warning: potentially overriding tags)</CompositableLoadouts.Settings.BiasLoadBearingItems>
 	
-	<CompositableLoadouts.Settings.ChangeDefaults>Change default HP-Range and Quality-Range for things in tags</CompositableLoadouts.Settings.ChangeDefaults>
-	<CompositableLoadouts.Settings.OnlyLoadoutItems>Pawns only wear items found in their tags</CompositableLoadouts.Settings.OnlyLoadoutItems>
+	<CompositableLoadouts.Settings.BiasLoadBearingItems>Prioritise wearing load bearing items</CompositableLoadouts.Settings.BiasLoadBearingItems>
+	<CompositableLoadouts.Settings.BiasLoadBearingItemsDesc>Pawns will prioritise wearing items which add mass. warning: this may override tag preference</CompositableLoadouts.Settings.BiasLoadBearingItemsDesc>
+
+	<CompositableLoadouts.Settings.OnlyLoadoutItems>Only wear items found in loadout</CompositableLoadouts.Settings.OnlyLoadoutItems>
+	<CompositableLoadouts.Settings.OnlyLoadoutItemsDesc>Pawns will only wear apparel which is found in the active tags of their loadout.</CompositableLoadouts.Settings.OnlyLoadoutItemsDesc>
 
 </LanguageData>
