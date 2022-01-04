@@ -348,7 +348,7 @@ namespace Inventory {
 
         private static IEnumerable<Widgets.DropdownMenuElement<LoadoutState>> States(Dialog_LoadoutEditor editor) {
             yield return new Widgets.DropdownMenuElement<LoadoutState>() {
-                option = new FloatMenuOption(Strings.Create, () => Find.WindowStack.Add(new Dialog_LoadoutStateEditor())),
+                option = new FloatMenuOption(Strings.Create, () => Find.WindowStack.Add(new Dialog_LoadoutStateEditor(LoadoutManager.States))),
                 payload = null,
             };
             

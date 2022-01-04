@@ -120,7 +120,7 @@ namespace Inventory {
         private IEnumerable<Widgets.DropdownMenuElement<LoadoutState>> GetElems(LoadoutElement element) {
 
             yield return new Widgets.DropdownMenuElement<LoadoutState>() {
-                option = new FloatMenuOption(Strings.Create, () => Find.WindowStack.Add(new Dialog_LoadoutStateEditor())),
+                option = new FloatMenuOption(Strings.Create, () => Find.WindowStack.Add(new Dialog_LoadoutStateEditor(LoadoutManager.States))),
                 payload = null,
             };
 
