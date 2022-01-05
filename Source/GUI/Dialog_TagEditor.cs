@@ -218,13 +218,14 @@ namespace Inventory {
                     var stats = DefDatabase<StatDef>.AllDefsListForReading.Where(s => s.LabelCap.ToString().ToLowerInvariant().Contains(filter)).ToHashSet();
 
                     defs = defList.Where(t => !itms.Contains(t)).ToList();
-                    defs = defs.Where(t => (t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel)).ToList();
-                    defs.RemoveAll(td => {
-                        return !(td.LabelCap.ToString().ToLowerInvariant().Contains(filter)
-                                 || (td.IsApparel || td.IsWeapon) && (td.statBases?.Any(s => stats.Contains(s.stat)) ?? false)
-                                 || (td.IsApparel || td.IsWeapon) && (td.equippedStatOffsets?.Any(s => stats.Contains(s.stat)) ?? false)
-                                 || td.IsApparel && td.apparel.layers.Intersect(acceptedLayers).Any());
-                    });
+                    defs = defs.Where(t => t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel).ToList();
+                    defs = defs.Where(td => {
+                        return td.LabelCap.ToString().ToLowerInvariant().Contains(filter)
+                               || td.modContentPack.Name.ToLowerInvariant().Contains(filter)
+                               || ((td.IsApparel || td.IsWeapon) && (td.statBases?.Any(s => stats.Contains(s.stat)) ?? false))
+                               || ((td.IsApparel || td.IsWeapon) && (td.equippedStatOffsets?.Any(s => stats.Contains(s.stat)) ?? false))
+                               || (td.IsApparel && td.apparel.layers.Intersect(acceptedLayers).Any());
+                    }).ToList();
 
                     lastDefFilter = defFilter;
                     lastDefList = defs;
@@ -234,8 +235,10 @@ namespace Inventory {
                 defs = defs.Where(t => (t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel)).ToList();
             }
 
-            GUIUtility.InputField(r.PopTopPartPixels(UIC.SPACED_HEIGHT).ContractedBy(2f), "Def List Filter", ref defFilter);
-
+            var inputFieldRect = r.PopTopPartPixels(UIC.SPACED_HEIGHT).ContractedBy(2f);
+            GUIUtility.InputField(inputFieldRect, "Def List Filter", ref defFilter);
+            TooltipHandler.TipRegion(inputFieldRect, Strings.SearchBarDesc);
+            
             var viewRect = new Rect(r.x, r.y, r.width - UIC.SCROLL_WIDTH, (defs.Count * UIC.DEFAULT_HEIGHT));
             Widgets.BeginScrollView(r, ref curScroll, viewRect);
             GUI.BeginGroup(viewRect);

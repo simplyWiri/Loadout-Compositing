@@ -88,6 +88,7 @@ namespace Inventory {
         public static string SetDefault => $"{P}SetDefault".TranslateSimple();
         public static string CouldNotFindPawn => $"{P}CouldNotFindPawn".TranslateSimple();
         public static string InvalidStateName => $"{P}InvalidStateName".TranslateSimple();
+        public static string SearchBarDesc => $"{P}SearchBarDesc".TranslateSimple();
 
         public static string Options => $"{P}{S}Options".TranslateSimple();
         public static string Keybinds => $"{P}{S}Keybinds".TranslateSimple();

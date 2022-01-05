@@ -94,6 +94,7 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.SetDefault>Set as default</CompositableLoadouts.SetDefault>
 	<CompositableLoadouts.CouldNotFindPawn>could not find a pawn to select</CompositableLoadouts.CouldNotFindPawn>
 	<CompositableLoadouts.InvalidStateName>Can not create a loadout state with an empty identifier</CompositableLoadouts.InvalidStateName>
+	<CompositableLoadouts.SearchBarDesc>Search by item name, mod name, stat bonus names, or the apparel layer the item covers</CompositableLoadouts.SearchBarDesc>
 
 	<CompositableLoadouts.Settings.Options>Options</CompositableLoadouts.Settings.Options>
 	<CompositableLoadouts.Settings.Keybinds>Keybinds</CompositableLoadouts.Settings.Keybinds>
