@@ -163,6 +163,13 @@ namespace Inventory {
             
             return true;
         }
+
+        public static bool InvalidBill(this Bill bill) {
+            if (bill == null) return true;
+            if (bill.deleted) return true;
+
+            return bill.billStack?.billGiver is not Thing bench || bench.Destroyed;
+        }
     }
 
 }

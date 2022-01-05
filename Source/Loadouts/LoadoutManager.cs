@@ -114,7 +114,7 @@ namespace Inventory {
 
         public override void ExposeData() {
             if (Scribe.mode == LoadSaveMode.Saving) {
-                billToTag?.RemoveAll(kv => kv.Key == null || kv.Key.repeatMode != InvBillRepeatModeDefOf.W_PerTag || kv.Key.DeletedOrDereferenced);
+                billToTag?.RemoveAll(kv => kv.Key.InvalidBill() || kv.Key.repeatMode != InvBillRepeatModeDefOf.W_PerTag);
                 pawnTags?.Do(kv => pawnTags[kv.Key]?.pawns?.RemoveAll(p => p is null || p.Dead || !p.IsValidLoadoutHolder()));
             }
 
