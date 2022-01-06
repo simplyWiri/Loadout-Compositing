@@ -170,7 +170,6 @@ namespace Inventory {
             itemsToRemove = new List<Item>();
             elements ??= new List<LoadoutElement>();
         }
-
     }
 
 }
