@@ -221,7 +221,7 @@ namespace Inventory {
                     defs = defs.Where(t => t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel).ToList();
                     defs = defs.Where(td => {
                         return td.LabelCap.ToString().ToLowerInvariant().Contains(filter)
-                               || td.modContentPack.Name.ToLowerInvariant().Contains(filter)
+                               || (td.modContentPack?.Name.ToLowerInvariant().Contains(filter) ?? false)
                                || ((td.IsApparel || td.IsWeapon) && (td.statBases?.Any(s => stats.Contains(s.stat)) ?? false))
                                || ((td.IsApparel || td.IsWeapon) && (td.equippedStatOffsets?.Any(s => stats.Contains(s.stat)) ?? false))
                                || (td.IsApparel && td.apparel.layers.Intersect(acceptedLayers).Any());
