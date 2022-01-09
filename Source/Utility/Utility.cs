@@ -136,6 +136,7 @@ namespace Inventory {
 
         public static bool IsValidLoadoutHolder(this Pawn pawn) {
             return pawn.RaceProps.Humanlike
+                   && !pawn.RaceProps.Animal
                    && pawn.IsColonist
                    && !pawn.Dead
                    && !pawn.IsQuestLodger()
