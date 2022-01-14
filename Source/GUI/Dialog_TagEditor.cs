@@ -215,12 +215,12 @@ namespace Inventory {
                 } else {
                     var filter = defFilter.ToLower();
                     var acceptedLayers = DefDatabase<ApparelLayerDef>.AllDefsListForReading.Where(l => l.LabelCap.ToString().ToLower().Contains(filter));
-                    var stats = DefDatabase<StatDef>.AllDefsListForReading.Where(s => s.LabelCap.ToString().ToLowerInvariant().Contains(filter)).ToHashSet();
+                    var stats = DefDatabase<StatDef>.AllDefsListForReading.Where(s => s.LabelCap.ToString()?.ToLowerInvariant().Contains(filter) ?? false).ToHashSet();
 
                     defs = defList.Where(t => !itms.Contains(t)).ToList();
                     defs = defs.Where(t => t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel).ToList();
                     defs = defs.Where(td => {
-                        return td.LabelCap.ToString().ToLowerInvariant().Contains(filter)
+                        return (td.LabelCap.ToString()?.ToLowerInvariant().Contains(filter) ?? false)
                                || (td.modContentPack?.Name.ToLowerInvariant().Contains(filter) ?? false)
                                || ((td.IsApparel || td.IsWeapon) && (td.statBases?.Any(s => stats.Contains(s.stat)) ?? false))
                                || ((td.IsApparel || td.IsWeapon) && (td.equippedStatOffsets?.Any(s => stats.Contains(s.stat)) ?? false))

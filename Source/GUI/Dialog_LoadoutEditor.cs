@@ -159,13 +159,7 @@ namespace Inventory {
                 TooltipHandler.TipRegion(editButtonRect, $"Edit {tag.name}");
 
                 if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT), TexButton.DeleteX)) {
-                    component.Loadout.elements.Remove(element);
-
-                    if (LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) {
-                        pList.pawns.Remove(pawn);
-                    }
-                    
-                    component.Loadout.UpdateState(element, false);
+                    component.RemoveTag(element);
                 }
 
                 var dRect = tagRect.PopLeftPartPixels(UIC.SMALL_GAP);
@@ -303,15 +297,7 @@ namespace Inventory {
             }
 
             if (Widgets.ButtonText(buttonRect.LeftHalf(), Strings.AddTag)) {
-                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(elements.Select(elem => elem.Tag)).ToList(), tag => {
-                    if (!LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) {
-                        pList = new SerializablePawnList(new List<Pawn>());
-                        LoadoutManager.PawnsWithTags.Add(tag, pList);
-                    }
-
-                    pList.pawns.Add(pawn);
-                    component.Loadout.elements.Add(new LoadoutElement(tag, null));
-                }));
+                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(elements.Select(elem => elem.Tag)).ToList(), component.AddTag));
             }
 
             if (Widgets.ButtonText(buttonRect.RightHalf(), coveragePanel.ShouldDraw ? Strings.HideCoverage : Strings.ShowCoverage)) {

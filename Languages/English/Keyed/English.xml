@@ -17,7 +17,15 @@
 	<!-- Pickup Steel x32 -->
 	<CompositableLoadouts.PickUpItems>Pickup {0} x{1}</CompositableLoadouts.PickUpItems>
 	<CompositableLoadouts.SelectTag>Select Tag</CompositableLoadouts.SelectTag>
-	<CompositableLoadouts.NoTagsYetWarning>You have not created any tags yet</CompositableLoadouts.NoTagsYetWarning>
+	<CompositableLoadouts.SelectTags>Select Tag(s)</CompositableLoadouts.SelectTags>
+
+	<!-- keep whitespace after -->
+	<CompositableLoadouts.SelectTagsFrom>Select tags from </CompositableLoadouts.SelectTagsFrom>
+	<CompositableLoadouts.CopyAllTagsFrom>Copy all tags from </CompositableLoadouts.CopyAllTagsFrom>
+	<!-- keep whitespace before  -->
+	<CompositableLoadouts.ReplaceOnPaste> and replace on paste</CompositableLoadouts.ReplaceOnPaste>
+	<CompositableLoadouts.AddOnPaste> and add on paste</CompositableLoadouts.AddOnPaste>
+
 	<CompositableLoadouts.CreateNewTag>Create New Tag</CompositableLoadouts.CreateNewTag>
 	<CompositableLoadouts.DeleteTag>Delete Tag</CompositableLoadouts.DeleteTag>
 	<CompositableLoadouts.ChangeTagName>Change Tag Name</CompositableLoadouts.ChangeTagName>
@@ -90,6 +98,8 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<!-- "View stats as if { LoadoutState } were active" -->
 	<CompositableLoadouts.ViewAsIf>View stats as if</CompositableLoadouts.ViewAsIf>
 	<CompositableLoadouts.WereActive>were active</CompositableLoadouts.WereActive>
+
+	<CompositableLoadouts.ToCopy>to copy</CompositableLoadouts.ToCopy>
 
 	<CompositableLoadouts.SetDefault>Set as default</CompositableLoadouts.SetDefault>
 	<CompositableLoadouts.CouldNotFindPawn>could not find a pawn to select</CompositableLoadouts.CouldNotFindPawn>

@@ -26,8 +26,13 @@ namespace Inventory {
         public static string PickUpItems(string itemTag, string count) => $"{P}PickUpItems".Translate(itemTag, count);
 
         public static string SelectTag => $"{P}SelectTag".TranslateSimple();
+        public static string SelectTags => $"{P}SelectTags".TranslateSimple();
 
-        public static string NoTagsYetWarning => $"{P}NoTagsYetWarning".TranslateSimple();
+        public static string SelectTagsFrom => $"{P}SelectTagsFrom".TranslateSimple();
+        public static string CopyAllTagsFrom => $"{P}CopyAllTagsFrom".TranslateSimple();
+        public static string ReplaceOnPaste => $"{P}ReplaceOnPaste".TranslateSimple();
+        public static string AddOnPaste => $"{P}AddOnPaste".TranslateSimple();
+        
         public static string CreateNewTag => $"{P}CreateNewTag".TranslateSimple();
         public static string DeleteTag => $"{P}DeleteTag".TranslateSimple();
 
@@ -52,7 +57,7 @@ namespace Inventory {
 
         // intentionally not translated
         public static string HitPointsAmount => $"{P}HitPointsAmount";
-
+        public static string ToCopy => $"{P}ToCopy".TranslateSimple();
         public static string Customize => $"{P}Customize".TranslateSimple();
         public static string MouseOverDetails => $"{P}MouseOverDetails".TranslateSimple();
         public static string Statistics => $"{P}Statistics".TranslateSimple();
