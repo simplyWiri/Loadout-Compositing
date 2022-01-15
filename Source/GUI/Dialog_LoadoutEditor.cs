@@ -146,12 +146,19 @@ namespace Inventory {
 
             DraggableTags(viewRect, elements);
 
+            var frustum = rect;
+            frustum.y += Mathf.FloorToInt(tagScroll.y);
+
             foreach (var element in elements.ToList()) {
                 var tag = element.Tag;
                 var tagIdx = elements.FindIndex(t => t == element);
-                var tagHeight = UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(tag.requiredItems.Count / 4.0f)));
+                var tagHeight = UIC.SPACED_HEIGHT * Mathf.Max(1, Mathf.CeilToInt(tag.requiredItems.Count / 4.0f));
                 var tagRect = viewRect.PopTopPartPixels(tagHeight);
                 var hovering = Mouse.IsOver(tagRect);
+
+                if (!tagRect.Overlaps(frustum)) {
+                    continue;
+                }
 
                 var editButtonRect = tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT);
                 if (Widgets.ButtonImageFitted(editButtonRect, Textures.EditTex)) {
@@ -185,13 +192,16 @@ namespace Inventory {
                 if (Widgets.ButtonText(tagRect.PopRightPartPixels(width).TopPartPixels(UIC.SPACED_HEIGHT), elemName)) {
                     Find.WindowStack.Add(new Dialog_SetTagLoadoutState(pawn.GetComp<LoadoutComponent>().Loadout, element));
                 }
-
-                var y = tagRect.y;
-
+                
                 // draw required items in blocks of 4
                 for (int i = 0; i < tag.requiredItems.Count; i += 4) {
                     for (int j = 0; j < 4; j++) {
-                        var drawRect = new Rect(tagRect.x + UIC.SPACED_HEIGHT * j, y + (i / 4.0f) * UIC.SPACED_HEIGHT, UIC.SPACED_HEIGHT, UIC.SPACED_HEIGHT);
+                        var drawRect = new Rect(tagRect.x + UIC.SPACED_HEIGHT * j, tagRect.y + (i / 4.0f) * UIC.SPACED_HEIGHT, UIC.SPACED_HEIGHT, UIC.SPACED_HEIGHT);
+                        var expFrustum = frustum.ExpandedBy(UIC.SPACED_HEIGHT * 1/2f);
+                        if (!expFrustum.Contains(drawRect.min) || !expFrustum.Contains(drawRect.max)) {
+                            continue;
+                        }
+                        
                         var idx = i + j;
                         if (idx >= tag.requiredItems.Count) break;
                         var item = tag.requiredItems[idx];

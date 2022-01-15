@@ -188,7 +188,11 @@ namespace Inventory {
         private Job FindItem(Pawn pawn, Item item, int count) {
             var things = item.ThingsOnMap(pawn.Map);
 
-            foreach (var thing in things.OrderByDescending(t => t.stackCount)) {
+            var orderedList = count == 1
+                ? things.OrderBy(t => t.Position.DistanceToSquared(pawn.Position))
+                : things.OrderByDescending(t => t.stackCount);
+            
+            foreach (var thing in orderedList) {
                 if (!Utility.ShouldAttemptToEquip(pawn, thing, true)) {
                     continue;
                 }
