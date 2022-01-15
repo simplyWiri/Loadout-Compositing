@@ -109,6 +109,8 @@ namespace Inventory {
                 }
             }
 
+            inRect.PopTopPartPixels(UIC.SMALL_GAP);
+            
             if (pawnStatPanel.ShouldDraw) {
                 // returns true if we pressed the button which selects a new pawn, in which case, this window has been closed
                 // and drawing any further content is useless.

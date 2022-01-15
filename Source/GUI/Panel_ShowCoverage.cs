@@ -198,7 +198,11 @@ namespace Inventory {
                 else {
                     if (overlappingApparel != null) {
                         var col = GetColorForTagAtIndex(component.Loadout.AllElements.FirstIndexOf(e => e.Tag == overlappingTag));
-                        Widgets.DrawBoxSolidWithOutline(columnRect, Widgets.WindowBGFillColor, col);
+                        Widgets.DrawBoxSolidWithOutline(columnRect, Widgets.WindowBGFillColor, Color.gray);
+                        GUI.color = col;
+                        GUI.DrawTexture(columnRect.LeftPartPixels(columnRect.height).ContractedBy(1f), Textures.CornerTex);
+                        GUI.color = Color.white;
+                        
                         Widgets.DefIcon(columnRect.ContractedBy(3f), overlappingApparel.Def,
                             overlappingApparel.RandomStuff);
 
@@ -214,6 +218,7 @@ namespace Inventory {
                     }
                     else {
                         var nextHighestPrio = possibleDefs.OrderBy(tup => component.Loadout.ElementsWith(parent.shownState).FirstIndexOf(e => e.Tag == overlappingTag)).First().Item2;
+                        
                         Widgets.DrawBoxSolidWithOutline(columnRect, Widgets.WindowBGFillColor, Color.red);
                         Widgets.DefIcon(columnRect.ContractedBy(3f), nextHighestPrio.Def, color: new Color(0.5f, 0.5f, 0.5f, 0.3f));
 

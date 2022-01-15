@@ -39,19 +39,16 @@ namespace Inventory {
 
         public void SetState(LoadoutState state) {
             var changedElems = new List<LoadoutElement>();
-            var changedCount = 0;
             foreach (var elem in AllElements) {
-                if ( !elem.Active(CurrentState) && elem.Active(state)) {
+                if ( elem.Active(CurrentState) != elem.Active(state)) {
                     changedElems.Add(elem);
                 }
-
-                changedCount++;
             }
 
             currentState = state;
             
             foreach (var elem in changedElems) {
-                UpdateState(elem, false);
+                UpdateState(elem, elem.Active(state));
             }
         }
 
@@ -109,8 +106,8 @@ namespace Inventory {
             return desiredCount;
         }
 
-        public bool Desires(Thing thing) {
-            return Tags.Any(t => t.ItemsMatching(item => item.Allows(thing)).Any());
+        public bool Desires(Thing thing, bool allTags = false) {
+            return (allTags ? AllTags : Tags).Any(t => t.ItemsMatching(item => item.Allows(thing)).Any());
         }
 
         public IEnumerable<Item> ItemsAccepting(Thing thing) {

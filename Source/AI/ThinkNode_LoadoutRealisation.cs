@@ -86,7 +86,7 @@ namespace Inventory {
                 if (itemCount > loadoutDesiredCount) {
                     var job = RemoveItem(pawnGear, item, Mathf.Min(itemCount - loadoutDesiredCount, item.Quantity));
                     if (job != null) {
-                        if (job.count > item.Quantity) {
+                        if (job.count >= item.Quantity) {
                             loadout.ThingsToRemove.Remove(item);
                         }
                         return job;
@@ -210,7 +210,8 @@ namespace Inventory {
             var thing = gear.FirstOrDefault();
             if (thing == null) return null;
 
-            var job = JobMaker.MakeJob(UnloadItem, thing);
+            var job = JobMaker.MakeJob(UnloadItem);
+            job.SetTarget(TargetIndex.A, thing);
             job.count = Mathf.Min(count, thing.stackCount);
 
             return job;

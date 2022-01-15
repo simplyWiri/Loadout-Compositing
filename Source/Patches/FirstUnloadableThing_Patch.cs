@@ -107,9 +107,9 @@ namespace Inventory {
             if (!inventory.pawn.IsValidLoadoutHolder()) return false;
 
             var thing = inventory.innerContainer.innerList[thingIndex];
-            var comp = inventory.pawn.GetComp<LoadoutComponent>();
+            var comp = inventory.pawn.TryGetComp<LoadoutComponent>();
 
-            return comp?.Loadout?.Desires(thing) ?? false;
+            return comp?.Loadout?.Desires(thing, true) ?? false;
         }
 
         // precondition: the thing pointed to by `thingIndex` must be in the pawns loadout

@@ -1,4 +1,6 @@
-﻿using Verse;
+﻿using RimWorld;
+using UnityEngine;
+using Verse;
 
 namespace Inventory {
 
@@ -95,6 +97,8 @@ namespace Inventory {
         public static string InvalidStateName => $"{P}InvalidStateName".TranslateSimple();
         public static string SearchBarDesc => $"{P}SearchBarDesc".TranslateSimple();
         public static string MassAssign => $"{P}MassAssign".TranslateSimple();
+        
+        public static string OutfitDisallowsKit(Pawn p, Outfit outfit, ThingDef apparelDef, Tag tag) => $"{P}OutfitDisallowsKit".Translate(p.LabelShort, outfit.label, apparelDef.LabelCap, tag.name);
 
         public static string Options => $"{P}{S}Options".TranslateSimple();
         public static string Keybinds => $"{P}{S}Keybinds".TranslateSimple();

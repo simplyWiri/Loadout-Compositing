@@ -107,6 +107,8 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.InvalidStateName>Can not create a loadout state with an empty identifier</CompositableLoadouts.InvalidStateName>
 	<CompositableLoadouts.SearchBarDesc>Search by item name, mod name, stat bonus names, or the apparel layer the item covers</CompositableLoadouts.SearchBarDesc>
 
+	<CompositableLoadouts.OutfitDisallowsKit>{0}'s outfit {1} will prevent them from equipping {2} added by the tag {3}</CompositableLoadouts.OutfitDisallowsKit>
+
 	<CompositableLoadouts.Settings.Options>Options</CompositableLoadouts.Settings.Options>
 	<CompositableLoadouts.Settings.Keybinds>Keybinds</CompositableLoadouts.Settings.Keybinds>
 	<CompositableLoadouts.Settings.ItemFilterDefaults>Tag-item filter defaults</CompositableLoadouts.Settings.ItemFilterDefaults>

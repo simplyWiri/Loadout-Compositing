@@ -25,6 +25,8 @@ namespace Inventory {
         public static readonly Texture2D DraggableTex = ContentFinder<Texture2D>.Get("Draggable");
         public static readonly Texture2D DragCursorTex = ContentFinder<Texture2D>.Get("DragCursor");
         public static readonly Texture2D HotSwapGizmoTex = ContentFinder<Texture2D>.Get("HotSwapGizmo");
+        public static readonly Texture2D CornerTex = ContentFinder<Texture2D>.Get("Corner");
+
     }
 
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using Verse;
 using Verse.AI;
@@ -14,7 +15,7 @@ namespace Inventory {
         private const TargetIndex StoreCellInd = TargetIndex.B;
 
         public override void ExposeData() {
-            Scribe_Values.Look(ref this.countToDrop, "countToDrop");
+            Scribe_Values.Look(ref countToDrop, nameof(countToDrop));
         }
 
         public override bool TryMakePreToilReservations(bool errorOnFailed) => true;
@@ -25,23 +26,30 @@ namespace Inventory {
             yield return Toils_General.Wait(10);
             yield return new Toil {
                 initAction = delegate() {
-                    if (!inven.HasAnyUnloadableThing) {
+                    countToDrop = 0;
+                    
+                    if (TargetA.HasThing) {
+                        countToDrop = job.count;
+                    } else {
+                        var firstUnloadableThing = inven.FirstUnloadableThing;
+                        if (firstUnloadableThing == null) {
+                            EndJobWith(JobCondition.Succeeded);
+                            return;
+                        } 
+                        
+                        job.SetTarget(TargetIndex.A, firstUnloadableThing.Thing);
+                        countToDrop = firstUnloadableThing.Count;
+                    }
+
+                    var thing = TargetA.Thing;
+                    
+                    if (!StoreUtility.TryFindStoreCellNearColonyDesperate(thing, pawn, out var cell)) {
+                        inven.innerContainer.TryDrop(thing, ThingPlaceMode.Near, countToDrop, out var _);
                         EndJobWith(JobCondition.Succeeded);
                         return;
                     }
 
-                    var firstUnloadableThing = inven.FirstUnloadableThing;
-                    if (!StoreUtility.TryFindStoreCellNearColonyDesperate(firstUnloadableThing.Thing, pawn,
-                            out var cell)) {
-                        inven.innerContainer.TryDrop(firstUnloadableThing.Thing, ThingPlaceMode.Near,
-                            firstUnloadableThing.Count, out var _);
-                        EndJobWith(JobCondition.Succeeded);
-                        return;
-                    }
-
-                    job.SetTarget(TargetIndex.A, firstUnloadableThing.Thing);
                     job.SetTarget(TargetIndex.B, cell);
-                    countToDrop = firstUnloadableThing.Count;
                 }
             };
             yield return Toils_Reserve.Reserve(TargetIndex.B);
@@ -49,18 +57,18 @@ namespace Inventory {
             yield return new Toil {
                 initAction = delegate() {
                     var thing = job.GetTarget(TargetIndex.A).Thing;
-                    if (thing == null || !inven.innerContainer.Contains(thing)) {
+                    if (thing == null || !inven.pawn.InventoryAndEquipment().Contains(thing)) {
                         EndJobWith(JobCondition.Incompletable);
                         return;
                     }
 
-                    if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) ||
-                        !thing.def.EverStorable(false)) {
-                        inven.innerContainer.TryDrop(thing, ThingPlaceMode.Near, countToDrop, out _);
+                    ThingOwner thingOwner = inven.innerContainer.Contains(thing) ? inven.innerContainer : inven.pawn.equipment.equipment;
+
+                    if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) || !thing.def.EverStorable(false)) {
+                        thingOwner.TryDrop(thing, ThingPlaceMode.Near, countToDrop, out _);
                         EndJobWith(JobCondition.Succeeded);
-                    }
-                    else {
-                        inven.innerContainer.TryTransferToContainer(thing, pawn.carryTracker.innerContainer, countToDrop, out _);
+                    } else {
+                        thingOwner.TryTransferToContainer(thing, pawn.carryTracker.innerContainer, countToDrop, out _);
                         job.count = countToDrop;
                         job.SetTarget(TargetIndex.A, thing);
                     }
