@@ -174,7 +174,8 @@ namespace Inventory {
                rect.PopRightPartPixels(edgeLength);
 
                if (Widgets.ButtonText(rect, Strings.CreateNewTag)) {
-                   var newTag = new Tag(string.Empty);
+                   // in the case `searchString` is empty, it will default generate a name like `Placeholder-XXX`
+                   var newTag = new Tag(searchString);
                    LoadoutManager.AddTag(newTag);
                    CloseAndSelect(newTag);
                    Find.WindowStack.Add(new Dialog_TagEditor(newTag));

@@ -86,8 +86,7 @@ namespace Inventory {
             if (draggableResult == Widgets.DraggableResult.Pressed) {
                 state = !state;
                 changed = true;
-            }
-            else if (draggableResult == Widgets.DraggableResult.Dragged) {
+            } else if (draggableResult == Widgets.DraggableResult.Dragged) {
                 state = !state;
                 changed = true;
                 Widgets.checkboxPainting = true;

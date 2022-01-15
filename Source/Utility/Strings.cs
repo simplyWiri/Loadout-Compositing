@@ -94,12 +94,12 @@ namespace Inventory {
         public static string CouldNotFindPawn => $"{P}CouldNotFindPawn".TranslateSimple();
         public static string InvalidStateName => $"{P}InvalidStateName".TranslateSimple();
         public static string SearchBarDesc => $"{P}SearchBarDesc".TranslateSimple();
+        public static string MassAssign => $"{P}MassAssign".TranslateSimple();
 
         public static string Options => $"{P}{S}Options".TranslateSimple();
         public static string Keybinds => $"{P}{S}Keybinds".TranslateSimple();
         public static string ItemFilterDefaults => $"{P}{S}ItemFilterDefaults".TranslateSimple();
 
-        
         public static string ImmediatelyResolveLoadout => $"{P}{S}ImmediatelyResolveLoadout".TranslateSimple();
         public static string ImmediatelyResolveLoadoutDesc => $"{P}{S}ImmediatelyResolveLoadoutDesc".TranslateSimple();
         public static string BiasLoadBearingItems => $"{P}{S}BiasLoadBearingItems".TranslateSimple();
