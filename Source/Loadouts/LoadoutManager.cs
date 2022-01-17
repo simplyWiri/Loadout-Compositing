@@ -99,17 +99,9 @@ namespace Inventory {
                 }
             }
         }
-
+        
         public override void FinalizeInit() {
             instance = this;
-
-            var method = AccessTools.Method("Sandy_Detailed_RPG_GearTab:FillTab");
-            if (method != null) {
-                if (Harmony.GetPatchInfo(method)?.Transpilers.All(p => p.owner != ModBase.harmony.Id) ?? true) {
-                    var hp = new HarmonyMethod(typeof(RPG_Inventory_Patch), nameof(RPG_Inventory_Patch.Transpiler));
-                    ModBase.harmony.Patch(method, transpiler: hp);
-                }
-            }
         }
 
         public override void ExposeData() {

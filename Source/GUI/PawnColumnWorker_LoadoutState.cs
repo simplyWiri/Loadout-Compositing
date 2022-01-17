@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using RimWorld;
@@ -9,9 +10,55 @@ using Verse;
 
 namespace Inventory {
 
+    class CopiedTags {
+
+        public Pawn fromPawn = null;
+        public List<Tag> tagsToCopy;
+        public bool replace = true;
+
+        public CopiedTags(Pawn pawn, List<Tag> tags, bool replace = true) {
+            this.fromPawn = pawn;
+            this.tagsToCopy = tags;
+            this.replace = replace;
+        }
+        
+        public void CopyTo(Pawn pawn) {
+            var pComp = pawn.GetComp<LoadoutComponent>();
+            if (replace) {
+                var elems = pComp.Loadout.AllElements.ToList();
+                foreach (var elem in elems) {
+                    pComp.RemoveTag(elem);
+                }
+
+                foreach (var tag in tagsToCopy) {
+                    pComp.AddTag(tag);
+                }
+            } else {
+                var heldTags = pComp.Loadout.AllTags.ToList();
+                var tagsToApply = tagsToCopy.Where(tag => !heldTags.Contains(tag));
+                foreach (var tag in tagsToApply) {
+                    pComp.AddTag(tag);
+                }  
+            }
+        }
+
+        public bool ApplicableTo(Pawn pawn) {
+            if (pawn == fromPawn) return false;
+
+            var pawnTags = pawn.GetComp<LoadoutComponent>().Loadout.AllTags.ToList();
+            if (replace) {
+                return !(tagsToCopy.All(t => pawnTags.Contains(t)) && tagsToCopy.Count == pawnTags.Count);
+            } 
+            
+            return !tagsToCopy.All(t => pawnTags.Contains(t));
+        }
+    }
+    
     public class PawnColumnWorker_LoadoutState : PawnColumnWorker {
 
         private const float HEADER_BUTTON_HEIGHT = 32f;
+        private CopiedTags copiedTags = null;
+        private bool hasCopyPrimed = false;
 
         public override void DoHeader(Rect rect, PawnTable table) {
             Text.Font = GameFont.Small;
@@ -19,17 +66,19 @@ namespace Inventory {
             base.DoHeader(rect, table);
 
             if (Widgets.ButtonText(rect.PopTopPartPixels(HEADER_BUTTON_HEIGHT), Strings.ModifyStates)) {
-                Find.WindowStack.Add(new Dialog_LoadoutStateEditor());
+                Find.WindowStack.Add(new Dialog_LoadoutStateEditor(LoadoutManager.States));
             }
         }
 
-        // [ Select State ] [ (EditIcon) ]
-        // ^^ set loadout state   ^^ edit the pawns loadout
+        // [ cp ] [ pst ] [ Select State ] [ (EditIcon) ]
+        //                  ^^ set loadout state  ^^ edit the pawns loadout
         public override void DoCell(Rect rect, Pawn pawn, PawnTable table) {
+            DoCopyPaste(rect.PopLeftPartPixels(rect.height * 0.8f * (hasCopyPrimed ? 2 : 1)), pawn);
+        
             var buttonRect = new Rect(rect.x, rect.y + 2f, rect.width * 0.7f, rect.height - 4f);
             var editIconRect = new Rect(rect.x + buttonRect.width, rect.y + 2f, rect.width * 0.3f, rect.height - 4);
             editIconRect.AdjHorzBy(4);
-            
+                
             Widgets.Dropdown(buttonRect, pawn,
                 (p) => p.TryGetComp<LoadoutComponent>().Loadout.CurrentState,
                 GenerateMenuFor, pawn.GetActiveState()?.name ?? Strings.SelectState,
@@ -58,6 +107,68 @@ namespace Inventory {
                 Find.WindowStack.Add(new Dialog_LoadoutEditor(pawn));
             }
         }
+        
+        private void DoCopyPaste(Rect rect, Pawn pawn) {
+            var copyRect = rect;
+            if (hasCopyPrimed) {
+                copyRect = rect.LeftHalf();
+            }
+            var pasteRect = rect.RightHalf();
+
+            Widgets.DrawTextureFitted(copyRect, TexButton.Copy, 1f);
+            if (Mouse.IsOver(copyRect)) {
+                if (Input.GetMouseButtonDown(0)) {
+                    copiedTags = new CopiedTags(pawn, pawn.GetComp<LoadoutComponent>().Loadout.AllTags.ToList());
+                    hasCopyPrimed = true;
+                } else if (Input.GetMouseButtonDown(1)) {
+                    copiedTags = null;
+                    var tags = pawn.GetComp<LoadoutComponent>().Loadout.AllTags.ToList();
+                    var opts = new List<FloatMenuOption>() {
+                        new FloatMenuOption(Strings.CopyAllTagsFrom + pawn.LabelShort + Strings.ReplaceOnPaste, () => {
+                            copiedTags = new CopiedTags(pawn, tags, true);
+                            hasCopyPrimed = true;
+                        }),
+                        new FloatMenuOption(Strings.CopyAllTagsFrom + pawn.LabelShort + Strings.AddOnPaste, () => {
+                            copiedTags = new CopiedTags(pawn, tags, false);
+                            hasCopyPrimed = true;
+                        }),
+                        new FloatMenuOption(Strings.SelectTagsFrom + pawn.LabelShort + Strings.ReplaceOnPaste, () => {
+                            Find.WindowStack.Add(new Dialog_TagSelector(tags, tag => {
+                                copiedTags ??= new CopiedTags(pawn, new List<Tag>(), true);
+                                copiedTags.tagsToCopy.Add(tag);
+                                hasCopyPrimed = true;
+                            }, customTitleSuffix: Strings.ToCopy));
+                        }),     
+                        new FloatMenuOption(Strings.SelectTagsFrom + pawn.LabelShort + Strings.AddOnPaste, () => {
+                            Find.WindowStack.Add(new Dialog_TagSelector(tags, tag => {
+                                copiedTags ??= new CopiedTags(pawn, new List<Tag>(), false);
+                                copiedTags.tagsToCopy.Add(tag);
+                                hasCopyPrimed = true;
+                            }, customTitleSuffix: Strings.ToCopy));
+                        })
+                    };
+                    Find.WindowStack.Add(new FloatMenu(opts));
+                }
+            }
+
+            if (!hasCopyPrimed) return;
+            
+            var color = Color.white;
+            if (copiedTags == null || !copiedTags.ApplicableTo(pawn)) {
+                color = Color.gray;
+            }
+            else if (Mouse.IsOver(pasteRect)) {
+                color = GenUI.MouseoverColor;
+            }
+
+            GUI.color = color;
+            Widgets.DrawTextureFitted(pasteRect, TexButton.Paste, 1f);
+            GUI.color = Color.white;
+
+            if (copiedTags != null && Mouse.IsOver(pasteRect) && Input.GetMouseButton(0)) {
+                copiedTags.CopyTo(pawn);
+            }
+        }
 
         public IEnumerable<Widgets.DropdownMenuElement<LoadoutState>> GenerateMenuFor(Pawn p) {
             var pState = p.TryGetComp<LoadoutComponent>().Loadout.CurrentState;
@@ -81,15 +192,15 @@ namespace Inventory {
             if (aState == null) return 1;
             if (bState == null) return -1;
 
-            return aState.name.CompareTo(bState.name);
+            return String.Compare(aState.name, bState.name, StringComparison.Ordinal);
         }
 
         public override int GetMinWidth(PawnTable table) {
-            return Mathf.Max(base.GetMinWidth(table), Mathf.CeilToInt(131f));
+            return Mathf.Max(base.GetMinWidth(table), Mathf.CeilToInt(131f + Text.LineHeight * (hasCopyPrimed ? 1.6f : 0)));
         }
 
         public override int GetOptimalWidth(PawnTable table) {
-            return Mathf.Clamp(Mathf.CeilToInt(201f), GetMinWidth(table), GetMaxWidth(table));
+            return Mathf.Clamp(239, GetMinWidth(table), GetMaxWidth(table));
         }
 
         public override int GetMinHeaderHeight(PawnTable table) {

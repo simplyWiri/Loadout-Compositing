@@ -20,7 +20,7 @@ namespace Inventory {
             var dropdownStrSize = Text.CalcHeight(dropdownStr, standard.ColumnWidth);
             var dropDownRect = standard.GetRect(Mathf.Max(30, dropdownStrSize + 5f));
             if (Widgets.ButtonText(dropDownRect, dropdownStr)) {
-                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags, (tag) => LoadoutManager.SetTagForBill(bill, tag)));
+                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags, (tag) => LoadoutManager.SetTagForBill(bill, tag), false));
             }
             
             // How many do we currently have?

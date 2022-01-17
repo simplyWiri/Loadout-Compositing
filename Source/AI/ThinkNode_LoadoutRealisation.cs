@@ -86,7 +86,7 @@ namespace Inventory {
                 if (itemCount > loadoutDesiredCount) {
                     var job = RemoveItem(pawnGear, item, Mathf.Min(itemCount - loadoutDesiredCount, item.Quantity));
                     if (job != null) {
-                        if (job.count > item.Quantity) {
+                        if (job.count >= item.Quantity) {
                             loadout.ThingsToRemove.Remove(item);
                         }
                         return job;
@@ -140,6 +140,8 @@ namespace Inventory {
         private bool ValidApparelFor(Apparel apparel, Pawn pawn) {
             if (!pawn.outfits.CurrentOutfit.filter.Allows(apparel)) return false;
             if (apparel.def.apparel.gender != Gender.None && apparel.def.apparel.gender != pawn.gender) return false;
+            if (!RimWorld.ApparelUtility.HasPartsToWear(pawn, apparel.def)) return false;
+
             return Utility.ShouldAttemptToEquip(pawn, apparel);
         }
 
@@ -186,7 +188,11 @@ namespace Inventory {
         private Job FindItem(Pawn pawn, Item item, int count) {
             var things = item.ThingsOnMap(pawn.Map);
 
-            foreach (var thing in things.OrderByDescending(t => t.stackCount)) {
+            var orderedList = count == 1
+                ? things.OrderBy(t => t.Position.DistanceToSquared(pawn.Position))
+                : things.OrderByDescending(t => t.stackCount);
+            
+            foreach (var thing in orderedList) {
                 if (!Utility.ShouldAttemptToEquip(pawn, thing, true)) {
                     continue;
                 }
@@ -208,7 +214,8 @@ namespace Inventory {
             var thing = gear.FirstOrDefault();
             if (thing == null) return null;
 
-            var job = JobMaker.MakeJob(UnloadItem, thing);
+            var job = JobMaker.MakeJob(UnloadItem);
+            job.SetTarget(TargetIndex.A, thing);
             job.count = Mathf.Min(count, thing.stackCount);
 
             return job;

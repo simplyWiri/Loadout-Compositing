@@ -136,6 +136,7 @@ namespace Inventory {
 
         public static bool IsValidLoadoutHolder(this Pawn pawn) {
             return pawn.RaceProps.Humanlike
+                   && !pawn.RaceProps.Animal
                    && pawn.IsColonist
                    && !pawn.Dead
                    && !pawn.IsQuestLodger()
@@ -146,7 +147,10 @@ namespace Inventory {
             return pawn.inventory.innerContainer.InnerListForReading
                 .ConcatIfNotNull(pawn.equipment.AllEquipmentListForReading);
         }
-
+        
+        public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> self)       
+            => self.Select((item, index) => (item, index)); 
+        
         public static void SetOrAppend<K, V>(this Dictionary<K, HashSet<V>> dictionary, K key, IEnumerable<V> elements) {
             if (dictionary.TryGetValue(key, out var elems)) {
                 elems.AddRange(elements);

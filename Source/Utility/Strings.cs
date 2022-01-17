@@ -1,4 +1,6 @@
-﻿using Verse;
+﻿using RimWorld;
+using UnityEngine;
+using Verse;
 
 namespace Inventory {
 
@@ -26,8 +28,13 @@ namespace Inventory {
         public static string PickUpItems(string itemTag, string count) => $"{P}PickUpItems".Translate(itemTag, count);
 
         public static string SelectTag => $"{P}SelectTag".TranslateSimple();
+        public static string SelectTags => $"{P}SelectTags".TranslateSimple();
 
-        public static string NoTagsYetWarning => $"{P}NoTagsYetWarning".TranslateSimple();
+        public static string SelectTagsFrom => $"{P}SelectTagsFrom".TranslateSimple();
+        public static string CopyAllTagsFrom => $"{P}CopyAllTagsFrom".TranslateSimple();
+        public static string ReplaceOnPaste => $"{P}ReplaceOnPaste".TranslateSimple();
+        public static string AddOnPaste => $"{P}AddOnPaste".TranslateSimple();
+        
         public static string CreateNewTag => $"{P}CreateNewTag".TranslateSimple();
         public static string DeleteTag => $"{P}DeleteTag".TranslateSimple();
 
@@ -52,7 +59,7 @@ namespace Inventory {
 
         // intentionally not translated
         public static string HitPointsAmount => $"{P}HitPointsAmount";
-
+        public static string ToCopy => $"{P}ToCopy".TranslateSimple();
         public static string Customize => $"{P}Customize".TranslateSimple();
         public static string MouseOverDetails => $"{P}MouseOverDetails".TranslateSimple();
         public static string Statistics => $"{P}Statistics".TranslateSimple();
@@ -87,12 +94,23 @@ namespace Inventory {
         public static string WereActive => $"{P}WereActive".TranslateSimple();
         public static string SetDefault => $"{P}SetDefault".TranslateSimple();
         public static string CouldNotFindPawn => $"{P}CouldNotFindPawn".TranslateSimple();
+        public static string InvalidStateName => $"{P}InvalidStateName".TranslateSimple();
+        public static string SearchBarDesc => $"{P}SearchBarDesc".TranslateSimple();
+        public static string MassAssign => $"{P}MassAssign".TranslateSimple();
+        
+        public static string OutfitDisallowsKit(Pawn p, Outfit outfit, ThingDef apparelDef, Tag tag) => $"{P}OutfitDisallowsKit".Translate(p.LabelShort, outfit.label, apparelDef.LabelCap, tag.name);
+
+        public static string Options => $"{P}{S}Options".TranslateSimple();
+        public static string Keybinds => $"{P}{S}Keybinds".TranslateSimple();
+        public static string ItemFilterDefaults => $"{P}{S}ItemFilterDefaults".TranslateSimple();
 
         public static string ImmediatelyResolveLoadout => $"{P}{S}ImmediatelyResolveLoadout".TranslateSimple();
         public static string ImmediatelyResolveLoadoutDesc => $"{P}{S}ImmediatelyResolveLoadoutDesc".TranslateSimple();
         public static string BiasLoadBearingItems => $"{P}{S}BiasLoadBearingItems".TranslateSimple();
-        public static string ChangeDefaults => $"{P}{S}ChangeDefaults".TranslateSimple();
+        public static string BiasLoadBearingItemsDesc => $"{P}{S}BiasLoadBearingItemsDesc".TranslateSimple();
+
         public static string OnlyLoadoutItems => $"{P}{S}OnlyLoadoutItems".TranslateSimple();
+        public static string OnlyLoadoutItemsDesc => $"{P}{S}OnlyLoadoutItemsDesc".TranslateSimple();
 
 
     }
