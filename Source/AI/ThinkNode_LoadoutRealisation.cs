@@ -17,6 +17,7 @@ namespace Inventory {
 
         private static JobDef EquipApparel => JobDefOf.Wear;
         private static JobDef EquipItem => JobDefOf.TakeInventory;
+        private static JobDef HoldItem => JobDefOf.Equip;
         private static JobDef UnloadItem => InvJobDefOf.CL_UnloadInventory;
         
         public ThinkNode_LoadoutRealisation() { }
@@ -197,10 +198,15 @@ namespace Inventory {
                     continue;
                 }
 
-                var job = JobMaker.MakeJob(EquipItem, thing);
-                job.count = Mathf.Min(count, thing.stackCount);
+                if (count == 1 && thing.def.IsWeapon && pawn.equipment.Primary is null )
+                {
+                    return JobMaker.MakeJob(HoldItem, thing);
+                } else {
+                    var job = JobMaker.MakeJob(EquipItem, thing);
+                    job.count = Mathf.Min(count, thing.stackCount);
 
-                return job;
+                    return job;
+                }
             }
 
             return null;
