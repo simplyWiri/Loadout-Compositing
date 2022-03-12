@@ -12,6 +12,7 @@ namespace Inventory {
         public bool immediatelyResolveLoadout = false;
         public bool onlyItemsFromLoadout = false;
         public bool biasLoadBearingItems = false;
+        public bool hideGizmo = false;
         public FloatRange defaultHitpoints = FloatRange.ZeroToOne;
         public QualityRange defaultQualityRange = QualityRange.All;
 
@@ -51,6 +52,7 @@ namespace Inventory {
             DrawOption(Strings.ImmediatelyResolveLoadout, ref immediatelyResolveLoadout, Strings.ImmediatelyResolveLoadoutDesc);
             DrawOption(Strings.BiasLoadBearingItems, ref biasLoadBearingItems, Strings.BiasLoadBearingItemsDesc);
             DrawOption(Strings.OnlyLoadoutItems, ref onlyItemsFromLoadout, Strings.OnlyLoadoutItemsDesc);
+            DrawOption(Strings.HideGizmo, ref hideGizmo, Strings.HideGizmoDesc);
         }
 
         private void DrawDefaults(ref Rect rect) {
