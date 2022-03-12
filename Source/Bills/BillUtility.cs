@@ -21,6 +21,7 @@ namespace Inventory {
         public static bool Satisfied(this Bill_Production productionBill) {
             var desiredTargetCount = productionBill.DesiredTargetCount();
             if (desiredTargetCount == 0) {
+                productionBill.paused = true;
                 return false;
             }
 
