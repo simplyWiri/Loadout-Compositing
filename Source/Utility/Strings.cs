@@ -111,7 +111,10 @@ namespace Inventory {
 
         public static string OnlyLoadoutItems => $"{P}{S}OnlyLoadoutItems".TranslateSimple();
         public static string OnlyLoadoutItemsDesc => $"{P}{S}OnlyLoadoutItemsDesc".TranslateSimple();
-
+        public static string HideGizmo => $"{P}{S}HideGizmo".TranslateSimple();
+        public static string HideGizmoDesc => $"{P}{S}HideGizmoDesc".TranslateSimple();
+        public static string DisableCustomScroll => $"{P}{S}DisableCustomScroll".TranslateSimple();
+        public static string DisableCustomScrollDesc => $"{P}{S}DisableCustomScrollDesc".TranslateSimple();
 
     }
 

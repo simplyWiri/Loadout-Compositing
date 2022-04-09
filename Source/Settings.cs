@@ -12,6 +12,8 @@ namespace Inventory {
         public bool immediatelyResolveLoadout = false;
         public bool onlyItemsFromLoadout = false;
         public bool biasLoadBearingItems = false;
+        public bool hideGizmo = false;
+        public bool disableCustomScroll = false;
         public FloatRange defaultHitpoints = FloatRange.ZeroToOne;
         public QualityRange defaultQualityRange = QualityRange.All;
 
@@ -51,6 +53,8 @@ namespace Inventory {
             DrawOption(Strings.ImmediatelyResolveLoadout, ref immediatelyResolveLoadout, Strings.ImmediatelyResolveLoadoutDesc);
             DrawOption(Strings.BiasLoadBearingItems, ref biasLoadBearingItems, Strings.BiasLoadBearingItemsDesc);
             DrawOption(Strings.OnlyLoadoutItems, ref onlyItemsFromLoadout, Strings.OnlyLoadoutItemsDesc);
+            DrawOption(Strings.HideGizmo, ref hideGizmo, Strings.HideGizmoDesc);
+            DrawOption(Strings.DisableCustomScroll, ref disableCustomScroll, Strings.DisableCustomScrollDesc);
         }
 
         private void DrawDefaults(ref Rect rect) {
@@ -100,7 +104,7 @@ namespace Inventory {
             Scribe_Values.Look(ref immediatelyResolveLoadout, nameof(immediatelyResolveLoadout), false);
             Scribe_Values.Look(ref biasLoadBearingItems, nameof(biasLoadBearingItems), false);
             Scribe_Values.Look(ref onlyItemsFromLoadout, nameof(onlyItemsFromLoadout), false);
-
+            Scribe_Values.Look(ref disableCustomScroll, nameof(disableCustomScroll), Application.platform == RuntimePlatform.LinuxPlayer);
             Scribe_Values.Look(ref defaultHitpoints, nameof(defaultHitpoints), FloatRange.ZeroToOne);
             Scribe_Values.Look(ref defaultQualityRange, nameof(defaultQualityRange), QualityRange.All);
         }

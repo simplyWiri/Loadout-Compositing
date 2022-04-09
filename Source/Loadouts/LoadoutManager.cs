@@ -50,7 +50,7 @@ namespace Inventory {
 
             instance.pawnTags[tag].pawns.RemoveAll(p => p is null || p.Dead || !p.IsValidLoadoutHolder());
 
-            return instance.pawnTags[tag].Pawns.Count(p => p.Map == bill.Map);
+            return instance.pawnTags[tag].Pawns.Count(p => p.Map == bill.Map && p.HostFaction is null);
         }
 
         public LoadoutManager(Game game) { }

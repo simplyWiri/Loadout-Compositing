@@ -16,15 +16,18 @@ namespace Inventory {
         public Loadout Loadout => loadout;
 
         public override IEnumerable<Gizmo> CompGetGizmosExtra() {
-            var action = new Command_Action {
-                action = () => Loadout.RequiresUpdate(),
-                defaultLabel = Strings.SatisfyLoadoutNow,
-                icon = Textures.HotSwapGizmoTex,
-                disabled = Loadout.NeedsUpdate,
-                disabledReason = Strings.SatisfyLoadoutNowFail(parent),
-                alsoClickIfOtherInGroupClicked = true
-            };
-            yield return action;
+            if ( !ModBase.settings.hideGizmo ) {
+                var action = new Command_Action
+                {
+                    action = () => Loadout.RequiresUpdate(),
+                    defaultLabel = Strings.SatisfyLoadoutNow,
+                    icon = Textures.HotSwapGizmoTex,
+                    disabled = Loadout.NeedsUpdate,
+                    disabledReason = Strings.SatisfyLoadoutNowFail(parent),
+                    alsoClickIfOtherInGroupClicked = true
+                };
+                yield return action;
+            }
         }
         
         public void AddTag(Tag tag) {
