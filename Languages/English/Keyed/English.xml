@@ -124,5 +124,8 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 
 	<CompositableLoadouts.Settings.HideGizmo>Hide "Satisfy Loadout Now" gizmo</CompositableLoadouts.Settings.HideGizmo>
 	<CompositableLoadouts.Settings.HideGizmoDesc>Prevents the gizmo from being rendered</CompositableLoadouts.Settings.HideGizmoDesc>
+	
+	<CompositableLoadouts.Settings.DisableCustomScroll>Disable custom cursor when dragging, may fix linux issues</CompositableLoadouts.Settings.DisableCustomScroll>
+	<CompositableLoadouts.Settings.DisableCustomScrollDesc>It may fix issues relating to perpetually inivisble mouses on linux platforms.</CompositableLoadouts.Settings.DisableCustomScrollDesc>
 
 </LanguageData>

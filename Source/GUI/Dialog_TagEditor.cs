@@ -81,13 +81,18 @@ namespace Inventory {
                 if (Input.GetMouseButtonDown(0)) {
                     dragging = true;
                 }
-                
-                Cursor.SetCursor(Textures.DragCursorTex, CustomCursor.CursorHotspot, CursorMode.ForceSoftware);
+
+                if (!ModBase.settings.disableCustomScroll) {
+                    Cursor.SetCursor(Textures.DragCursorTex, CustomCursor.CursorHotspot, CursorMode.ForceSoftware);
+                }
             } else {
-                if (Prefs.data.customCursorEnabled) {
-                    Cursor.SetCursor(CustomCursor.CursorTex, CustomCursor.CursorHotspot, CursorMode.Auto);
-                } else {
-                    Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+                if (!ModBase.settings.disableCustomScroll) {
+                    if (Prefs.data.customCursorEnabled) {
+                        Cursor.SetCursor(CustomCursor.CursorTex, CustomCursor.CursorHotspot, CursorMode.Auto);
+                    }
+                    else {
+                        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+                    }
                 }
             }
             

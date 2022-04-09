@@ -271,11 +271,14 @@ namespace Inventory {
                     GUI.color = Color.white;
                 }
                 else {
-                    if (Prefs.data.customCursorEnabled) {
-                        Cursor.SetCursor(CustomCursor.CursorTex, CustomCursor.CursorHotspot, CursorMode.Auto);
-                    } else {
-                        Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+                    if (!ModBase.settings.disableCustomScroll) {
+                        if (Prefs.data.customCursorEnabled) {
+                            Cursor.SetCursor(CustomCursor.CursorTex, CustomCursor.CursorHotspot, CursorMode.Auto);
+                        } else {
+                            Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+                        }
                     }
+
 
                     dragging = false;
                     curTagIdx = -1;
@@ -290,7 +293,10 @@ namespace Inventory {
                 if (rect.Contains(cEvent.mousePosition)) {
                     curTagIdx = i;
                     dragging = true;
-                    Cursor.SetCursor(Textures.DragCursorTex, CustomCursor.CursorHotspot, CursorMode.ForceSoftware);
+                    if (!ModBase.settings.disableCustomScroll) {
+                        Cursor.SetCursor(Textures.DragCursorTex, CustomCursor.CursorHotspot, CursorMode.ForceSoftware);
+                    }
+
                     Event.current.Use();
                     break;
                 }
