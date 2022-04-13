@@ -101,6 +101,7 @@ namespace Inventory {
         }
 
         public override void ExposeData() {
+            Scribe_Values.Look(ref hideGizmo, nameof(hideGizmo), false);
             Scribe_Values.Look(ref immediatelyResolveLoadout, nameof(immediatelyResolveLoadout), false);
             Scribe_Values.Look(ref biasLoadBearingItems, nameof(biasLoadBearingItems), false);
             Scribe_Values.Look(ref onlyItemsFromLoadout, nameof(onlyItemsFromLoadout), false);
