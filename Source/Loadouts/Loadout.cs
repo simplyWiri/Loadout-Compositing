@@ -7,10 +7,6 @@ using Verse;
 namespace Inventory {
 
     public class Loadout : IExposable {
-
-        // should never be used, exists for backwards compat
-        private List<Tag> tags = null;
-
         public List<LoadoutElement> elements;
         private List<Item> itemsToRemove;
         private LoadoutState currentState;
@@ -149,15 +145,6 @@ namespace Inventory {
         }
 
         public void ExposeData() {
-            // backwards compatibility, todo remove
-            if (Scribe.mode != LoadSaveMode.Saving) {
-                Scribe_Collections.Look(ref tags, nameof(tags), LookMode.Reference);
-
-                if (!tags.NullOrEmpty()) {
-                    elements = tags.Select(t => new LoadoutElement(t, null)).ToList();
-                }
-            }
-
             Scribe_Values.Look(ref needsUpdate, nameof(needsUpdate), false);
             Scribe_Collections.Look(ref elements, nameof(elements), LookMode.Deep);
             Scribe_Collections.Look(ref itemsToRemove, nameof(itemsToRemove), LookMode.Deep);
