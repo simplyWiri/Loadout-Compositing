@@ -59,6 +59,13 @@ namespace Inventory {
             return ret;
         }
 
+        public static Rect PopBottomPartPixels(this ref Rect rect, float numPixels)
+        {
+            var ret = rect.BottomPartPixels(numPixels);
+            rect.height -= numPixels;
+            return ret;
+        }
+
         public static Rect PopLeftPartPixels(this ref Rect rect, float numPixels) {
             var ret = rect.LeftPartPixels(numPixels);
             rect.AdjHorzBy(numPixels);
@@ -103,7 +110,7 @@ namespace Inventory {
             return changed;
         }
 
-        public static void ListSeperator(ref Rect rect, string label, bool heading = false) {
+        public static void ListSeperator(ref Rect rect, string label, bool heading = false, string subHeading = "") {
             
             rect.AdjVertBy(3f);
             GUI.color = Widgets.SeparatorLabelColor;
@@ -113,9 +120,16 @@ namespace Inventory {
             
             var height = Text.CalcHeight(label, rect.width);
             Widgets.Label(rect.PopTopPartPixels(height), label);
-            
+            if (heading && subHeading != "")
+            {
+                Text.Font = GameFont.Tiny;
+                GUI.color = Color.gray;
+
+                height = Text.CalcHeight(subHeading, rect.width);
+                Widgets.Label(rect.PopTopPartPixels(height), subHeading);
+            } 
             Text.Font = GameFont.Small;
-            
+
             GUI.color = Widgets.SeparatorLineColor;
             Widgets.DrawLineHorizontal(rect.x, rect.y - 2f, rect.width);
             

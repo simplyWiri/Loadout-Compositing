@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using System.Text;
 using RimWorld;
 using UnityEngine;
 using Verse;
+using static System.Runtime.CompilerServices.RuntimeHelpers;
+using static RimWorld.BaseGen.SymbolStack;
 
 namespace Inventory {
 
@@ -16,6 +20,9 @@ namespace Inventory {
         public bool disableCustomScroll = false;
         public FloatRange defaultHitpoints = FloatRange.ZeroToOne;
         public QualityRange defaultQualityRange = QualityRange.All;
+        
+        public List<Tag> genericTags = new List<Tag>();
+        Panel_InterGameSettingsPanel interGamePanel = new Panel_InterGameSettingsPanel();
 
         public void DoSettingsWindow(Rect rect) {
 
@@ -30,7 +37,9 @@ namespace Inventory {
             rightColumn.AdjHorzBy(UIC.SMALL_GAP / 2.0f);
             
             GUIUtility.ListSeperator(ref leftColumn, $"{Strings.Options}", true);
-            DrawOptions(leftColumn);
+            DrawOptions(ref leftColumn);
+
+            leftColumn.AdjVertBy(UIC.SMALL_GAP);
 
             GUIUtility.ListSeperator(ref rightColumn, $"{Strings.Keybinds}", true);
             DrawKeybinds(ref rightColumn);
@@ -39,10 +48,13 @@ namespace Inventory {
             
             GUIUtility.ListSeperator(ref rightColumn, $"{Strings.ItemFilterDefaults}", true);
             DrawDefaults(ref rightColumn);
+
+            GUIUtility.ListSeperator(ref leftColumn, $"Inter-Game Tag Use", true, "must be in game if you intend to load tags to and from a save");
+            CrossGameTags(ref leftColumn);
         }
-        
-        private void DrawOptions(Rect rect) {
-            void DrawOption(string label, ref bool option, string tooltip = null) {
+
+        private void DrawOptions(ref Rect rect) {
+            void DrawOption(ref Rect rect, string label, ref bool option, string tooltip = null) {
                 var optionRect = rect.PopTopPartPixels(Text.CalcHeight(label, rect.width - UIC.SCROLL_WIDTH));
                 Widgets.CheckboxLabeled(optionRect, label, ref option);
                 if (tooltip != null) {
@@ -50,11 +62,11 @@ namespace Inventory {
                 }
             }
 
-            DrawOption(Strings.ImmediatelyResolveLoadout, ref immediatelyResolveLoadout, Strings.ImmediatelyResolveLoadoutDesc);
-            DrawOption(Strings.BiasLoadBearingItems, ref biasLoadBearingItems, Strings.BiasLoadBearingItemsDesc);
-            DrawOption(Strings.OnlyLoadoutItems, ref onlyItemsFromLoadout, Strings.OnlyLoadoutItemsDesc);
-            DrawOption(Strings.HideGizmo, ref hideGizmo, Strings.HideGizmoDesc);
-            DrawOption(Strings.DisableCustomScroll, ref disableCustomScroll, Strings.DisableCustomScrollDesc);
+            DrawOption(ref rect, Strings.ImmediatelyResolveLoadout, ref immediatelyResolveLoadout, Strings.ImmediatelyResolveLoadoutDesc);
+            DrawOption(ref rect, Strings.BiasLoadBearingItems, ref biasLoadBearingItems, Strings.BiasLoadBearingItemsDesc);
+            DrawOption(ref rect, Strings.OnlyLoadoutItems, ref onlyItemsFromLoadout, Strings.OnlyLoadoutItemsDesc);
+            DrawOption(ref rect, Strings.HideGizmo, ref hideGizmo, Strings.HideGizmoDesc);
+            DrawOption(ref rect, Strings.DisableCustomScroll, ref disableCustomScroll, Strings.DisableCustomScrollDesc);
         }
 
         private void DrawDefaults(ref Rect rect) {
@@ -100,6 +112,16 @@ namespace Inventory {
             }
         }
 
+        private void CrossGameTags(ref Rect rect) {
+            var loadoutManagerComponent = Current.Game?.GetComponent<LoadoutManager>();
+            if (loadoutManagerComponent == null) {
+                return;
+            }
+
+            interGamePanel.Draw(ref rect, LoadoutManager.Tags, genericTags);
+        }
+
+
         public override void ExposeData() {
             Scribe_Values.Look(ref hideGizmo, nameof(hideGizmo), false);
             Scribe_Values.Look(ref immediatelyResolveLoadout, nameof(immediatelyResolveLoadout), false);
@@ -108,6 +130,12 @@ namespace Inventory {
             Scribe_Values.Look(ref disableCustomScroll, nameof(disableCustomScroll), Application.platform == RuntimePlatform.LinuxPlayer);
             Scribe_Values.Look(ref defaultHitpoints, nameof(defaultHitpoints), FloatRange.ZeroToOne);
             Scribe_Values.Look(ref defaultQualityRange, nameof(defaultQualityRange), QualityRange.All);
+
+            Tag.GenericLoad = true;
+            Scribe_Collections.Look(ref genericTags, nameof(genericTags), LookMode.Deep);
+            Tag.GenericLoad = false;
+
+            genericTags ??= new List<Tag>();
         }
 
     }
