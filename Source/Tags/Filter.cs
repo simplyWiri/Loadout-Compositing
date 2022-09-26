@@ -8,14 +8,14 @@ namespace Inventory {
 
     public class Filter : IExposable {
 
-        private ThingDef forThing;
+        internal SafeDef forThing;
 
-        private HashSet<ThingDef> stuffs;
+        internal HashSet<SafeDef> stuffs;
         private FloatRange allowedHpRange;
         private QualityRange allowedQualities;
 
-        public ThingDef Thing => forThing;
-        public HashSet<ThingDef> AllowedStuffs => stuffs;
+        public ThingDef Thing => forThing.Def;
+        public HashSet<SafeDef> AllowedStuffs => stuffs;
         public QualityRange QualityRange => allowedQualities;
         public FloatRange HpRange => allowedHpRange;
 
@@ -25,15 +25,16 @@ namespace Inventory {
 
         public Filter() {
             this.forThing = null;
-            this.stuffs = new HashSet<ThingDef>();
+            this.stuffs = new HashSet<SafeDef>();
 
-            this.allowedQualities = ModBase.settings.defaultQualityRange;
-            this.allowedHpRange = ModBase.settings.defaultHitpoints;
+            // todo: right this wrong.
+            this.allowedQualities = ModBase.settings?.defaultQualityRange ?? QualityRange.All;
+            this.allowedHpRange = ModBase.settings?.defaultHitpoints ?? FloatRange.ZeroToOne;
         }
-
+            
         public Filter(ThingDef thing) {
-            this.forThing = thing;
-            this.stuffs = new HashSet<ThingDef>();
+            this.forThing = new SafeDef(thing);
+            this.stuffs = new HashSet<SafeDef>();
 
             this.allowedQualities = ModBase.settings.defaultQualityRange;
             this.allowedHpRange = ModBase.settings.defaultHitpoints;
@@ -48,7 +49,7 @@ namespace Inventory {
         }
 
         public void CopyTo(ThingFilter thingFilter) {
-            thingFilter.allowedDefs = stuffs.Count == 0 ? GenStuff.AllowedStuffsFor(forThing).ToHashSet() : stuffs.ToHashSet();
+            thingFilter.allowedDefs = stuffs.Count == 0 ? GenStuff.AllowedStuffsFor(forThing).ToHashSet() : AllowedStuffs.Select(d => d.Def).ToHashSet();
         }
 
         public static Filter CopyFrom(Filter from, Filter to) {
@@ -71,15 +72,10 @@ namespace Inventory {
         }
 
         public void ExposeData() {
-            Scribe_Defs.Look(ref forThing, nameof(forThing));
+            Scribe_Values.Look(ref forThing, nameof(forThing));
             Scribe_Collections.Look(ref stuffs, nameof(stuffs));
             Scribe_Values.Look(ref allowedHpRange, nameof(allowedHpRange));
             Scribe_Values.Look(ref allowedQualities, nameof(allowedQualities));
-
-            var count = stuffs.RemoveWhere(thing => thing is null);
-            if (count != 0) {
-                Log.Error($"Attempted to load a null stuff from a filter, have you removed a mod?");
-            }
         }
 
         private static QualityCategory GetQuality(Thing thing) {
@@ -93,9 +89,9 @@ namespace Inventory {
         public bool Allows(Thing thing) {
             thing = thing.GetInnerIfMinified();
             // Check the thing is equal to `forThing`
-            if (thing.def != forThing) return false;
+            if (thing.def != forThing.Def) return false;
             // is it made from the correct stuff
-            if (thing.def.MadeFromStuff && (!stuffs.EnumerableNullOrEmpty() && !stuffs.Contains(thing.Stuff))) return false;
+            if (thing.def.MadeFromStuff && !stuffs.EnumerableNullOrEmpty() && !stuffs.Contains(new SafeDef(thing.Stuff))) return false;
             // does it have the correct number of hit points
             if (thing.def.useHitPoints && (!allowedHpRange.IncludesEpsilon(Mathf.Clamp01(thing.HitPoints / (float)thing.MaxHitPoints)))) return false;
             // does it fall within the quality range?

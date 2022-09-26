@@ -125,7 +125,7 @@ namespace Inventory {
                     backCompat = 1;
                     Log.Message("[Loadout Compositing] Successfully migrated save data from version v1.1 to v1.2");
                 }
-                 
+  
             }
 
             tags ??= new List<Tag>();

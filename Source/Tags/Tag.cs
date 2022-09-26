@@ -8,10 +8,20 @@ using Verse;
 namespace Inventory {
 
     public class Tag : IComparable<Tag>, IExposable, ILoadReferenceable {
+        public static bool GenericLoad = false;
+        public static int FakeId = 0;
 
         public List<Item> requiredItems = null;
         public string name = null;
         public int uniqueId = -1;
+
+        // What & Why?
+        // It is a signifier of the context in which we are loading this tag, if this is being loaded in the context of the 
+        // settings menu, this will be `GenericTag_`, otherwise for real uses in game saved in the GameComponent, this will just 
+        // be `Tag_`. This is used by the ILoadReferenceable interface to scribe references to this unit, tags which get saved in
+        // the generic (settings) menu should never be referenced inside an actual game (a copy should be made), and as such we could
+        // set the unique id returned by these tags to be garbage (in `GetUniqueLoadID`)
+        public string idType = "Tag_";
 
         public Tag() {
             this.requiredItems = new List<Item>();
@@ -26,6 +36,14 @@ namespace Inventory {
             if (name == "") {
                 this.name = "Placeholder-" + uniqueId;
             }
+        }
+
+        public Tag MakeCopy() {
+            var tag = new Tag();
+            tag.name = this.name;
+            tag.requiredItems = this.requiredItems.ListFullCopy();
+            tag.uniqueId = this.uniqueId;
+            return tag;
         }
 
         public IEnumerable<Item> ItemsMatching(Thing thing) {
@@ -84,16 +102,28 @@ namespace Inventory {
             Scribe_Values.Look(ref name, nameof(name));
             Scribe_Values.Look(ref uniqueId, nameof(uniqueId));
 
-            var count = requiredItems.RemoveAll(item => item.Def == null);
-            if (count != 0) {
-                Log.Error($"Attempting to load a null def, have you removed a mod? - Removing item from {name} - ({GetUniqueLoadID()})");
+            if (!GenericLoad && idType != "GenericTag_") {
+                var count = requiredItems.RemoveAll(item => item.Def == null);
+                if (count != 0) {
+                    Log.Error($"Attempting to load a null def, have you removed a mod? - Removing item from {name} - ({GetUniqueLoadID()})");
+                }
+
+                foreach(var item in requiredItems) {
+                    count = item.filter.stuffs.RemoveWhere(thing => thing.Def is null);
+                    if (count != 0) {
+                        Log.Error($"Attempted to load a null stuff in a filter, have you removed a mod?");
+                    }
+                }
+
+                idType = "Tag_";
+            } else {
+                idType = "GenericTag_";
             }
         }
 
         public string GetUniqueLoadID() {
-            return "Tag_" + uniqueId;
+            return idType + uniqueId;
         }
-
     }
 
 }

@@ -10,8 +10,7 @@ namespace Inventory {
 
     // the base type, contains a `ThingDef`
     public class Item : IExposable {
-
-        private ThingDef def;
+        private SafeDef def;
 
         // should only be directly accessed in `Dialog_TagEditor.cs`
         internal Filter filter;
@@ -25,6 +24,8 @@ namespace Inventory {
         public Filter Filter => filter;
         public ThingDef Def => def;
         public int Quantity => quantity;
+
+        public SafeDef WrappedDef => def;
 
         public ThingDef RandomStuff => !Def.MadeFromStuff ? null : filter.AllowedStuffs.Any() ? filter.AllowedStuffs.First() : GenStuff.AllowedStuffsFor(Def).First();
         public QualityCategory RandomQuality => (QualityCategory)Mathf.FloorToInt(((int)filter.QualityRange.max + (int)filter.QualityRange.min) / 2.0f);
@@ -40,7 +41,7 @@ namespace Inventory {
             if (Def.MadeFromStuff) {
                 var count = filter.AllowedStuffs.Count;
                 if (count == 0) stringBuilder.Append(Strings.Generic);
-                else if (count == 1) stringBuilder.Append(filter.AllowedStuffs.First().LabelCap);
+                else if (count == 1) stringBuilder.Append(filter.AllowedStuffs.First().Def.LabelCap);
                 else stringBuilder.Append(Strings.Generic + "*");
                 stringBuilder.Append(" ");
             }
@@ -71,7 +72,7 @@ namespace Inventory {
         }
 
         public Item(ThingDef def) {
-            this.def = def;
+            this.def = new SafeDef(def);
             this.filter = new Filter(def);
             this.quantity = 1;
         }
@@ -93,7 +94,7 @@ namespace Inventory {
         }
 
         public void ExposeData() {
-            Scribe_Defs.Look(ref def, nameof(def));
+            Scribe_Values.Look(ref def, nameof(def));
             Scribe_Deep.Look(ref filter, nameof(filter));
             Scribe_Values.Look(ref quantity, nameof(quantity));
         }

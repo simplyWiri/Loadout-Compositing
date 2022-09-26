@@ -28,6 +28,10 @@ namespace Inventory {
         public static Settings settings;
         public static Harmony harmony;
 
+        static ModBase() {
+            ParseHelper.Parsers<SafeDef>.Register(new Func<string, SafeDef>(SafeDef.FromString));
+        }
+
         public ModBase(ModContentPack content) : base(content) {
             settings = GetSettings<Settings>();
 
