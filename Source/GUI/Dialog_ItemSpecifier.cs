@@ -237,7 +237,7 @@ namespace Inventory {
                 ref stuffScrollViewFilter);
 
             // filter stuff list by search bar
-            stuffList.RemoveAll(td => !td.LabelCap.Resolve().Contains(stuffScrollViewFilter));
+            stuffList.RemoveAll(td => !td.LabelCap.Resolve().ToLower().Contains(stuffScrollViewFilter));
 
             Rect viewRect = new Rect(outRect.x, outRect.y, outRect.width - UIC.SCROLL_WIDTH, scrollViewHeight);
             Text.Font = GameFont.Small;
