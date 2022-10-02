@@ -68,7 +68,7 @@ namespace Inventory {
             DrawOption(ref rect, Strings.OnlyLoadoutItems, ref onlyItemsFromLoadout, Strings.OnlyLoadoutItemsDesc);
             DrawOption(ref rect, Strings.HideGizmo, ref hideGizmo, Strings.HideGizmoDesc);
             DrawOption(ref rect, Strings.DisableCustomScroll, ref disableCustomScroll, Strings.DisableCustomScrollDesc);
-            DrawOption(ref rect, Strings.NoPanicAlert, ref noPanicAlert, Strings.NoPanicAlert);
+            DrawOption(ref rect, Strings.NoPanicAlert, ref noPanicAlert, Strings.NoPanicAlertDesc);
         }
 
         private void DrawDefaults(ref Rect rect) {
