@@ -17,8 +17,7 @@ namespace Inventory {
 
         public override IEnumerable<Gizmo> CompGetGizmosExtra() {
             if ( !ModBase.settings.hideGizmo ) {
-                var action = new Command_Action
-                {
+                yield return new Command_Action {
                     action = () => Loadout.RequiresUpdate(),
                     defaultLabel = Strings.SatisfyLoadoutNow,
                     icon = Textures.HotSwapGizmoTex,
@@ -26,7 +25,12 @@ namespace Inventory {
                     disabledReason = Strings.SatisfyLoadoutNowFail(parent),
                     alsoClickIfOtherInGroupClicked = true
                 };
-                yield return action;
+
+                yield return new Command_Action {
+                    action = () => Pawn.EnqueueEmptyInventory(),
+                    defaultLabel = Strings.ClearInventoryNow,
+                    alsoClickIfOtherInGroupClicked = true
+                };
             }
         }
         

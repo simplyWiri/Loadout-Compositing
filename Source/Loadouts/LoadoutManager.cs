@@ -194,8 +194,10 @@ namespace Inventory {
                 } else {
                     comp.Loadout.ActivatePanicMode(instance.panicState);
 
-                    pawn.jobs.ClearQueuedJobs();
-                    pawn.jobs.CleanupCurrentJob(Verse.AI.JobCondition.InterruptForced, true);
+                    if ( pawn.jobs.IsCurrentJobPlayerInterruptible() ) {
+                        pawn.jobs.ClearQueuedJobs();
+                        pawn.jobs.CleanupCurrentJob(Verse.AI.JobCondition.InterruptForced, true);
+                    }
                 }
             }
         }

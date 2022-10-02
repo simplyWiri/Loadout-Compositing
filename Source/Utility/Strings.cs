@@ -108,6 +108,8 @@ namespace Inventory {
         public static string PanicStateAlert => $"{P}PanicStateAlert".TranslateSimple();
         public static string PanicStateAlertDesc(LoadoutState panicState) => $"{P}PanicStateAlertDesc".Translate(panicState?.name ?? Strings.DefaultStateName);
 
+        public static string ClearInventoryNow => $"{P}ClearInventoryNow".TranslateSimple();
+
         public static string Options => $"{P}{S}Options".TranslateSimple();
         public static string Keybinds => $"{P}{S}Keybinds".TranslateSimple();
         public static string ItemFilterDefaults => $"{P}{S}ItemFilterDefaults".TranslateSimple();

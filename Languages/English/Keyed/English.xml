@@ -85,6 +85,8 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.SatisfyLoadoutNow>Satisfy Loadout Now</CompositableLoadouts.SatisfyLoadoutNow>
 	<CompositableLoadouts.SatisfyLoadoutNowFail>{0} is already attempting to satisfy loadout</CompositableLoadouts.SatisfyLoadoutNowFail>
 
+	<CompositableLoadouts.ClearInventoryNow>Clear Excess Inventory Items</CompositableLoadouts.ClearInventoryNow>
+
 	<!-- used to compose the sentences:
 	"Active when { LoadoutState } is ( Active / Inactive )"
 	"Active when { Any } state is active";

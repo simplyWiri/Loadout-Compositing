@@ -179,6 +179,13 @@ namespace Inventory {
 
             return bill.billStack?.billGiver is not Thing bench || bench.Destroyed;
         }
+
+        public static void EnqueueEmptyInventory(this Pawn pawn) {
+            var firstUnloadableThing = pawn.inventory.FirstUnloadableThing;
+            if (firstUnloadableThing == default) return;
+
+            pawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(InvJobDefOf.CL_UnloadInventory), JobTag.DraftedOrder, true);
+        }
     }
 
 }
