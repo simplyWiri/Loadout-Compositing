@@ -100,6 +100,14 @@ namespace Inventory {
         
         public static string OutfitDisallowsKit(Pawn p, Outfit outfit, ThingDef apparelDef, Tag tag) => $"{P}OutfitDisallowsKit".Translate(p.LabelShort, outfit.label, apparelDef.LabelCap, tag.name);
 
+        public static string PanicState => $"{P}PanicState".TranslateSimple();
+        public static string PanicStateDesc => $"{P}PanicStateDesc".TranslateSimple();
+        public static string NoValidPanicStates => $"{P}NoValidPanicStates".TranslateSimple();
+        public static string CantOverridePanicMode => $"{P}CantOverridePanicMode".TranslateSimple();
+
+        public static string PanicStateAlert => $"{P}PanicStateAlert".TranslateSimple();
+        public static string PanicStateAlertDesc(LoadoutState panicState) => $"{P}PanicStateAlertDesc".Translate(panicState?.name ?? Strings.DefaultStateName);
+
         public static string Options => $"{P}{S}Options".TranslateSimple();
         public static string Keybinds => $"{P}{S}Keybinds".TranslateSimple();
         public static string ItemFilterDefaults => $"{P}{S}ItemFilterDefaults".TranslateSimple();
@@ -115,7 +123,8 @@ namespace Inventory {
         public static string HideGizmoDesc => $"{P}{S}HideGizmoDesc".TranslateSimple();
         public static string DisableCustomScroll => $"{P}{S}DisableCustomScroll".TranslateSimple();
         public static string DisableCustomScrollDesc => $"{P}{S}DisableCustomScrollDesc".TranslateSimple();
-
+        public static string NoPanicAlert => $"{P}{S}NoPanicAlert".TranslateSimple();
+        public static string NoPanicAlertDesc => $"{P}{S}NoPanicAlertDesc".TranslateSimple();
     }
 
 }

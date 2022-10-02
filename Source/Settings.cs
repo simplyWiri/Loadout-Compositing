@@ -17,6 +17,7 @@ namespace Inventory {
         public bool onlyItemsFromLoadout = false;
         public bool biasLoadBearingItems = false;
         public bool hideGizmo = false;
+        public bool noPanicAlert = false;
         public bool disableCustomScroll = false;
         public FloatRange defaultHitpoints = FloatRange.ZeroToOne;
         public QualityRange defaultQualityRange = QualityRange.All;
@@ -67,6 +68,7 @@ namespace Inventory {
             DrawOption(ref rect, Strings.OnlyLoadoutItems, ref onlyItemsFromLoadout, Strings.OnlyLoadoutItemsDesc);
             DrawOption(ref rect, Strings.HideGizmo, ref hideGizmo, Strings.HideGizmoDesc);
             DrawOption(ref rect, Strings.DisableCustomScroll, ref disableCustomScroll, Strings.DisableCustomScrollDesc);
+            DrawOption(ref rect, Strings.NoPanicAlert, ref noPanicAlert, Strings.NoPanicAlert);
         }
 
         private void DrawDefaults(ref Rect rect) {
@@ -83,7 +85,7 @@ namespace Inventory {
 
         private void DrawKeybinds(ref Rect rect) {
             
-            foreach (var keyBind in new List<KeyBindingDef> { InvKeyBindingDefOf.CL_OpenLoadoutEditor, InvKeyBindingDefOf.CL_OpenTagEditor }) {
+            foreach (var keyBind in new List<KeyBindingDef> { InvKeyBindingDefOf.CL_OpenLoadoutEditor, InvKeyBindingDefOf.CL_OpenTagEditor, InvKeyBindingDefOf.CL_PanicButton }) {
                 var keyCode = KeyPrefs.KeyPrefsData.GetBoundKeyCode(keyBind, KeyPrefs.BindingSlot.A);
                 void SetBinding(KeyCode code) {
                     KeyPrefs.KeyPrefsData.SetBinding(keyBind, KeyPrefs.BindingSlot.A, code);
@@ -128,6 +130,7 @@ namespace Inventory {
             Scribe_Values.Look(ref biasLoadBearingItems, nameof(biasLoadBearingItems), false);
             Scribe_Values.Look(ref onlyItemsFromLoadout, nameof(onlyItemsFromLoadout), false);
             Scribe_Values.Look(ref disableCustomScroll, nameof(disableCustomScroll), Application.platform == RuntimePlatform.LinuxPlayer);
+            Scribe_Values.Look(ref noPanicAlert, nameof(noPanicAlert), false);
             Scribe_Values.Look(ref defaultHitpoints, nameof(defaultHitpoints), FloatRange.ZeroToOne);
             Scribe_Values.Look(ref defaultQualityRange, nameof(defaultQualityRange), QualityRange.All);
 

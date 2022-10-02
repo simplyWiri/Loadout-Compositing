@@ -8,6 +8,7 @@ namespace Inventory {
 
         public static KeyBindingDef CL_OpenLoadoutEditor;
         public static KeyBindingDef CL_OpenTagEditor;
+        public static KeyBindingDef CL_PanicButton;
 
     }
 

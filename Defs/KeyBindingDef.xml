@@ -15,4 +15,11 @@
     <defaultKeyCodeA></defaultKeyCodeA>
   </KeyBindingDef>
 
+  <KeyBindingDef>
+    <category>MainTabs</category>
+    <defName>CL_PanicButton</defName>
+    <label>Panic Button</label>
+    <defaultKeyCodeA></defaultKeyCodeA>
+  </KeyBindingDef>
+
 </Defs>

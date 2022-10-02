@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
@@ -12,11 +13,15 @@ namespace Inventory {
         private LoadoutState currentState;
         private bool needsUpdate = false;
 
+        private bool panicMode = false;
+        private LoadoutState priorState = null;
+
         public IEnumerable<Tag> AllTags => elements.Select(elem => elem.Tag);
         public IEnumerable<Item> AllItems => AllTags.SelectMany(t => t.requiredItems);
         public IEnumerable<Tag> Tags => TagsWith(currentState);
 
         public bool NeedsUpdate => needsUpdate;
+        public bool InPanicMode => panicMode;
         public LoadoutState CurrentState => currentState;
         public List<Item> ThingsToRemove => itemsToRemove;
 
@@ -34,6 +39,11 @@ namespace Inventory {
         }
 
         public void SetState(LoadoutState state) {
+            if ( panicMode ) {
+                Messages.Message(Strings.CantOverridePanicMode, MessageTypeDefOf.CautionInput, false);
+                return;
+            }
+
             var changedElems = new List<LoadoutElement>();
             foreach (var elem in AllElements) {
                 if ( elem.Active(CurrentState) != elem.Active(state)) {
@@ -144,12 +154,28 @@ namespace Inventory {
             }
         }
 
+        public void ActivatePanicMode(LoadoutState newState) {
+            priorState = currentState;
+            SetState(newState);
+
+            panicMode = true;
+            RequiresUpdate();
+        }
+
+        public void DeactivatePanicMode() {
+            panicMode = false;
+            SetState(priorState);
+            priorState = null;
+        }
+
         public void ExposeData() {
             Scribe_Values.Look(ref needsUpdate, nameof(needsUpdate), false);
             Scribe_Collections.Look(ref elements, nameof(elements), LookMode.Deep);
             Scribe_Collections.Look(ref itemsToRemove, nameof(itemsToRemove), LookMode.Deep);
             Scribe_References.Look(ref currentState, nameof(currentState));
 
+            Scribe_Values.Look(ref panicMode, nameof(panicMode));
+            Scribe_References.Look(ref priorState, nameof(priorState));
 
             itemsToRemove = new List<Item>();
             elements ??= new List<LoadoutElement>();

@@ -22,6 +22,8 @@ namespace Inventory {
         
         
         public override void DoWindowContents(Rect inRect) {
+            DrawSetPanicState(ref inRect);
+
             Text.Font = GameFont.Small;
             var topPrt = inRect.PopTopPartPixels(UIC.SPACED_HEIGHT);
 
@@ -82,6 +84,38 @@ namespace Inventory {
             Widgets.EndScrollView();
         }
 
+        public void DrawSetPanicState(ref Rect rect) {
+            var topRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(Text.LineHeight);
+            TooltipHandler.TipRegion(topRect, Strings.PanicStateDesc);
+            Widgets.Label(topRect.PopLeftPartPixels(Strings.PanicState.GetWidthCached() + UIC.SMALL_GAP), Strings.PanicState);
+
+            if ( LoadoutManager.States.Except(LoadoutManager.PanicState).Count() >= 1 ) {
+               Widgets.Dropdown(topRect, LoadoutManager.PanicState, (p) => p, GenerateMenuFor, LoadoutManager.PanicState?.name ?? Strings.DefaultStateName, paintable: true);
+            } else {
+                GUI.color = Color.gray;
+                if (Widgets.ButtonText(topRect, LoadoutManager.PanicState?.name ?? Strings.DefaultStateName)) {
+                    Messages.Message(Strings.NoValidPanicStates, MessageTypeDefOf.CautionInput, false);
+                }
+                GUI.color = Color.white;
+            }
+
+            GUI.color = Widgets.SeparatorLineColor;
+            Widgets.DrawLineHorizontal(rect.x - 2f, rect.y - 4f, rect.width + 2f);
+
+            rect.AdjVertBy(4f);
+            GUI.color = Color.white;
+        }
+
+        public IEnumerable<Widgets.DropdownMenuElement<LoadoutState>> GenerateMenuFor(LoadoutState currentPanicMode)
+        {
+            foreach (var state in LoadoutManager.States.Except(currentPanicMode)) {
+                yield return new Widgets.DropdownMenuElement<LoadoutState>() {
+                    option = new FloatMenuOption(state.name, () => LoadoutManager.SetPanicState(state)),
+                    payload = state
+                };
+            }
+
+        }
     }
 
 }

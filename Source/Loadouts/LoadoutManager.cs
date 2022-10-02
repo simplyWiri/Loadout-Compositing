@@ -26,9 +26,12 @@ namespace Inventory {
         private Dictionary<Tag, SerializablePawnList> pawnTags = new Dictionary<Tag, SerializablePawnList>();
         private Dictionary<Bill_Production, Tag> billToTag = new Dictionary<Bill_Production, Tag>();
 
+        private LoadoutState panicState = null;
+
         public static List<Tag> Tags => instance.tags;
         public static List<LoadoutState> States => instance.states;
         public static Dictionary<Tag, SerializablePawnList> PawnsWithTags => instance.pawnTags;
+        public static LoadoutState PanicState => instance.panicState;
 
         public static int GetNextTagId() => UniqueIDsManager.GetNextID(ref instance.nextTagId);
         public static int GetNextStateId() => UniqueIDsManager.GetNextID(ref instance.nextStateId);
@@ -68,7 +71,7 @@ namespace Inventory {
 
             instance.billToTag.RemoveAll((pair) => pair.Value == tag);
 
-            foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.AllPawns).Where(p => p.IsValidLoadoutHolder())) {
+            foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.FreeColonistsSpawned).Where(p => p.IsValidLoadoutHolder())) {
                 var loadout = pawn.TryGetComp<LoadoutComponent>();
                 if (loadout == null) continue;
 
@@ -79,7 +82,7 @@ namespace Inventory {
         public static void RemoveState(LoadoutState state) {
             instance.states.Remove(state);
             
-            foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.AllPawns).Where(p => p.IsValidLoadoutHolder())) {
+            foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.FreeColonistsSpawned).Where(p => p.IsValidLoadoutHolder())) {
                 var loadout = pawn.TryGetComp<LoadoutComponent>();
                 if (loadout == null) continue;
 
@@ -114,6 +117,7 @@ namespace Inventory {
             Scribe_Collections.Look(ref states, nameof(states), LookMode.Deep);
             Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Deep, ref pTagsLoading, ref pPawnLoading);
             Scribe_Collections.Look(ref billToTag, nameof(billToTag), LookMode.Reference, LookMode.Reference);
+            Scribe_References.Look(ref panicState, nameof(panicState));
             Scribe_Values.Look(ref nextTagId, nameof(nextTagId));
             Scribe_Values.Look(ref nextStateId, nameof(nextStateId));
             Scribe_Values.Look(ref backCompat, nameof(backCompat));
@@ -162,6 +166,36 @@ namespace Inventory {
                 }
                 else {
                     Find.WindowStack.RemoveWindowsOfType(typeof(Dialog_TagEditor));
+                }
+            }
+
+            if (InvKeyBindingDefOf.CL_PanicButton?.KeyDownEvent ?? false ) {
+                TogglePanicMode();
+            }
+        }
+
+        public static void SetPanicState(LoadoutState state) {
+            instance.panicState = state;
+        }
+
+        public static void TogglePanicMode() {
+            var targetMap = Find.CurrentMap;
+            if (targetMap is null) {
+                return;
+            }
+
+            var pawns = targetMap.mapPawns.FreeColonistsSpawned.Where(p => p.IsValidLoadoutHolder());
+            var activePanicState = pawns.Any(p => p.TryGetComp<LoadoutComponent>().Loadout.InPanicMode);
+
+            foreach (var pawn in pawns) {
+                var comp = pawn.TryGetComp<LoadoutComponent>();
+                if (activePanicState) {
+                    comp.Loadout.DeactivatePanicMode();
+                } else {
+                    comp.Loadout.ActivatePanicMode(instance.panicState);
+
+                    pawn.jobs.ClearQueuedJobs();
+                    pawn.jobs.CleanupCurrentJob(Verse.AI.JobCondition.InterruptForced, true);
                 }
             }
         }
