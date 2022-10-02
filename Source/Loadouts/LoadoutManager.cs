@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -105,6 +104,9 @@ namespace Inventory {
         
         public override void FinalizeInit() {
             instance = this;
+
+            // Ugly workaround detailed on the type itself.
+            BetterPawnControl_EmergencyToggle_Patch.TryPatch(ModBase.harmony);
         }
 
         public override void ExposeData() {
@@ -178,26 +180,26 @@ namespace Inventory {
             instance.panicState = state;
         }
 
-        public static void TogglePanicMode() {
+        public static void TogglePanicMode(bool? panicState = null) {
             var targetMap = Find.CurrentMap;
             if (targetMap is null) {
                 return;
             }
 
             var pawns = targetMap.mapPawns.FreeColonistsSpawned.Where(p => p.IsValidLoadoutHolder());
-            var activePanicState = pawns.Any(p => p.TryGetComp<LoadoutComponent>().Loadout.InPanicMode);
+            var activatePanicState = panicState ?? !pawns.Any(p => p.TryGetComp<LoadoutComponent>().Loadout.InPanicMode);
 
             foreach (var pawn in pawns) {
                 var comp = pawn.TryGetComp<LoadoutComponent>();
-                if (activePanicState) {
-                    comp.Loadout.DeactivatePanicMode();
-                } else {
+                if (activatePanicState) {
                     comp.Loadout.ActivatePanicMode(instance.panicState);
 
-                    if ( pawn.jobs.IsCurrentJobPlayerInterruptible() ) {
+                    if (pawn.jobs.IsCurrentJobPlayerInterruptible()) {
                         pawn.jobs.ClearQueuedJobs();
                         pawn.jobs.CleanupCurrentJob(Verse.AI.JobCondition.InterruptForced, true);
                     }
+                } else {
+                    comp.Loadout.DeactivatePanicMode();
                 }
             }
         }

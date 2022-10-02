@@ -14,8 +14,11 @@ namespace Inventory {
     public class AddHumanLikeOrders_Patch {
 
         public static bool Prepare() {
-            return !LoadedModManager.RunningModsListForReading.Any(m =>
-                m.PackageId == "Mehni.PickUpAndHaul".ToLowerInvariant());
+            var puahLoaded = LoadedModManager.RunningModsListForReading.Any(m => m.PackageId == "Mehni.PickUpAndHaul".ToLowerInvariant());
+            if ( puahLoaded ) {
+                Log.Message("[Loadout Compositing] Enabled mod integrations with Pick Up and Haul, disabling duplicate functionality.");
+            }
+            return !puahLoaded;
         }
 
         public static MethodInfo TargetMethod() {
