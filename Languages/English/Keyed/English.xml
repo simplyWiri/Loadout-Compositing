@@ -119,9 +119,35 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.PanicStateAlert>Colonists in active Panic State</CompositableLoadouts.PanicStateAlert>
 	<CompositableLoadouts.PanicStateAlertDesc>There are colonists which are in an active panic state, meaning they have the {0} state active.</CompositableLoadouts.PanicStateAlertDesc>
 
+	<CompositableLoadouts.LoadedTags>Loaded Tags</CompositableLoadouts.LoadedTags>
+	<CompositableLoadouts.SavedTags>Saved Tags</CompositableLoadouts.SavedTags>
+	<CompositableLoadouts.SavedTagName>Saved tag name: </CompositableLoadouts.SavedTagName>
+	<CompositableLoadouts.Load>Load</CompositableLoadouts.Load>
+	<CompositableLoadouts.Save>Save</CompositableLoadouts.Save>
+	<CompositableLoadouts.LoadTagDialogue>Load tag "{0}" into your game as "{1}"</CompositableLoadouts.LoadTagDialogue>
+	<CompositableLoadouts.SaveTagDialogue>Save tag "{0}" under the name "{1}"</CompositableLoadouts.SaveTagDialogue>
+	<!-- (loaded/saved) -->
+	<CompositableLoadouts.TagAlreadyRegistered>a tag has already been {0} with that name</CompositableLoadouts.TagAlreadyRegistered>
+	<CompositableLoadouts.Loaded>loaded</CompositableLoadouts.Loaded>
+	<CompositableLoadouts.Saved>saved</CompositableLoadouts.Saved>
+
+	<CompositableLoadouts.DeleteSavedTag>Delete tag from saved tags</CompositableLoadouts.DeleteSavedTag>
+	<CompositableLoadouts.ConfirmRemoveTag>Remove tag "{0}" from saved tags</CompositableLoadouts.ConfirmRemoveTag>
+
+	<CompositableLoadouts.WarningItemDependsOnModLoad>{0} depends on {1}</CompositableLoadouts.WarningItemDependsOnModLoad>
+	<CompositableLoadouts.WarningItemDependsOnModLoadDesc>If this item is loaded into a save without these mods it will drop these items automatically from the tag automatically, without removing them from the saved tag.</CompositableLoadouts.WarningItemDependsOnModLoadDesc>
+	<CompositableLoadouts.WarningItemFilterDependsOnModLoad>{0}'s filter item {1} depends on {2}</CompositableLoadouts.WarningItemFilterDependsOnModLoad> 
+	<CompositableLoadouts.WarningItemFilterDependsOnModLoadDesc>If this item is loaded into a save without these mods it will drop these items automatically from the filter automatically, without removing them from the saved tag.</CompositableLoadouts.WarningItemFilterDependsOnModLoadDesc> 
+	<CompositableLoadouts.WarningItemDependsOnModSave>Can not load {0}</CompositableLoadouts.WarningItemDependsOnModSave>
+	<CompositableLoadouts.WarningItemDependsOnModSaveDesc>This item will be dropped from the tag, its mod is most likely not loaded.</CompositableLoadouts.WarningItemDependsOnModSaveDesc>
+	<CompositableLoadouts.WarningItemFilterDependsOnModSave>Can not load filter item {0}</CompositableLoadouts.WarningItemFilterDependsOnModSave> 
+	<CompositableLoadouts.WarningItemFilterDependsOnModSaveDesc>This item will be dropped from the filter automatically, its mod is most likely not loaded.</CompositableLoadouts.WarningItemFilterDependsOnModSaveDesc> 
+
 	<CompositableLoadouts.Settings.Options>Options</CompositableLoadouts.Settings.Options>
 	<CompositableLoadouts.Settings.Keybinds>Keybinds</CompositableLoadouts.Settings.Keybinds>
 	<CompositableLoadouts.Settings.ItemFilterDefaults>Tag-item filter defaults</CompositableLoadouts.Settings.ItemFilterDefaults>
+	<CompositableLoadouts.Settings.InterGameTagSaving>Inter-Game Tag Use</CompositableLoadouts.Settings.InterGameTagSaving>
+	<CompositableLoadouts.Settings.InterGameTagSavingSubheading>must be in game if you intend to load tags to and from a save</CompositableLoadouts.Settings.InterGameTagSavingSubheading>
 
 	<CompositableLoadouts.Settings.ImmediatelyResolveLoadout>Immediately resolve loadout when changed</CompositableLoadouts.Settings.ImmediatelyResolveLoadout>
 	<CompositableLoadouts.Settings.ImmediatelyResolveLoadoutDesc>Pawns will immediately attempt to update their loadout any time it has changed (tag removed from loadout, current loadoutstate changed, etc)</CompositableLoadouts.Settings.ImmediatelyResolveLoadoutDesc>

@@ -32,8 +32,8 @@ namespace Inventory
             var savedTagsColumn = rect.RightHalf();
 
             Text.Anchor = TextAnchor.MiddleCenter;
-            Widgets.Label(inGameTagsColumn.PopTopPartPixels(Text.LineHeight), "Loaded Tags");
-            Widgets.Label(savedTagsColumn.PopTopPartPixels(Text.LineHeight), "Saved Tags");
+            Widgets.Label(inGameTagsColumn.PopTopPartPixels(Text.LineHeight), Strings.LoadedTags);
+            Widgets.Label(savedTagsColumn.PopTopPartPixels(Text.LineHeight), Strings.SavedTags);
             Text.Anchor = TextAnchor.UpperLeft;
 
             DrawTagSummaryView(ref inGameTagsColumn, loadedTags.ToList(), ref loadedTagScroll, true);
@@ -43,7 +43,7 @@ namespace Inventory
         private void DrawTagOperations(ref Rect rect, Tag tag, List<Tag> loadedTags, List<Tag> savedTags)
         {
             var textRect = rect.PopTopPartPixels(Text.LineHeight);
-            var textStr = $"Saved tag name: ";
+            var textStr = Strings.SavedTagName;
             var lineWidth = textStr.GetWidthCached();
             Widgets.Label(textRect.PopLeftPartPixels(lineWidth + UIC.SMALL_GAP), textStr);
 
@@ -64,9 +64,9 @@ namespace Inventory
             bool existingWithSameName = loadedTags.Any(t => t.name == currentTagNextName);
             GUI.color = existingWithSameName ? Color.gray : Color.white;
 
-            var iconRect = buttonRect.PopRightPartPixels(Mathf.Max(UIC.SPACED_HEIGHT * 3, "Load".GetWidthCached() + 5f));
+            var iconRect = buttonRect.PopRightPartPixels(Mathf.Max(UIC.SPACED_HEIGHT * 3, Strings.Load.GetWidthCached() + 5f));
 
-            if (Widgets.ButtonText(iconRect, "Load") && !existingWithSameName) {
+            if (Widgets.ButtonText(iconRect, Strings.Load) && !existingWithSameName) {
                 Find.WindowStack.Add(new Dialog_ConfirmSettings(() => {
                     var newTag = tag.MakeCopy();
                     newTag.name = currentTagNextName;
@@ -76,14 +76,14 @@ namespace Inventory
                     }
                     newTag.uniqueId = LoadoutManager.GetNextTagId();
                     loadedTags.Add(newTag);
-                }, $"Load tag \"{tag.name}\" into your game as \"{currentTagNextName}\"", MakeLoadWarnings(tag)));
+                }, Strings.LoadTagDialogue(tag.name, currentTagNextName), MakeLoadWarnings(tag)));
             }
 
             if (existingWithSameName) {
                 showConflict = Mouse.IsOver(iconRect);
 
                 GUI.color = Color.red;
-                Widgets.Label(buttonRect, "a tag has already been loaded with that name");
+                Widgets.Label(buttonRect, Strings.TagAlreadyRegistered(Strings.Loaded));
                 GUI.color = Color.white;
             }
         }
@@ -93,23 +93,23 @@ namespace Inventory
             bool existingWithSameName = savedTags.Any(t => t.name == currentTagNextName);
             GUI.color = existingWithSameName ? Color.gray : Color.white;
 
-            var saveButtonRect = buttonRect.PopRightPartPixels(Mathf.Max(UIC.SPACED_HEIGHT * 3, "Save".GetWidthCached() + 5f));
+            var saveButtonRect = buttonRect.PopRightPartPixels(Mathf.Max(UIC.SPACED_HEIGHT * 3, Strings.Save.GetWidthCached() + 5f));
             
-            if (Widgets.ButtonText(saveButtonRect, "Save") && !existingWithSameName) {
+            if (Widgets.ButtonText(saveButtonRect, Strings.Save) && !existingWithSameName) {
                 Find.WindowStack.Add(new Dialog_ConfirmSettings(() => {
                     var newTag = tag.MakeCopy();
                     newTag.name = currentTagNextName;
                     newTag.requiredItems = selectedTag.requiredItems.ToList();
                     newTag.uniqueId = savedTags.Count == 0 ? 0 : savedTags.MaxBy(t => t.uniqueId).uniqueId + 1;
                     savedTags.Add(newTag);
-                }, $"Save tag \"{tag.name}\" under the name \"{currentTagNextName}\"", MakeSaveWarnings(tag)));
+                }, Strings.SaveTagDialogue(tag.name, currentTagNextName), MakeSaveWarnings(tag)));
             }
 
             if (existingWithSameName) {
                 showConflict = Mouse.IsOver(saveButtonRect);
 
                 GUI.color = Color.red;
-                Widgets.Label(buttonRect, "a tag has already been saved with that name");
+                Widgets.Label(buttonRect, Strings.TagAlreadyRegistered(Strings.Saved));
                 GUI.color = Color.white;
             }
         }
@@ -117,12 +117,12 @@ namespace Inventory
         private void DrawDeleteSavedTagButton(ref Rect rect, Tag tag, List<Tag> savedTags) {
             var buttonRect = rect.PopRightPartPixels(UIC.SMALL_ICON);
 
-            TooltipHandler.TipRegion(buttonRect, "Delete tag from saved tags");
+            TooltipHandler.TipRegion(buttonRect, Strings.DeleteSavedTag);
 
             if (Widgets.ButtonImage(buttonRect, TexButton.DeleteX)) {
                 Find.WindowStack.Add(new Dialog_ConfirmSettings(() => {
                     savedTags.Remove(tag);
-                }, $"Remove tag \"{tag.name}\" from saved tags", new List<Warning>()));
+                }, Strings.ConfirmRemoveTag(tag.name), new List<Warning>()));
             }
         }
 
@@ -131,16 +131,16 @@ namespace Inventory
             foreach(var item in tag.requiredItems) {
                 if (!(item.Def.modContentPack?.IsCoreMod ?? true)) {
                     warnings.Add(new Warning() {
-                        message = $"{item.Def.modContentPack.Name} depends on {item.Def.LabelCap}",
-                        tooltip = "If this item is loaded into a save without these mods it will drop these items automatically from the tag automatically, without removing them from the saved tag.",
+                        message = Strings.WarningItemDependsOnModLoad(item.Def.LabelCap, item.Def.modContentPack.Name),
+                        tooltip = Strings.WarningItemDependsOnModLoadDesc,
                         severity = Warning.Severity.Note
                     });
                 }
                 foreach(var defFilter in item.filter.AllowedStuffs) {
                     if (!(defFilter.Def.modContentPack?.IsCoreMod ?? true)) {
                         warnings.Add(new Warning() {
-                            message = $"{item.Def.LabelCap}'s filter item {defFilter.Def.LabelCap} depends on {defFilter.Def.modContentPack.Name}",
-                            tooltip = "If this item is loaded into a save without these mods it will drop these items automatically from the filter automatically, without removing them from the saved tag.",
+                            message = Strings.WarningItemFilterDependsOnModLoad(item.Def.LabelCap, defFilter.Def.LabelCap, defFilter.Def.modContentPack.Name),
+                            tooltip = Strings.WarningItemFilterDependsOnModLoadDesc,
                             severity = Warning.Severity.Note
                         });
                     }
@@ -157,8 +157,8 @@ namespace Inventory
                 if (!item.WrappedDef.Valid)
                 {
                     warnings.Add(new Warning() {
-                        message = $"Can not load {item.WrappedDef.defName}.",
-                        tooltip = "This item will be dropped from the tag, its mod is most likely not loaded.",
+                        message = Strings.WarningItemDependsOnModSave(item.WrappedDef.defName),
+                        tooltip = Strings.WarningItemDependsOnModSaveDesc,
                         severity = Warning.Severity.Warn
                     });
                 }
@@ -167,8 +167,8 @@ namespace Inventory
                     if (!defFilter.Valid)
                     {
                         warnings.Add(new Warning() {
-                            message = $"Can not load filter item {defFilter.defName}.",
-                            tooltip = "This item will be dropped from the tag, its mod is most likely not loaded.",
+                            message = Strings.WarningItemFilterDependsOnModSave(defFilter.defName),
+                            tooltip = Strings.WarningItemFilterDependsOnModSaveDesc,
                             severity = Warning.Severity.Warn
                         });
                     }

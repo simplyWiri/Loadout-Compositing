@@ -110,9 +110,33 @@ namespace Inventory {
 
         public static string ClearInventoryNow => $"{P}ClearInventoryNow".TranslateSimple();
 
+        public static string LoadedTags => $"{P}LoadedTags".TranslateSimple();
+        public static string SavedTags => $"{P}SavedTags".TranslateSimple();
+        public static string SavedTagName => $"{P}SavedTagName".TranslateSimple();
+        public static string Load => $"{P}Load".TranslateSimple();
+        public static string Save => $"{P}Save".TranslateSimple();
+        public static string LoadTagDialogue(string curTag, string loadedName) => $"{P}LoadTagDialogue".Translate(curTag, loadedName);
+        public static string SaveTagDialogue(string curTag, string savedName) => $"{P}SaveTagDialogue".Translate(curTag, savedName);
+        public static string TagAlreadyRegistered(string registerKind) => $"{P}TagAlreadyRegistered".Translate(registerKind);
+        public static string Loaded => $"{P}Loaded".TranslateSimple();
+        public static string Saved => $"{P}Saved".TranslateSimple();
+        public static string DeleteSavedTag => $"{P}DeleteSavedTag".TranslateSimple();
+        public static string ConfirmRemoveTag(string tagName) => $"{P}ConfirmRemoveTag".Translate(tagName);
+        public static string WarningItemDependsOnModLoad(string item, string mod) => $"{P}WarningItemDependsOnModLoad".Translate(item, mod);
+        public static string WarningItemFilterDependsOnModLoad(string item, string filterItem, string mod) => $"{P}WarningItemFilterDependsOnModLoad".Translate(item, filterItem, mod);
+        public static string WarningItemDependsOnModSave(string item) => $"{P}WarningItemDependsOnModSave".Translate(item);
+        public static string WarningItemFilterDependsOnModSave(string filterItem) => $"{P}WarningItemFilterDependsOnModSave".Translate(filterItem);
+
+        public static string WarningItemDependsOnModLoadDesc => $"{P}WarningItemDependsOnModLoadDesc".TranslateSimple();
+        public static string WarningItemFilterDependsOnModLoadDesc => $"{P}WarningItemFilterDependsOnModLoadDesc".TranslateSimple();
+        public static string WarningItemDependsOnModSaveDesc => $"{P}WarningItemDependsOnModSaveDesc".TranslateSimple();
+        public static string WarningItemFilterDependsOnModSaveDesc => $"{P}WarningItemFilterDependsOnModSaveDesc".TranslateSimple();
+
         public static string Options => $"{P}{S}Options".TranslateSimple();
         public static string Keybinds => $"{P}{S}Keybinds".TranslateSimple();
         public static string ItemFilterDefaults => $"{P}{S}ItemFilterDefaults".TranslateSimple();
+        public static string InterGameTagSaving => $"{P}{S}InterGameTagSaving".TranslateSimple();
+        public static string InterGameTagSavingSubheading => $"{P}{S}InterGameTagSavingSubheading".TranslateSimple();
 
         public static string ImmediatelyResolveLoadout => $"{P}{S}ImmediatelyResolveLoadout".TranslateSimple();
         public static string ImmediatelyResolveLoadoutDesc => $"{P}{S}ImmediatelyResolveLoadoutDesc".TranslateSimple();

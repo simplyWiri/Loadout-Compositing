@@ -37,20 +37,20 @@ namespace Inventory {
             leftColumn.width -= UIC.SMALL_GAP / 2.0f;
             rightColumn.AdjHorzBy(UIC.SMALL_GAP / 2.0f);
             
-            GUIUtility.ListSeperator(ref leftColumn, $"{Strings.Options}", true);
+            GUIUtility.ListSeperator(ref leftColumn, Strings.Options, true);
             DrawOptions(ref leftColumn);
 
             leftColumn.AdjVertBy(UIC.SMALL_GAP);
 
-            GUIUtility.ListSeperator(ref rightColumn, $"{Strings.Keybinds}", true);
+            GUIUtility.ListSeperator(ref rightColumn, Strings.Keybinds, true);
             DrawKeybinds(ref rightColumn);
 
             rightColumn.AdjVertBy(UIC.SMALL_GAP);
             
-            GUIUtility.ListSeperator(ref rightColumn, $"{Strings.ItemFilterDefaults}", true);
+            GUIUtility.ListSeperator(ref rightColumn, Strings.ItemFilterDefaults, true);
             DrawDefaults(ref rightColumn);
 
-            GUIUtility.ListSeperator(ref leftColumn, $"Inter-Game Tag Use", true, "must be in game if you intend to load tags to and from a save");
+            GUIUtility.ListSeperator(ref leftColumn, Strings.InterGameTagSaving, true, Strings.InterGameTagSavingSubheading);
             CrossGameTags(ref leftColumn);
         }
 
