@@ -131,8 +131,12 @@ namespace Inventory {
             return comp is not null ? comp.Loadout.CurrentState : null;
         }
 
-        public static void SetActiveState(this Pawn p, LoadoutState state) {
-            p.TryGetComp<LoadoutComponent>().Loadout.SetState(state);
+        public static void SetActiveState(this Pawn p, LoadoutState state, bool immediatelyResolve = false) {
+            var loadout = p.TryGetComp<LoadoutComponent>().Loadout;
+            loadout.SetState(state);
+            if ( immediatelyResolve ) {
+                loadout.RequiresUpdate();
+            }
         }
 
         public static bool IsValidLoadoutHolder(this Pawn pawn) {

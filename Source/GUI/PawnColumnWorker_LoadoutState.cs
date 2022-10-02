@@ -96,7 +96,7 @@ namespace Inventory {
 
                 Find.WindowStack.Add(new FloatMenu(new List<FloatMenuOption>() {
                     new FloatMenuOption(Strings.MassChangeStates(pawn, pawn.IsCaravanMember() ? Strings.Caravan : Strings.Map, pawn.GetActiveState()), () => {
-                        pawns.Do(p => p.SetActiveState(pawn.GetActiveState()));
+                        pawns.Do(p => p.SetActiveState(pawn.GetActiveState(), true));
                     })
                 }));
             }
