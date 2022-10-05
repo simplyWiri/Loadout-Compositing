@@ -36,6 +36,8 @@ namespace Inventory {
             medicinalDefs ??= items.Where(def => def.IsMedicine || def.IsDrug).ToList();
 
             if (ModLister.HasActiveModWithName("Vanilla Apparel Expanded — Accessories")) {
+                Log.Message("[Loadout Compositing] Enabled mod integrations with Vanilla Apparel Expanded — Accessories, biasing mass carrying clothes...");
+
                 var type = AccessTools.TypeByName("VAE_Accessories.CaravanCapacityApparelDef");
                 var field = type.GetField("carryingCapacity", BindingFlags.Instance | BindingFlags.Public);
                 

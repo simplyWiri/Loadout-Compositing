@@ -31,6 +31,12 @@ namespace Inventory {
         }
 
         public override ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams) {
+            // This is a relatively high priority node on the thinknode, so we do some sanity safeguards to check that the pawn
+            // isn't shirking 'more important' responsibilites, like eating when they are starving, or walking around while they are dying!
+            if ( pawn.needs.food.CurInstantLevelPercentage < 0.15f || HealthUtility.TicksUntilDeathDueToBloodLoss(pawn) < 45000 || HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn) ) {
+                return ThinkResult.NoJob;
+            }
+
             var comp = pawn.TryGetComp<LoadoutComponent>();
             
             if (comp.Loadout.NeedsUpdate || PawnNeedsUpdate(pawn)) {

@@ -29,6 +29,7 @@ namespace Inventory {
                 yield return new Command_Action {
                     action = () => Pawn.EnqueueEmptyInventory(),
                     defaultLabel = Strings.ClearInventoryNow,
+                    icon = Textures.DropInventoryGizmoTex,
                     alsoClickIfOtherInGroupClicked = true
                 };
             }
