@@ -2,6 +2,7 @@
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 
 namespace Inventory {
 
@@ -209,6 +210,16 @@ namespace Inventory {
             var c = rect.center;
             rect.x = c.x - width / 2.0f;
             rect.width = width;
+        }
+
+        public static bool ColoredButtonIcon(this WidgetRow row, Texture2D tex, string tooltip, Color color)
+        {
+            row.IncrementYIfWillExceedMaxWidth(24f);
+            var rect = new Rect(row.LeftX(24f), row.curY, 24f, 24f);
+            var result = Widgets.ButtonImage(rect, tex, color, GenUI.MouseoverColor);
+            row.IncrementPosition(24f);
+            TooltipHandler.TipRegion(rect, tooltip);
+            return result;
         }
 
     }

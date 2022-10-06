@@ -26,6 +26,7 @@ namespace Inventory {
         private Dictionary<Bill_Production, Tag> billToTag = new Dictionary<Bill_Production, Tag>();
 
         private LoadoutState panicState = null;
+        private bool inPanicState = false;
 
         public static List<Tag> Tags => instance.tags;
         public static List<LoadoutState> States => instance.states;
@@ -120,6 +121,7 @@ namespace Inventory {
             Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Deep, ref pTagsLoading, ref pPawnLoading);
             Scribe_Collections.Look(ref billToTag, nameof(billToTag), LookMode.Reference, LookMode.Reference);
             Scribe_References.Look(ref panicState, nameof(panicState));
+            Scribe_Values.Look(ref inPanicState, nameof(inPanicState));
             Scribe_Values.Look(ref nextTagId, nameof(nextTagId));
             Scribe_Values.Look(ref nextStateId, nameof(nextStateId));
             Scribe_Values.Look(ref backCompat, nameof(backCompat));
@@ -198,10 +200,16 @@ namespace Inventory {
                         pawn.jobs.ClearQueuedJobs();
                         pawn.jobs.CleanupCurrentJob(Verse.AI.JobCondition.InterruptForced, true);
                     }
+                    instance.inPanicState = true;
                 } else {
                     comp.Loadout.DeactivatePanicMode();
+                    instance.inPanicState = false;
                 }
             }
+        }
+
+        public static bool ActivePanicState() {
+            return instance.inPanicState;
         }
 
     }

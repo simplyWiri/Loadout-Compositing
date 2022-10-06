@@ -119,6 +119,9 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.PanicStateAlert>Colonists in active Panic State</CompositableLoadouts.PanicStateAlert>
 	<CompositableLoadouts.PanicStateAlertDesc>There are colonists which are in an active panic state, meaning they have the {0} state active.</CompositableLoadouts.PanicStateAlertDesc>
 
+	<CompositableLoadouts.ActivatePanicState>Enable panic state in all pawns, this will switch all pawns temporarily to the {0} state, until toggled off, where their previous state will be reinstated.</CompositableLoadouts.ActivatePanicState>
+	<CompositableLoadouts.DeactivatePanicState>Disable panic state, restoring all colonists loadout state to the state they were in prior to the panic state being activated.</CompositableLoadouts.DeactivatePanicState>
+
 	<CompositableLoadouts.LoadedTags>Loaded Tags</CompositableLoadouts.LoadedTags>
 	<CompositableLoadouts.SavedTags>Saved Tags</CompositableLoadouts.SavedTags>
 	<CompositableLoadouts.SavedTagName>Saved tag name: </CompositableLoadouts.SavedTagName>

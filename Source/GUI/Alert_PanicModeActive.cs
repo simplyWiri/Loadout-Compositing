@@ -19,21 +19,19 @@ namespace Inventory
                 return false;
             }
 
-            var pawns = PanicModePawns().ToList();
-            if ( pawns.Count == 0 ) {
+            if ( !LoadoutManager.ActivePanicState() ) {
                 return false;
             }
 
             this.defaultExplanation = Strings.PanicStateAlertDesc(LoadoutManager.PanicState);
-            return AlertReport.CulpritsAre(pawns);
+            return AlertReport.CulpritsAre(PanicModePawns().ToList());
         }
 
-        public IEnumerable<Pawn> PanicModePawns()
-        {
+        public IEnumerable<Pawn> PanicModePawns() {
             var maps = Find.Maps;
-            foreach(var map in maps) {
+            foreach (var map in maps) {
                 var pawns = map.mapPawns.FreeColonistsSpawned.Where(p => p.IsValidLoadoutHolder());
-                foreach(var pawn in pawns.Where(p => p.TryGetComp<LoadoutComponent>().Loadout.InPanicMode)) {
+                foreach (var pawn in pawns.Where(p => p.TryGetComp<LoadoutComponent>().Loadout.InPanicMode)) {
                     yield return pawn;
                 }
             }
