@@ -19,13 +19,11 @@ namespace Inventory {
             this.ShouldDraw = shouldDraw;
         }
 
-        public bool Draw(Rect rect) {
+        public void Draw(Rect rect) {
             // header [ Prev ] [ Current Pawn Name ] [ Next ]
 
             var topPartRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
-            if (DrawHeader(topPartRect)) {
-                return true;
-            }
+            DrawHeader(topPartRect);
 
             rect.PopRightPartPixels(GenUI.GapTiny);
             rect.PopTopPartPixels(GenUI.GapTiny);
@@ -94,43 +92,25 @@ namespace Inventory {
             }
 
             Widgets.EndScrollView();
-
-            return false;
         }
 
-        public bool DrawHeader(Rect rect) {
+        public void DrawHeader(Rect rect) {
             var lhs = rect.PopLeftPartPixels(UIC.SMALL_ICON);
             var rhs = rect.PopRightPartPixels(UIC.SMALL_ICON);
 
             TooltipHandler.TipRegion(lhs, Strings.SelectPrevious);
             if (Widgets.ButtonImageFitted(lhs, Textures.PreviousTex)) {
                 ThingSelectionUtility.SelectPreviousColonist();
-                if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
-                    parent.Close();
-                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), parent));
-                    return true;
-                } else {
-                    Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
-                }
             }
 
             TooltipHandler.TipRegion(rhs, Strings.SelectNext);
             if (Widgets.ButtonImageFitted(rhs, Textures.NextTex)) {
                 ThingSelectionUtility.SelectNextColonist();
-                if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
-                    parent.Close();
-                    Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), parent));
-                    return true;
-                } else {
-                    Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
-                }
             }
 
             Text.Anchor = TextAnchor.MiddleCenter;
             Widgets.Label(rect, $"{parent.pawn.LabelShort}");
             Text.Anchor = TextAnchor.UpperLeft;
-
-            return false;
         }
 
     }

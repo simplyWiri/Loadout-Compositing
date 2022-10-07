@@ -83,28 +83,14 @@ namespace Inventory {
 
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode != KeyCode.None) {
                 if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.Comma)) {
-                    ThingSelectionUtility.SelectPreviousColonist();
-                    if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
-                        Close();
-                        Event.current.Use();
-                        Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), this));
-                        return;
-                    } else {
-                        Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
-                    }
+                    Event.current.Use();
+                    ThingSelectionUtility.SelectNextColonist();
+                    return;
                 }
 
                 if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.Period)) {
+                    Event.current.Use();
                     ThingSelectionUtility.SelectNextColonist();
-                    if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
-                        Close();
-                        Event.current.Use();
-                        Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), this));
-                        return;
-                    } else {
-                        Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
-                    }
-
                     return;
                 }
             }
@@ -112,11 +98,7 @@ namespace Inventory {
             inRect.PopTopPartPixels(UIC.SMALL_GAP);
             
             if (pawnStatPanel.ShouldDraw) {
-                // returns true if we pressed the button which selects a new pawn, in which case, this window has been closed
-                // and drawing any further content is useless.
-                if (pawnStatPanel.Draw(inRect.PopLeftPartPixels(Panel_PawnStats.WIDTH))) {
-                    return;
-                }
+                pawnStatPanel.Draw(inRect.PopLeftPartPixels(Panel_PawnStats.WIDTH));
             }
 
             var middlePanel = inRect.PopLeftPartPixels(WIDTH - Margin);
