@@ -130,6 +130,8 @@ namespace Inventory {
         public static string WarningItemDependsOnModSave(string item) => $"{P}WarningItemDependsOnModSave".Translate(item);
         public static string WarningItemFilterDependsOnModSave(string filterItem) => $"{P}WarningItemFilterDependsOnModSave".Translate(filterItem);
 
+        public static string WarnNoPanicStateLoadoutSet => $"{P}WarnNoPanicStateLoadoutSet".TranslateSimple();
+
         public static string WarningItemDependsOnModLoadDesc => $"{P}WarningItemDependsOnModLoadDesc".TranslateSimple();
         public static string WarningItemFilterDependsOnModLoadDesc => $"{P}WarningItemFilterDependsOnModLoadDesc".TranslateSimple();
         public static string WarningItemDependsOnModSaveDesc => $"{P}WarningItemDependsOnModSaveDesc".TranslateSimple();

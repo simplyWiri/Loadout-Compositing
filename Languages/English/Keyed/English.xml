@@ -138,6 +138,7 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.DeleteSavedTag>Delete tag from saved tags</CompositableLoadouts.DeleteSavedTag>
 	<CompositableLoadouts.ConfirmRemoveTag>Remove tag "{0}" from saved tags</CompositableLoadouts.ConfirmRemoveTag>
 
+	<CompositableLoadouts.WarnNoPanicStateLoadoutSet>No loadout state has been set as the state to default to when pawns are in their panic state.</CompositableLoadouts.WarnNoPanicStateLoadoutSet>
 
 	<CompositableLoadouts.WarningItemDependsOnModLoad>{0} depends on {1}</CompositableLoadouts.WarningItemDependsOnModLoad>
 	<CompositableLoadouts.WarningItemDependsOnModLoadDesc>If this item is loaded into a save without these mods it will drop these items automatically from the tag automatically, without removing them from the saved tag.</CompositableLoadouts.WarningItemDependsOnModLoadDesc>

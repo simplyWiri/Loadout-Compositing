@@ -183,6 +183,10 @@ namespace Inventory {
         }
 
         public static void TogglePanicMode(bool? panicState = null) {
+            if (instance.panicState == null) {
+                Messages.Message(Strings.WarnNoPanicStateLoadoutSet, MessageTypeDefOf.CautionInput, false);
+            }
+
             var targetMap = Find.CurrentMap;
             if (targetMap is null) {
                 return;
@@ -194,6 +198,18 @@ namespace Inventory {
             foreach (var pawn in pawns) {
                 var comp = pawn.TryGetComp<LoadoutComponent>();
                 if (activatePanicState) {
+                    // No tags, don't interrupt their work.
+                    if ( comp.Loadout.AllTags.Count() == 0 ) {
+                        continue;
+                    }
+
+                    var currentTags = comp.Loadout.Tags;
+                    var nextTags = comp.Loadout.TagsWith(instance.panicState);
+                    // Activating this state wouldn't change anything for this pawn, don't interrupt their work.
+                    if ( currentTags.All(nextTags.Contains) ) {
+                        continue;
+                    }
+
                     comp.Loadout.ActivatePanicMode(instance.panicState);
 
                     if (pawn.jobs.IsCurrentJobPlayerInterruptible()) {
