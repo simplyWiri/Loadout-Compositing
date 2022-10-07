@@ -49,6 +49,7 @@ namespace Inventory {
         public static string SelectNext => $"{P}SelectNext".TranslateSimple();
         public static string TopFourSkills => $"{P}TopFourSkills".TranslateSimple();
         public static string ApparelWhichCanBeWorn => $"{P}ApparelWhichCanBeWorn".TranslateSimple();
+        public static string PawnTraits => $"{P}PawnTraits".TranslateSimple();
         public static string AppliedTags => $"{P}AppliedTags".TranslateSimple();
         public static string PawnStats => $"{P}PawnStats".TranslateSimple();
         public static string ShowCoverage => $"{P}ShowCoverage".TranslateSimple();

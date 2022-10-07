@@ -57,6 +57,23 @@ namespace Inventory {
                     new TipSignal(SkillUI.GetSkillDescription(skill), skill.def.GetHashCode() * 397945));
             }
 
+            GUIUtility.ListSeperator(ref rect, Strings.PawnTraits);
+
+            foreach( var trait in parent.pawn.story.traits.allTraits ) {
+                var traitRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
+
+                if (Mouse.IsOver(traitRect)) {
+                    Widgets.DrawHighlight(traitRect);
+                    TooltipHandler.TipRegion(traitRect, new TipSignal(() => trait.TipString(parent.pawn), parent.pawn.thingIDNumber % 89));
+                }
+
+                GUI.color = CharacterCardUtility.StackElementBackground;
+                GUI.DrawTexture(traitRect.ContractedBy(1f), BaseContent.WhiteTex);
+                GUI.color = Color.white;
+
+                Widgets.Label(traitRect.ContractedBy(3f), trait.LabelCap);
+            }
+
             GUIUtility.ListSeperator(ref rect, Strings.ApparelWhichCanBeWorn);
 
             var wornApparel = parent.component.Loadout.HypotheticalWornApparel(parent.shownState, parent.pawn.RaceProps.body).ToList();
