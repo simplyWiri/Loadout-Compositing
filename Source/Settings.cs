@@ -6,8 +6,6 @@ using System.Text;
 using RimWorld;
 using UnityEngine;
 using Verse;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
-using static RimWorld.BaseGen.SymbolStack;
 
 namespace Inventory {
 
@@ -24,6 +22,8 @@ namespace Inventory {
         
         public List<Tag> genericTags = new List<Tag>();
         Panel_InterGameSettingsPanel interGamePanel = new Panel_InterGameSettingsPanel();
+
+        private bool seenOpenKeybindingDialog = false;
 
         public void DoSettingsWindow(Rect rect) {
 
@@ -52,6 +52,14 @@ namespace Inventory {
 
             GUIUtility.ListSeperator(ref leftColumn, Strings.InterGameTagSaving, true, Strings.InterGameTagSavingSubheading);
             CrossGameTags(ref leftColumn);
+
+            if ( seenOpenKeybindingDialog ) {
+                seenOpenKeybindingDialog = Find.WindowStack.IsOpen<Dialog_DefineBinding>();
+                if ( !seenOpenKeybindingDialog ) {
+                    KeyPrefs.Save();
+                }
+            }
+
         }
 
         private void DrawOptions(ref Rect rect) {
@@ -103,6 +111,7 @@ namespace Inventory {
                 
                 if (Event.current.button == 0) {
                     Find.WindowStack.Add(new Dialog_DefineBinding(KeyPrefs.KeyPrefsData, keyBind, KeyPrefs.BindingSlot.A));
+                    seenOpenKeybindingDialog = true;    
                 } else if (Event.current.button == 1) {
                     var list = new List<FloatMenuOption> {
                         new ("ResetBinding".Translate(), () => SetBinding(keyBind.defaultKeyCodeA)),
@@ -122,7 +131,6 @@ namespace Inventory {
 
             interGamePanel.Draw(ref rect, LoadoutManager.Tags, genericTags);
         }
-
 
         public override void ExposeData() {
             Scribe_Values.Look(ref hideGizmo, nameof(hideGizmo), false);
