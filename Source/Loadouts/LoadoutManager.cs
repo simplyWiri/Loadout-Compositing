@@ -206,7 +206,7 @@ namespace Inventory {
                     var currentTags = comp.Loadout.Tags;
                     var nextTags = comp.Loadout.TagsWith(instance.panicState);
                     // Activating this state wouldn't change anything for this pawn, don't interrupt their work.
-                    if ( currentTags.All(nextTags.Contains) ) {
+                    if ( nextTags.All(currentTags.Contains) ) {
                         continue;
                     }
 
