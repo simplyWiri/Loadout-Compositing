@@ -147,7 +147,8 @@ namespace Inventory {
                    && pawn.IsColonist
                    && !pawn.Dead
                    && !pawn.IsQuestLodger()
-                   && !(pawn.apparel?.AnyApparelLocked ?? true);
+                   && !(pawn.apparel?.AnyApparelLocked ?? true)
+                   && !pawn.RaceProps.packAnimal; // for a mod which has animals which somehow pass all of the above criteria...
         }
 
         public static IEnumerable<Thing> InventoryAndEquipment(this Pawn pawn) {

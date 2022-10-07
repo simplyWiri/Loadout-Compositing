@@ -31,6 +31,11 @@ namespace Inventory {
         }
 
         public override ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams) {
+            // For some reason, the `ThinkNode_SubtreesByTag` does not check to see if the ThinkNode is satisfied before querying it, which would negate the need for this check.
+            if (!pawn.IsValidLoadoutHolder()) {
+                return ThinkResult.NoJob;
+            }
+
             // This is a relatively high priority node on the thinknode, so we do some sanity safeguards to check that the pawn
             // isn't shirking 'more important' responsibilites, like eating when they are starving, or walking around while they are dying!
             if ( (pawn.needs.food.CurLevelPercentage < pawn.needs.food.PercentageThreshUrgentlyHungry) || (HealthUtility.TicksUntilDeathDueToBloodLoss(pawn) < 45000) ) {
