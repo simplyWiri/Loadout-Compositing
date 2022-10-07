@@ -16,6 +16,7 @@ namespace Inventory {
 
         static IEnumerable<MethodBase> TargetMethods() {
             if (ModLister.HasActiveModWithName("Owl's Colonist Bar (dev)")) {
+                Log.Message("[Loadout Compositing] Enabled mod integrations with Owl's Colonist Bar (dev).");
                 yield return AccessTools.Method("OwlBar.OwlColonistBar:HandleClicks");
             }
             

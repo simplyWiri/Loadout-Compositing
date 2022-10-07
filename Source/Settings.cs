@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using System.Text;
 using RimWorld;
 using UnityEngine;
@@ -13,9 +15,15 @@ namespace Inventory {
         public bool onlyItemsFromLoadout = false;
         public bool biasLoadBearingItems = false;
         public bool hideGizmo = false;
+        public bool noPanicAlert = false;
         public bool disableCustomScroll = false;
         public FloatRange defaultHitpoints = FloatRange.ZeroToOne;
         public QualityRange defaultQualityRange = QualityRange.All;
+        
+        public List<Tag> genericTags = new List<Tag>();
+        Panel_InterGameSettingsPanel interGamePanel = new Panel_InterGameSettingsPanel();
+
+        private bool seenOpenKeybindingDialog = false;
 
         public void DoSettingsWindow(Rect rect) {
 
@@ -29,20 +37,33 @@ namespace Inventory {
             leftColumn.width -= UIC.SMALL_GAP / 2.0f;
             rightColumn.AdjHorzBy(UIC.SMALL_GAP / 2.0f);
             
-            GUIUtility.ListSeperator(ref leftColumn, $"{Strings.Options}", true);
-            DrawOptions(leftColumn);
+            GUIUtility.ListSeperator(ref leftColumn, Strings.Options, true);
+            DrawOptions(ref leftColumn);
 
-            GUIUtility.ListSeperator(ref rightColumn, $"{Strings.Keybinds}", true);
+            leftColumn.AdjVertBy(UIC.SMALL_GAP);
+
+            GUIUtility.ListSeperator(ref rightColumn, Strings.Keybinds, true);
             DrawKeybinds(ref rightColumn);
 
             rightColumn.AdjVertBy(UIC.SMALL_GAP);
             
-            GUIUtility.ListSeperator(ref rightColumn, $"{Strings.ItemFilterDefaults}", true);
+            GUIUtility.ListSeperator(ref rightColumn, Strings.ItemFilterDefaults, true);
             DrawDefaults(ref rightColumn);
+
+            GUIUtility.ListSeperator(ref leftColumn, Strings.InterGameTagSaving, true, Strings.InterGameTagSavingSubheading);
+            CrossGameTags(ref leftColumn);
+
+            if ( seenOpenKeybindingDialog ) {
+                seenOpenKeybindingDialog = Find.WindowStack.IsOpen<Dialog_DefineBinding>();
+                if ( !seenOpenKeybindingDialog ) {
+                    KeyPrefs.Save();
+                }
+            }
+
         }
-        
-        private void DrawOptions(Rect rect) {
-            void DrawOption(string label, ref bool option, string tooltip = null) {
+
+        private void DrawOptions(ref Rect rect) {
+            void DrawOption(ref Rect rect, string label, ref bool option, string tooltip = null) {
                 var optionRect = rect.PopTopPartPixels(Text.CalcHeight(label, rect.width - UIC.SCROLL_WIDTH));
                 Widgets.CheckboxLabeled(optionRect, label, ref option);
                 if (tooltip != null) {
@@ -50,11 +71,12 @@ namespace Inventory {
                 }
             }
 
-            DrawOption(Strings.ImmediatelyResolveLoadout, ref immediatelyResolveLoadout, Strings.ImmediatelyResolveLoadoutDesc);
-            DrawOption(Strings.BiasLoadBearingItems, ref biasLoadBearingItems, Strings.BiasLoadBearingItemsDesc);
-            DrawOption(Strings.OnlyLoadoutItems, ref onlyItemsFromLoadout, Strings.OnlyLoadoutItemsDesc);
-            DrawOption(Strings.HideGizmo, ref hideGizmo, Strings.HideGizmoDesc);
-            DrawOption(Strings.DisableCustomScroll, ref disableCustomScroll, Strings.DisableCustomScrollDesc);
+            DrawOption(ref rect, Strings.ImmediatelyResolveLoadout, ref immediatelyResolveLoadout, Strings.ImmediatelyResolveLoadoutDesc);
+            DrawOption(ref rect, Strings.BiasLoadBearingItems, ref biasLoadBearingItems, Strings.BiasLoadBearingItemsDesc);
+            DrawOption(ref rect, Strings.OnlyLoadoutItems, ref onlyItemsFromLoadout, Strings.OnlyLoadoutItemsDesc);
+            DrawOption(ref rect, Strings.HideGizmo, ref hideGizmo, Strings.HideGizmoDesc);
+            DrawOption(ref rect, Strings.DisableCustomScroll, ref disableCustomScroll, Strings.DisableCustomScrollDesc);
+            DrawOption(ref rect, Strings.NoPanicAlert, ref noPanicAlert, Strings.NoPanicAlertDesc);
         }
 
         private void DrawDefaults(ref Rect rect) {
@@ -71,7 +93,7 @@ namespace Inventory {
 
         private void DrawKeybinds(ref Rect rect) {
             
-            foreach (var keyBind in new List<KeyBindingDef> { InvKeyBindingDefOf.CL_OpenLoadoutEditor, InvKeyBindingDefOf.CL_OpenTagEditor }) {
+            foreach (var keyBind in new List<KeyBindingDef> { InvKeyBindingDefOf.CL_OpenLoadoutEditor, InvKeyBindingDefOf.CL_OpenTagEditor, InvKeyBindingDefOf.CL_PanicButton }) {
                 var keyCode = KeyPrefs.KeyPrefsData.GetBoundKeyCode(keyBind, KeyPrefs.BindingSlot.A);
                 void SetBinding(KeyCode code) {
                     KeyPrefs.KeyPrefsData.SetBinding(keyBind, KeyPrefs.BindingSlot.A, code);
@@ -89,6 +111,7 @@ namespace Inventory {
                 
                 if (Event.current.button == 0) {
                     Find.WindowStack.Add(new Dialog_DefineBinding(KeyPrefs.KeyPrefsData, keyBind, KeyPrefs.BindingSlot.A));
+                    seenOpenKeybindingDialog = true;    
                 } else if (Event.current.button == 1) {
                     var list = new List<FloatMenuOption> {
                         new ("ResetBinding".Translate(), () => SetBinding(keyBind.defaultKeyCodeA)),
@@ -100,14 +123,30 @@ namespace Inventory {
             }
         }
 
+        private void CrossGameTags(ref Rect rect) {
+            var loadoutManagerComponent = Current.Game?.GetComponent<LoadoutManager>();
+            if (loadoutManagerComponent == null) {
+                return;
+            }
+
+            interGamePanel.Draw(ref rect, LoadoutManager.Tags, genericTags);
+        }
+
         public override void ExposeData() {
             Scribe_Values.Look(ref hideGizmo, nameof(hideGizmo), false);
             Scribe_Values.Look(ref immediatelyResolveLoadout, nameof(immediatelyResolveLoadout), false);
             Scribe_Values.Look(ref biasLoadBearingItems, nameof(biasLoadBearingItems), false);
             Scribe_Values.Look(ref onlyItemsFromLoadout, nameof(onlyItemsFromLoadout), false);
             Scribe_Values.Look(ref disableCustomScroll, nameof(disableCustomScroll), Application.platform == RuntimePlatform.LinuxPlayer);
+            Scribe_Values.Look(ref noPanicAlert, nameof(noPanicAlert), false);
             Scribe_Values.Look(ref defaultHitpoints, nameof(defaultHitpoints), FloatRange.ZeroToOne);
             Scribe_Values.Look(ref defaultQualityRange, nameof(defaultQualityRange), QualityRange.All);
+
+            Tag.GenericLoad = true;
+            Scribe_Collections.Look(ref genericTags, nameof(genericTags), LookMode.Deep);
+            Tag.GenericLoad = false;
+
+            genericTags ??= new List<Tag>();
         }
 
     }

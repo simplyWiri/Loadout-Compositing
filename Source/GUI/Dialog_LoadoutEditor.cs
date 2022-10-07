@@ -83,28 +83,14 @@ namespace Inventory {
 
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode != KeyCode.None) {
                 if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.Comma)) {
-                    ThingSelectionUtility.SelectPreviousColonist();
-                    if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
-                        Close();
-                        Event.current.Use();
-                        Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), this));
-                        return;
-                    } else {
-                        Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
-                    }
+                    Event.current.Use();
+                    ThingSelectionUtility.SelectNextColonist();
+                    return;
                 }
 
                 if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.Period)) {
+                    Event.current.Use();
                     ThingSelectionUtility.SelectNextColonist();
-                    if (Find.Selector.SelectedPawns.Any(p => p.IsValidLoadoutHolder())) {
-                        Close();
-                        Event.current.Use();
-                        Find.WindowStack.Add(new Dialog_LoadoutEditor(Find.Selector.SelectedPawns.First(p => p.IsValidLoadoutHolder()), this));
-                        return;
-                    } else {
-                        Messages.Message(Strings.CouldNotFindPawn, MessageTypeDefOf.RejectInput);
-                    }
-
                     return;
                 }
             }
@@ -112,11 +98,7 @@ namespace Inventory {
             inRect.PopTopPartPixels(UIC.SMALL_GAP);
             
             if (pawnStatPanel.ShouldDraw) {
-                // returns true if we pressed the button which selects a new pawn, in which case, this window has been closed
-                // and drawing any further content is useless.
-                if (pawnStatPanel.Draw(inRect.PopLeftPartPixels(Panel_PawnStats.WIDTH))) {
-                    return;
-                }
+                pawnStatPanel.Draw(inRect.PopLeftPartPixels(Panel_PawnStats.WIDTH));
             }
 
             var middlePanel = inRect.PopLeftPartPixels(WIDTH - Margin);
@@ -184,19 +166,34 @@ namespace Inventory {
                     GUI.color = Color.white;
                 }
                 
-                tagRect.AdjHorzBy(3f);
-                Widgets.Label(tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + UIC.SMALL_GAP), tag.name);
-
                 var elemName = $" {element.StateName} ";
                 var width = Mathf.Min(elemName.GetWidthCached() + 5, tagRect.width - UIC.SPACED_HEIGHT * 4);
                 if (Widgets.ButtonText(tagRect.PopRightPartPixels(width).TopPartPixels(UIC.SPACED_HEIGHT), elemName)) {
                     Find.WindowStack.Add(new Dialog_SetTagLoadoutState(pawn.GetComp<LoadoutComponent>().Loadout, element));
                 }
-                
+
+                var iconsRect = tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 4);
+
+                tagRect.AdjHorzBy(3f);
+                if(tag.name.GetWidthCached() + UIC.SMALL_GAP > tagRect.width) {
+                    int idx = tag.name.Length;
+                    var truncatedName = tag.name;
+                    do {
+                        idx -= 1;
+                        truncatedName = truncatedName.Substring(0, idx);
+                    }
+                    while (truncatedName.GetWidthCached() + UIC.SMALL_GAP > tagRect.width);
+
+                    Widgets.Label(tagRect, truncatedName);
+                    TooltipHandler.TipRegion(tagRect, tag.name);
+                } else {
+                    Widgets.Label(tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + UIC.SMALL_GAP), tag.name);
+                }
+
                 // draw required items in blocks of 4
                 for (int i = 0; i < tag.requiredItems.Count; i += 4) {
                     for (int j = 0; j < 4; j++) {
-                        var drawRect = new Rect(tagRect.x + UIC.SPACED_HEIGHT * j, tagRect.y + (i / 4.0f) * UIC.SPACED_HEIGHT, UIC.SPACED_HEIGHT, UIC.SPACED_HEIGHT);
+                        var drawRect = new Rect(iconsRect.x + UIC.SPACED_HEIGHT * j, iconsRect.y + (i / 4.0f) * UIC.SPACED_HEIGHT, UIC.SPACED_HEIGHT, UIC.SPACED_HEIGHT);
                         var expFrustum = frustum.ExpandedBy(UIC.SPACED_HEIGHT * 1/2f);
                         if (!expFrustum.Contains(drawRect.min) || !expFrustum.Contains(drawRect.max)) {
                             continue;

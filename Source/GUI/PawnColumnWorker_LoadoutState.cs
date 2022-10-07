@@ -73,6 +73,10 @@ namespace Inventory {
         // [ cp ] [ pst ] [ Select State ] [ (EditIcon) ]
         //                  ^^ set loadout state  ^^ edit the pawns loadout
         public override void DoCell(Rect rect, Pawn pawn, PawnTable table) {
+            if ( !pawn.IsValidLoadoutHolder() ) {
+                return;
+            }
+
             DoCopyPaste(rect.PopLeftPartPixels(rect.height * 0.8f * (hasCopyPrimed ? 2 : 1)), pawn);
         
             var buttonRect = new Rect(rect.x, rect.y + 2f, rect.width * 0.7f, rect.height - 4f);
@@ -96,7 +100,7 @@ namespace Inventory {
 
                 Find.WindowStack.Add(new FloatMenu(new List<FloatMenuOption>() {
                     new FloatMenuOption(Strings.MassChangeStates(pawn, pawn.IsCaravanMember() ? Strings.Caravan : Strings.Map, pawn.GetActiveState()), () => {
-                        pawns.Do(p => p.SetActiveState(pawn.GetActiveState()));
+                        pawns.Do(p => p.SetActiveState(pawn.GetActiveState(), true));
                     })
                 }));
             }

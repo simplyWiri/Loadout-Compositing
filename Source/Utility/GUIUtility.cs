@@ -2,6 +2,7 @@
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.Sound;
 
 namespace Inventory {
 
@@ -59,6 +60,13 @@ namespace Inventory {
             return ret;
         }
 
+        public static Rect PopBottomPartPixels(this ref Rect rect, float numPixels)
+        {
+            var ret = rect.BottomPartPixels(numPixels);
+            rect.height -= numPixels;
+            return ret;
+        }
+
         public static Rect PopLeftPartPixels(this ref Rect rect, float numPixels) {
             var ret = rect.LeftPartPixels(numPixels);
             rect.AdjHorzBy(numPixels);
@@ -103,7 +111,7 @@ namespace Inventory {
             return changed;
         }
 
-        public static void ListSeperator(ref Rect rect, string label, bool heading = false) {
+        public static void ListSeperator(ref Rect rect, string label, bool heading = false, string subHeading = "") {
             
             rect.AdjVertBy(3f);
             GUI.color = Widgets.SeparatorLabelColor;
@@ -113,9 +121,16 @@ namespace Inventory {
             
             var height = Text.CalcHeight(label, rect.width);
             Widgets.Label(rect.PopTopPartPixels(height), label);
-            
+            if (heading && subHeading != "")
+            {
+                Text.Font = GameFont.Tiny;
+                GUI.color = Color.gray;
+
+                height = Text.CalcHeight(subHeading, rect.width);
+                Widgets.Label(rect.PopTopPartPixels(height), subHeading);
+            } 
             Text.Font = GameFont.Small;
-            
+
             GUI.color = Widgets.SeparatorLineColor;
             Widgets.DrawLineHorizontal(rect.x, rect.y - 2f, rect.width);
             
@@ -195,6 +210,16 @@ namespace Inventory {
             var c = rect.center;
             rect.x = c.x - width / 2.0f;
             rect.width = width;
+        }
+
+        public static bool ColoredButtonIcon(this WidgetRow row, Texture2D tex, string tooltip, Color color)
+        {
+            row.IncrementYIfWillExceedMaxWidth(24f);
+            var rect = new Rect(row.LeftX(24f), row.curY, 24f, 24f);
+            var result = Widgets.ButtonImage(rect, tex, color, GenUI.MouseoverColor);
+            row.IncrementPosition(24f);
+            TooltipHandler.TipRegion(rect, tooltip);
+            return result;
         }
 
     }

@@ -36,6 +36,8 @@ namespace Inventory {
             medicinalDefs ??= items.Where(def => def.IsMedicine || def.IsDrug).ToList();
 
             if (ModLister.HasActiveModWithName("Vanilla Apparel Expanded — Accessories")) {
+                Log.Message("[Loadout Compositing] Enabled mod integrations with Vanilla Apparel Expanded — Accessories, biasing mass carrying clothes...");
+
                 var type = AccessTools.TypeByName("VAE_Accessories.CaravanCapacityApparelDef");
                 var field = type.GetField("carryingCapacity", BindingFlags.Instance | BindingFlags.Public);
                 
@@ -131,8 +133,12 @@ namespace Inventory {
             return comp is not null ? comp.Loadout.CurrentState : null;
         }
 
-        public static void SetActiveState(this Pawn p, LoadoutState state) {
-            p.TryGetComp<LoadoutComponent>().Loadout.SetState(state);
+        public static void SetActiveState(this Pawn p, LoadoutState state, bool immediatelyResolve = false) {
+            var loadout = p.TryGetComp<LoadoutComponent>().Loadout;
+            loadout.SetState(state);
+            if ( immediatelyResolve ) {
+                loadout.RequiresUpdate();
+            }
         }
 
         public static bool IsValidLoadoutHolder(this Pawn pawn) {
@@ -141,7 +147,8 @@ namespace Inventory {
                    && pawn.IsColonist
                    && !pawn.Dead
                    && !pawn.IsQuestLodger()
-                   && !(pawn.apparel?.AnyApparelLocked ?? true);
+                   && !(pawn.apparel?.AnyApparelLocked ?? true)
+                   && !pawn.RaceProps.packAnimal; // for a mod which has animals which somehow pass all of the above criteria...
         }
 
         public static IEnumerable<Thing> InventoryAndEquipment(this Pawn pawn) {
@@ -174,6 +181,13 @@ namespace Inventory {
             if (bill.deleted) return true;
 
             return bill.billStack?.billGiver is not Thing bench || bench.Destroyed;
+        }
+
+        public static void EnqueueEmptyInventory(this Pawn pawn) {
+            var firstUnloadableThing = pawn.inventory.FirstUnloadableThing;
+            if (firstUnloadableThing == default) return;
+
+            pawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(InvJobDefOf.CL_UnloadInventory), JobTag.DraftedOrder, true);
         }
     }
 

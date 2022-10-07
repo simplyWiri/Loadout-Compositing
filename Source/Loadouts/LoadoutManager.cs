@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -26,9 +25,13 @@ namespace Inventory {
         private Dictionary<Tag, SerializablePawnList> pawnTags = new Dictionary<Tag, SerializablePawnList>();
         private Dictionary<Bill_Production, Tag> billToTag = new Dictionary<Bill_Production, Tag>();
 
+        private LoadoutState panicState = null;
+        private bool inPanicState = false;
+
         public static List<Tag> Tags => instance.tags;
         public static List<LoadoutState> States => instance.states;
         public static Dictionary<Tag, SerializablePawnList> PawnsWithTags => instance.pawnTags;
+        public static LoadoutState PanicState => instance.panicState;
 
         public static int GetNextTagId() => UniqueIDsManager.GetNextID(ref instance.nextTagId);
         public static int GetNextStateId() => UniqueIDsManager.GetNextID(ref instance.nextStateId);
@@ -68,7 +71,7 @@ namespace Inventory {
 
             instance.billToTag.RemoveAll((pair) => pair.Value == tag);
 
-            foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.AllPawns).Where(p => p.IsValidLoadoutHolder())) {
+            foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.FreeColonistsSpawned).Where(p => p.IsValidLoadoutHolder())) {
                 var loadout = pawn.TryGetComp<LoadoutComponent>();
                 if (loadout == null) continue;
 
@@ -79,7 +82,7 @@ namespace Inventory {
         public static void RemoveState(LoadoutState state) {
             instance.states.Remove(state);
             
-            foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.AllPawns).Where(p => p.IsValidLoadoutHolder())) {
+            foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.FreeColonistsSpawned).Where(p => p.IsValidLoadoutHolder())) {
                 var loadout = pawn.TryGetComp<LoadoutComponent>();
                 if (loadout == null) continue;
 
@@ -102,6 +105,9 @@ namespace Inventory {
         
         public override void FinalizeInit() {
             instance = this;
+
+            // Ugly workaround detailed on the type itself.
+            BetterPawnControl_EmergencyToggle_Patch.TryPatch(ModBase.harmony);
         }
 
         public override void ExposeData() {
@@ -114,6 +120,8 @@ namespace Inventory {
             Scribe_Collections.Look(ref states, nameof(states), LookMode.Deep);
             Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Deep, ref pTagsLoading, ref pPawnLoading);
             Scribe_Collections.Look(ref billToTag, nameof(billToTag), LookMode.Reference, LookMode.Reference);
+            Scribe_References.Look(ref panicState, nameof(panicState));
+            Scribe_Values.Look(ref inPanicState, nameof(inPanicState));
             Scribe_Values.Look(ref nextTagId, nameof(nextTagId));
             Scribe_Values.Look(ref nextStateId, nameof(nextStateId));
             Scribe_Values.Look(ref backCompat, nameof(backCompat));
@@ -125,7 +133,7 @@ namespace Inventory {
                     backCompat = 1;
                     Log.Message("[Loadout Compositing] Successfully migrated save data from version v1.1 to v1.2");
                 }
-                 
+  
             }
 
             tags ??= new List<Tag>();
@@ -164,6 +172,60 @@ namespace Inventory {
                     Find.WindowStack.RemoveWindowsOfType(typeof(Dialog_TagEditor));
                 }
             }
+
+            if (InvKeyBindingDefOf.CL_PanicButton?.KeyDownEvent ?? false ) {
+                TogglePanicMode();
+            }
+        }
+
+        public static void SetPanicState(LoadoutState state) {
+            instance.panicState = state;
+        }
+
+        public static void TogglePanicMode(bool? panicState = null) {
+            if (instance.panicState == null) {
+                Messages.Message(Strings.WarnNoPanicStateLoadoutSet, MessageTypeDefOf.CautionInput, false);
+            }
+
+            var targetMap = Find.CurrentMap;
+            if (targetMap is null) {
+                return;
+            }
+
+            var pawns = targetMap.mapPawns.FreeColonistsSpawned.Where(p => p.IsValidLoadoutHolder());
+            var activatePanicState = panicState ?? !pawns.Any(p => p.TryGetComp<LoadoutComponent>().Loadout.InPanicMode);
+
+            foreach (var pawn in pawns) {
+                var comp = pawn.TryGetComp<LoadoutComponent>();
+                if (activatePanicState) {
+                    // No tags, don't interrupt their work.
+                    if ( comp.Loadout.AllTags.Count() == 0 ) {
+                        continue;
+                    }
+
+                    var currentTags = comp.Loadout.Tags;
+                    var nextTags = comp.Loadout.TagsWith(instance.panicState);
+                    // Activating this state wouldn't change anything for this pawn, don't interrupt their work.
+                    if ( nextTags.All(currentTags.Contains) ) {
+                        continue;
+                    }
+
+                    comp.Loadout.ActivatePanicMode(instance.panicState);
+
+                    if (pawn.jobs.IsCurrentJobPlayerInterruptible()) {
+                        pawn.jobs.ClearQueuedJobs();
+                        pawn.jobs.CleanupCurrentJob(Verse.AI.JobCondition.InterruptForced, true);
+                    }
+                    instance.inPanicState = true;
+                } else {
+                    comp.Loadout.DeactivatePanicMode();
+                    instance.inPanicState = false;
+                }
+            }
+        }
+
+        public static bool ActivePanicState() {
+            return instance.inPanicState;
         }
 
     }

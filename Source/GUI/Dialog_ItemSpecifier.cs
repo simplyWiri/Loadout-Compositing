@@ -237,7 +237,7 @@ namespace Inventory {
                 ref stuffScrollViewFilter);
 
             // filter stuff list by search bar
-            stuffList.RemoveAll(td => !td.LabelCap.Resolve().Contains(stuffScrollViewFilter));
+            stuffList.RemoveAll(td => !td.LabelCap.Resolve().ToLower().Contains(stuffScrollViewFilter));
 
             Rect viewRect = new Rect(outRect.x, outRect.y, outRect.width - UIC.SCROLL_WIDTH, scrollViewHeight);
             Text.Font = GameFont.Small;
@@ -256,6 +256,7 @@ namespace Inventory {
             stuffList.SortBy(t => t.defName);
             for (int i = 0; i < stuffList.Count; ++i) {
                 ThingDef stuff = stuffList[i];
+                var wrappedStuff = new SafeDef(stuff);
 
                 if (i % 2 == 0)
                     Widgets.DrawLightHighlight(row);
@@ -267,13 +268,12 @@ namespace Inventory {
                 Widgets.DefIcon(iconRect, stuff);
                 Widgets.Label(labelRect, stuff.LabelCap);
 
-                var state = filter.AllowedStuffs.Contains(stuff);
+                var state = filter.AllowedStuffs.Contains(wrappedStuff);
                 if (GUIUtility.DraggableCheckbox(row, checkBoxRect, ref state)) {
                     if (state) {
-                        filter.AllowedStuffs.Add(stuff);
-                    }
-                    else {
-                        filter.AllowedStuffs.Remove(stuff);
+                        filter.AllowedStuffs.Add(wrappedStuff);
+                    } else {
+                        filter.AllowedStuffs.Remove(wrappedStuff);
                     }
                 }
 

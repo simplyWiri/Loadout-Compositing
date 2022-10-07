@@ -12,10 +12,12 @@
 - Create tags containing items which a pawn will wear / pick up / equip automatically
 - Create loadouts consisting of multiple tags for flexibility (composition)
 - Create bills which make `x` number of items, where `x` is the number of pawns with the tag `y`
+- Share tags across multiple saves
 
 &lt;size=24&gt;Mod Integrations:&lt;/size&gt;
 - Better Workbench Management: When copying a bill which targets a tag to another bill, copy the tag with it.
 - Pick up and Haul: Disable pick up patch from our side when PUAH is loaded (duplicate functionality).
+- Better Pawn Control: Panic mode integrates with the panic mode in BPC
 
 &lt;size=24&gt;Incompatibilies:&lt;/size&gt;
 - Awesome Inventory: Both mods work in the same space, and will never be compatible. Sorry.
