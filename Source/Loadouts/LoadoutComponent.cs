@@ -16,7 +16,7 @@ namespace Inventory {
         public Loadout Loadout => loadout;
 
         public override IEnumerable<Gizmo> CompGetGizmosExtra() {
-            if ( !ModBase.settings.hideGizmo ) {
+            if ( Pawn.IsValidLoadoutHolder() && !ModBase.settings.hideGizmo ) {
                 yield return new Command_Action {
                     action = () => Loadout.RequiresUpdate(),
                     defaultLabel = Strings.SatisfyLoadoutNow,
