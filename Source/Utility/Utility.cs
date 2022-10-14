@@ -13,7 +13,7 @@ namespace Inventory {
     public static class Utility {
 
         public static List<ThingDef> apparelDefs = null;
-        public static Dictionary<ThingDef, Func<Thing, float>> massBoostingClothes = null;
+        public static Dictionary<ThingDef, Func<QualityCategory, float>> massBoostingClothes = null;
         public static List<ThingDef> meleeWeapons = null;
         public static List<ThingDef> rangedWeapons = null;
         public static List<ThingDef> medicinalDefs = null;
@@ -30,7 +30,7 @@ namespace Inventory {
                 || td.IsCorpse)).ToList();
 
             apparelDefs ??= items.Where(def => def.IsApparel).ToList();
-            massBoostingClothes = new Dictionary<ThingDef, Func<Thing, float>>();
+            massBoostingClothes = new Dictionary<ThingDef, Func<QualityCategory, float>>();
             meleeWeapons ??= items.Where(def => def.IsMeleeWeapon).ToList();
             rangedWeapons ??= items.Where(def => def.IsRangedWeapon && def.category != ThingCategory.Building).ToList();
             medicinalDefs ??= items.Where(def => def.IsMedicine || def.IsDrug).ToList();
@@ -44,21 +44,17 @@ namespace Inventory {
                 foreach (var def in apparelDefs) {
                     if (def.GetType() == type) {
                         var carryingCapacity = (float)field.GetValue(def);
-                        massBoostingClothes.Add(def, (thing) => {
-                            if (thing.TryGetQuality(out var qc)) {
-                                return carryingCapacity * qc switch {
-                                    QualityCategory.Awful      => 0.5f,
-                                    QualityCategory.Poor       => 0.8f,
-                                    QualityCategory.Normal     => 1.0f,
-                                    QualityCategory.Good       => 1.2f,
-                                    QualityCategory.Excellent  => 1.5f,
-                                    QualityCategory.Masterwork => 1.7f,
-                                    QualityCategory.Legendary  => 2.0f,
-                                    _                          => 0
-                                };
-                            }
-
-                            return carryingCapacity;
+                        massBoostingClothes.Add(def, (QualityCategory quality) => {
+                            return carryingCapacity * quality switch {
+                                QualityCategory.Awful      => 0.5f,
+                                QualityCategory.Poor       => 0.8f,
+                                QualityCategory.Normal     => 1.0f,
+                                QualityCategory.Good       => 1.2f,
+                                QualityCategory.Excellent  => 1.5f,
+                                QualityCategory.Masterwork => 1.7f,
+                                QualityCategory.Legendary  => 2.0f,
+                                _                          => 0
+                            };
                         });
                     }
                 }
@@ -73,22 +69,6 @@ namespace Inventory {
             return (QualityCategory)Mathf.Max((int)qc - 1, (int)QualityCategory.Awful);
         }
 
-        public static Thing MakeThingWithoutID(ThingDef def, ThingDef stuff, QualityCategory quality) {
-            var thing = (Thing)Activator.CreateInstance(def.thingClass);
-            thing.def = def;
-            if (def.MadeFromStuff)
-                thing.SetStuffDirect(stuff);
-            if (thing.def.useHitPoints)
-                thing.HitPoints = thing.MaxHitPoints;
-
-            if (thing is ThingWithComps thingWithComps)
-                thingWithComps.InitializeComps();
-
-            thing.TryGetComp<CompQuality>()?.SetQuality(quality, ArtGenerationContext.Outsider);
-
-            return thing;
-        }
-
         public static float HypotheticalEncumberancePercent(Pawn p, List<Item> items) {
             return Mathf.Clamp01(HypotheticalUnboundedEncumberancePercent(p, items));
         }
@@ -100,8 +80,8 @@ namespace Inventory {
         public static float HypotheticalGearAndInventoryMass(Pawn p, List<Item> items) {
             var mass = 0f;
             foreach (var item in items) {
-                var thing = item.MakeDummyThingNoId();
-                mass += (thing.GetStatValue(StatDefOf.Mass) * item.Quantity);
+                var sr = StatRequest.For(item.Def, item.RandomStuff, item.RandomQuality);
+                mass += (StatDefOf.Mass.Worker.GetValue(sr) * item.Quantity);
             }
 
             return mass;
@@ -119,8 +99,7 @@ namespace Inventory {
             }
             
             foreach (var item in items.Where(item => massBoostingClothes.ContainsKey(item.Def))) {
-                var dummyItem = item.MakeDummyThingNoId();
-                massCapacity += massBoostingClothes[item.Def](dummyItem);
+                massCapacity += massBoostingClothes[item.Def](item.RandomQuality);
             }
 
             return massCapacity;

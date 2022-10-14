@@ -61,9 +61,9 @@ namespace Inventory {
             return stringBuilder.ToString();
         }
 
-        public Thing MakeDummyThingNoId() {
-            return Utility.MakeThingWithoutID(Def, RandomStuff, RandomQuality);
-        }
+        //public Thing MakeDummyThingNoId() {
+        //    return Utility.MakeThingWithoutID(Def, RandomStuff, RandomQuality);
+        //}
 
         public Item() {
             this.def = null;

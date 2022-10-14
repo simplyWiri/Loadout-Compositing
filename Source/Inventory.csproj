@@ -6,13 +6,10 @@
 		<TargetFramework>net472</TargetFramework>
 		<LangVersion>9.0</LangVersion>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<OutputPath>..\Assemblies</OutputPath>
-	</PropertyGroup>
-	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-	  <Optimize>true</Optimize>
+		<OutputPath>..\$(Configuration)\Assemblies</OutputPath>
+		<Configurations>1.3;1.4</Configurations>
 	</PropertyGroup>
 	<ItemGroup>
-    	<PackageReference Include="Krafs.Rimworld.Ref" Version="1.3.3235-beta" />
 		<PackageReference Include="Krafs.Publicizer" Version="1.0.1">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
@@ -22,6 +19,21 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
+	</ItemGroup>
+
+	<PropertyGroup Condition="$(Configuration) == '1.3'">
+		<DefineConstants>$(DEFINE_CONSTANTS);VERSION_1_3</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="$(Configuration) == '1.4'">
+		<DefineConstants>$(DEFINE_CONSTANTS);VERSION_1_4</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup Condition="$(Configuration) == '1.3'">
+		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.3.*" GeneratePathProperty="true"/>
+ 	</ItemGroup>
+	<ItemGroup Condition="$(Configuration) == '1.4'">
+		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.4.*-*" />
 	</ItemGroup>
 
 	<ItemGroup>

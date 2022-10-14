@@ -14,7 +14,8 @@ namespace Inventory {
             var multiplier = comp?.Loadout.WeightAtWhichLoadoutDesires(ap) ?? 0;
             if (multiplier != 0) {
                 if (ModBase.settings.biasLoadBearingItems && Utility.massBoostingClothes.TryGetValue(ap.def, out var func)) {
-                    var score = func(ap);
+                    var hasQuality = ap.TryGetQuality(out var quality);
+                    var score = func(hasQuality ? quality : QualityCategory.Normal);
                     __result += Mathf.Lerp(0.16f, 0.24f, score / 135f);
                 }
                 __result += 0.24f; // flat bonus for being an apparel in the loadout
