@@ -182,27 +182,33 @@ namespace Inventory {
             return bodyPartGroup;
         }
         
-        public static List<Tuple<Item, Tag>> WornApparelFor(BodyDef def, List<Tuple<Item, Tag, int>> apparels) {
-            var wornApparels = new List<Tuple<Item, Tag>>();
-            ApparelSlot wornApparelSlots = null;
-            foreach (var (apparel, tag, _) in apparels.OrderBy(app => app.Item3)) {
-                // can obviously wear it if we aren't wearing anything
-                if (wornApparelSlots == null) {
-                    wornApparelSlots = ApparelSlotMaker.Create(def, apparel.Def);
-                    wornApparels.Add(new Tuple<Item, Tag>(apparel, tag));
-                    continue;
-                }
+        public static List<Tuple<Item, Tag>> WornApparelFor(BodyDef def, List<Tuple<Item, Tag, int>> apparels)
+        {
+            var elements = apparels.Select(app => ApparelElementBuilder.MakeApparelElement(app.Item1.Def, def)).ToList();
+            var resolvedElements = WeightedConflictResolver<ApparelElement>.FindOptimalSolution(elements);
 
-                var apparelSlots = ApparelSlotMaker.Create(def, apparel.Def);
-
-                if (!wornApparelSlots.Intersects(apparelSlots)) {
-                    wornApparels.Add(new Tuple<Item, Tag>(apparel, tag));
-
-                    wornApparelSlots = ApparelSlotMaker.Create(def, wornApparels.Select(kv => kv.Item1.Def));
-                }
-            }
-
-            return wornApparels;
+            return apparels.Where((app, idx) => resolvedElements.Select(elem => elements.IndexOf(elem))
+                .Contains(idx)).Select(tup => new Tuple<Item, Tag>(tup.Item1, tup.Item2)).ToList();
+            // var wornApparels = new List<Tuple<Item, Tag>>();
+            // ApparelSlot wornApparelSlots = null;
+            // foreach (var (apparel, tag, _) in apparels.OrderBy(app => app.Item3)) {
+            //     // can obviously wear it if we aren't wearing anything
+            //     if (wornApparelSlots == null) {
+            //         wornApparelSlots = ApparelSlotMaker.Create(def, apparel.Def);
+            //         wornApparels.Add(new Tuple<Item, Tag>(apparel, tag));
+            //         continue;
+            //     }
+            //
+            //     var apparelSlots = ApparelSlotMaker.Create(def, apparel.Def);
+            //
+            //     if (!wornApparelSlots.Intersects(apparelSlots)) {
+            //         wornApparels.Add(new Tuple<Item, Tag>(apparel, tag));
+            //
+            //         wornApparelSlots = ApparelSlotMaker.Create(def, wornApparels.Select(kv => kv.Item1.Def));
+            //     }
+            // }
+            //
+            // return wornApparels;
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
@@ -33,10 +34,13 @@ namespace Inventory {
             this.interferingBodyPartGroups = new Dictionary<ApparelLayerDef, HashSet<BodyPartGroupDef>>();
             this.intersectionCache = new Dictionary<ApparelSlot, bool>();
 
+
             foreach (var layer in apparel.apparel.layers) {
                 this.bodyPartGroups.SetOrAppend(layer, apparel.apparel.bodyPartGroups);
                 this.interferingBodyPartGroups.SetOrAppend(layer, apparel.apparel.GetInterferingBodyPartGroups(bodyDef));
             }
+
+            ApparelElementBuilder.MakeApparelElement(apparel, bodyDef);
         }
 
         private bool IntersectsWith(ApparelSlot other) {
