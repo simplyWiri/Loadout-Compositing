@@ -102,6 +102,7 @@ namespace Inventory
                     newTag.requiredItems = selectedTag.requiredItems.ToList();
                     newTag.uniqueId = savedTags.Count == 0 ? 0 : savedTags.MaxBy(t => t.uniqueId).uniqueId + 1;
                     savedTags.Add(newTag);
+                    ModBase.settings.Write();
                 }, Strings.SaveTagDialogue(tag.name, currentTagNextName), MakeSaveWarnings(tag)));
             }
 
@@ -122,6 +123,7 @@ namespace Inventory
             if (Widgets.ButtonImage(buttonRect, TexButton.DeleteX)) {
                 Find.WindowStack.Add(new Dialog_ConfirmSettings(() => {
                     savedTags.Remove(tag);
+                    ModBase.settings.Write();
                 }, Strings.ConfirmRemoveTag(tag.name), new List<Warning>()));
             }
         }
@@ -178,7 +180,7 @@ namespace Inventory
         }
 
         private void DrawTagSummaryView(ref Rect rect, List<Tag> tags, ref Vector2 scroll, bool load) {
-            tags.SortByDescending(t => t.name);
+            tags.SortBy(t => t.name);
 
             rect.AdjVertBy(GenUI.GapTiny);
             rect.PopRightPartPixels(UIC.SCROLL_WIDTH);
@@ -188,9 +190,16 @@ namespace Inventory
 
             Widgets.BeginScrollView(rect, ref scroll, viewRect);
 
+            var frumstum = rect;
+            frumstum.y += Mathf.FloorToInt(scroll.y);
+
             foreach (var tag in tags) {
                 var tagHeight = UIC.SPACED_HEIGHT * Mathf.Max(1, Mathf.CeilToInt(tag.requiredItems.Count / 2.0f));
                 var tagRect = viewRect.PopTopPartPixels(tagHeight);
+
+                if (!tagRect.Overlaps(frumstum)) {
+                    continue;
+                }
 
                 if (selectedTag is not null && tag.name == selectedTag.name) {
                     if ((load == selectedFromSavedList && showConflict)) {
@@ -224,6 +233,9 @@ namespace Inventory
                 for (int i = 0; i < tag.requiredItems.Count; i += 2) {
                     for (int j = 0; j < 2; j++) {
                         var drawRect = new Rect(tagRect.x + UIC.SPACED_HEIGHT * j, tagRect.y + (i / 2.0f) * UIC.SPACED_HEIGHT, UIC.SPACED_HEIGHT, UIC.SPACED_HEIGHT);
+                        if ( !drawRect.Overlaps(frumstum) ) {
+                            continue;
+                        }
 
                         var idx = i + j;
                         if (idx >= tag.requiredItems.Count) {
