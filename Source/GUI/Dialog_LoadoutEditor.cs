@@ -104,7 +104,7 @@ namespace Inventory {
             var middlePanel = inRect.PopLeftPartPixels(WIDTH - Margin);
 
             // 45 = 35 + 10, 35 = `ListSeperator` height, 10 = arbitrary buffer
-            var tagsRect = middlePanel.PopTopPartPixels(Mathf.Min(45 + UIC.SPACED_HEIGHT * 2 + tagsHeight, middlePanel.height / 2.0f));
+            var tagsRect = middlePanel.PopTopPartPixels(Mathf.Min(45 + UIC.SPACED_HEIGHT * 2 + tagsHeight, middlePanel.height - (statsHeight + UIC.LIST_SEP_HEIGHT)));
             DrawTags(tagsRect);
             DrawStatistics(middlePanel);
 
