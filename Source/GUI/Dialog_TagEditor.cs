@@ -226,8 +226,7 @@ namespace Inventory {
                 // Info
                 Rect infoRect = itemRect.PopLeftPartPixels(UIC.SMALL_ICON);
                 if (Widgets.ButtonImageFitted(infoRect.ContractedBy(1f), TexButton.Info)) {
-                    Thing thing = Utility.MakeThingWithoutID(def, item.RandomStuff, item.RandomQuality);
-                    Find.WindowStack.Add(new Dialog_InfoCard(thing));
+                    Find.WindowStack.Add(new Dialog_InfoCard(def, item.RandomStuff));
                 }
 
                 // Icon
@@ -452,8 +451,7 @@ namespace Inventory {
 
                 if (Widgets.ButtonImageFitted(rect.RightPart(0.15f).ContractedBy(2f), TexButton.Info)) {
                     var stuff = def.MadeFromStuff ? GenStuff.AllowedStuffsFor(def).First() : null;
-                    Thing thing = Utility.MakeThingWithoutID(def, stuff, QualityCategory.Normal);
-                    Find.WindowStack.Add(new Dialog_InfoCard(thing));
+                    Find.WindowStack.Add(new Dialog_InfoCard(def, stuff));
                 }
 
                 if (i % 2 == 0)

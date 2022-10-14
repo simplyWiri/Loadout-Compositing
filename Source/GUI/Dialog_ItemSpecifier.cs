@@ -298,10 +298,10 @@ namespace Inventory {
 
                 void DrawColumnFor(ThingDef def, ThingDef stuff, QualityCategory qual) {
                     var drawInfo = new StatDrawInfo();
-                    var tempThing = Utility.MakeThingWithoutID(def, stuff, qual);
-                    StatRequest statRequest = StatRequest.For(tempThing);
-                    if ((stats[i].Worker.ShouldShowFor(statRequest) && !stats[i].Worker.IsDisabledFor(tempThing)) ||
-                        stats[i] == StatDefOf.MaxHitPoints || stats[i] == StatDefOf.MeleeWeapon_CooldownMultiplier) {
+                    var statRequest = StatRequest.For(def, stuff, qual);
+                    if (stats[i].Worker.ShouldShowFor(statRequest) 
+                        || stats[i] == StatDefOf.MaxHitPoints 
+                        || stats[i] == StatDefOf.MeleeWeapon_CooldownMultiplier) {
                         drawInfo.StatRequest = statRequest;
                         drawInfo.Value = GetCachedValue(
                             statCache,
@@ -407,8 +407,7 @@ namespace Inventory {
             void DrawHeaderFor(Rect rect, ThingDef def, ThingDef stuff, QualityCategory quality) {
                 Rect buttonRect = rect.PopRightPartPixels(UIC.SMALL_ICON);
                 if (Widgets.ButtonImage(buttonRect.ContractedBy(1f), TexButton.Info)) {
-                    Thing thing = Utility.MakeThingWithoutID(def, stuff, quality);
-                    Find.WindowStack.Add(new Dialog_InfoCard(thing));
+                    Find.WindowStack.Add(new Dialog_InfoCard(def, stuff));
                 }
 
                 string text = stuff != null
