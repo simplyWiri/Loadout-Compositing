@@ -23,7 +23,7 @@ namespace Inventory {
             yield return AccessTools.Method(typeof(ColonistBarColonistDrawer), nameof(ColonistBarColonistDrawer.HandleClicks));
         }
         
-        private static MethodInfo target = AccessTools.Method(typeof(CameraJumper), nameof(CameraJumper.TryJump), new Type[] { typeof(GlobalTargetInfo) });
+        private static MethodInfo target = AccessTools.Method(typeof(CameraJumper), nameof(CameraJumper.TryJump), new Type[] { typeof(GlobalTargetInfo), typeof(CameraJumper.MovementMode) });
         private static MethodInfo insertMethod = AccessTools.Method(typeof(ColonistBarClicker_Patch), "ChangeWindowTo");
         
         // CameraJumper.TryJump(pawn)
