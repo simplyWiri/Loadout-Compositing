@@ -77,7 +77,7 @@ namespace Inventory {
             var colorIdx = 0;
 
             foreach (var tag in tags) {
-                if (!tag.name.Contains(searchString)) {
+                if (!tag.name.ToLowerInvariant().Contains(searchString.ToLowerInvariant())) {
                     continue;
                 }
                 
