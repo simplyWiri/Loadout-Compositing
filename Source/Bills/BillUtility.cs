@@ -18,7 +18,17 @@ namespace Inventory {
         }
 
         // precondition: the productionBill.repeatMode MUST be W_PerTag
-        public static bool Satisfied(this Bill_Production productionBill) {
+        public static bool Satisfied(this Bill_Production productionBill)  {
+            if (productionBill.suspended) {
+                return false;
+            }
+                
+            var tag = LoadoutManager.TagFor(productionBill);
+            if ( productionBill.suspended || tag == null ) {
+                productionBill.suspended = true;
+                return false;
+            }
+        
             var desiredTargetCount = productionBill.DesiredTargetCount();
             if (desiredTargetCount == 0) {
                 productionBill.paused = true;

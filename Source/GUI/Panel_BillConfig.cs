@@ -13,14 +13,25 @@ namespace Inventory {
             standard.Gap(6f);
             
             // Drop down
-            var dropdownStr = LoadoutManager.TagFor(bill) == null
+            var tag = LoadoutManager.TagFor(bill);
+            var dropdownStr = tag == null
                 ? Strings.PickTargetTag
                 : Strings.SwitchTargetTag(LoadoutManager.TagFor(bill).name);
             
             var dropdownStrSize = Text.CalcHeight(dropdownStr, standard.ColumnWidth);
             var dropDownRect = standard.GetRect(Mathf.Max(30, dropdownStrSize + 5f));
             if (Widgets.ButtonText(dropDownRect, dropdownStr)) {
-                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags, (tag) => LoadoutManager.SetTagForBill(bill, tag), false));
+                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(tag).ToList(), selectedTag =>
+                {
+                    if (tag is null && bill.suspended) {
+                        bill.suspended = false;
+                    }
+                    LoadoutManager.SetTagForBill(bill, selectedTag);
+                }, false));
+            }
+
+            if (tag == null) {
+                return;
             }
             
             // How many do we currently have?
@@ -80,8 +91,7 @@ namespace Inventory {
             var producedThingDef = bill.recipe.ProducedThingDef;
             if (producedThingDef == null) return;
 
-            var tag = LoadoutManager.TagFor(bill);
-            if (tag != null && tag.HasThingDef(producedThingDef, out var item)) {
+            if (tag.HasThingDef(producedThingDef, out var item)) {
                 var copyTagStr = Strings.CopyFromTag(item.Def.LabelCap);
                 if (standard.ButtonText(copyTagStr)) {
                     item.Filter.CopyTo(bill.ingredientFilter);
