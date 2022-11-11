@@ -386,15 +386,13 @@ namespace Inventory {
             DrawOptionButton(Textures.MiscItemsTex, "Items", State.Items);
 
             if (selectedStat != null) {
-                Text.Anchor = TextAnchor.MiddleRight;
                 Text.Font = GameFont.Tiny;
-                GUI.color = Color.gray;
+                Text.WordWrap = false;
                 var strLen = selectedStat.LabelCap.GetWidthCached();
                 topRect.width = Mathf.Max(topRect.width, strLen);
-                Widgets.Label(topRect, selectedStat.LabelCap);
-                GUI.color = Color.white;
+                GUIUtility.WithModifiers(topRect, selectedStat.LabelCap, color: Color.gray, anchor: TextAnchor.MiddleRight);
                 Text.Font = GameFont.Small;
-                Text.Anchor = TextAnchor.UpperLeft; 
+                Text.WordWrap = true;
             }
             
             switch (curState) {
@@ -556,7 +554,10 @@ namespace Inventory {
                     var statRect = rowRect.PopLeftPartPixels(statLength);
 
                     if (StatSelector(defs[0]) == StatSelector(defs[defs.Count - 1])) {
-                        Widgets.Label(statRect, $"{StatSelector(defs[0]):0.##}");
+                        var statValue = StatSelector(defs[0]);
+                        if (statValue != INVALID_STAT_VALUE) {
+                            Widgets.Label(statRect, $"{statValue:0.##}");
+                        }
                     } else {
                         var max = StatSelector(defs[ascending ? defs.Count - 1 : 0]);
                         var min = defs.Min(d => {
