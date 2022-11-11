@@ -82,7 +82,7 @@ namespace Inventory {
             }
 
             if (matches != 1 || branchMatches != 1) {
-                Log.ErrorOnce($"[Loadout Compositing] {matches} {branchMatches} Failed to apply bill config transpiler, no option to enable 'X per tag' bills will be available in the dropdown", 384932);
+                Log.ErrorOnce($"[Loadout Compositing] {matches} {branchMatches} Failed to apply transpiler which prevents pawns from automatically dropping items in their Loadout", 384932);
             }
         }
 
