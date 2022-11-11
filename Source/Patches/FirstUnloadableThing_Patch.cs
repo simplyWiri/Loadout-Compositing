@@ -43,6 +43,7 @@ namespace Inventory {
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
             ILGenerator iLGenerator) {
+            int matches = 0, branchMatches = 0;
             var insts = instructions.ToList();
             var localCount = iLGenerator.DeclareLocal(typeof(ThingCount));
             var continueExecutingLabel = iLGenerator.DefineLabel();
@@ -53,6 +54,7 @@ namespace Inventory {
                     for (int j = i; j < insts.Count; j++) {
                         if (MatchesBranchCondition(insts, j)) {
                             insts[j].labels.Add(breakLoopLabel);
+                            branchMatches++;
                         }
                     }
 
@@ -72,10 +74,15 @@ namespace Inventory {
                     yield return new CodeInstruction(OpCodes.Ret);
 
                     yield return insts[i].WithLabels(continueExecutingLabel);
+                    matches++;
                 }
                 else {
                     yield return insts[i];
                 }
+            }
+
+            if (matches != 1 || branchMatches != 1) {
+                Log.ErrorOnce($"[Loadout Compositing] {matches} {branchMatches} Failed to apply bill config transpiler, no option to enable 'X per tag' bills will be available in the dropdown", 384932);
             }
         }
 

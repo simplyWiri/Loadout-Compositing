@@ -18,6 +18,7 @@ namespace Inventory {
 
         
         public static IEnumerable<CodeInstruction> Transpiler(MethodBase __originalMethod, IEnumerable<CodeInstruction> instructions) {
+            var matches = 0;
             var insts = instructions.ToList();
 
             var locs = __originalMethod.GetMethodBody()?.LocalVariables ?? new List<LocalVariableInfo>();
@@ -25,12 +26,17 @@ namespace Inventory {
             
             for (int i = 0; i < insts.Count; i++) {
                 if (Matches(insts, i)) {
+                    matches++;
                     yield return new CodeInstruction(OpCodes.Ldloc, targetLoc.LocalIndex); // ldloc
                     yield return new CodeInstruction(OpCodes.Ldarg_0); // bill_production
                     yield return new CodeInstruction(OpCodes.Call, getOptions);
                 }
 
                 yield return insts[i];
+            }
+
+            if (matches != 1) {
+                Log.ErrorOnce($"[Loadout Compositing] {matches} Failed to add 'X per tag' option to float menu map options", 49500384);
             }
         }
 

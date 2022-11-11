@@ -32,7 +32,9 @@ namespace Inventory {
         
         // CameraJumper.TryJump(pawn)
         // + ChangeWindowTo(pawn) <-- gets added
-        public static IEnumerable<CodeInstruction> Transpiler(MethodBase __originalMethod, IEnumerable<CodeInstruction> instructions) {
+        public static IEnumerable<CodeInstruction> Transpiler(MethodBase __originalMethod, IEnumerable<CodeInstruction> instructions)
+        {
+            var matches = 0;
             var insts = instructions.ToList();
 
             for (int i = 0; i < insts.Count; i++) {
@@ -41,12 +43,17 @@ namespace Inventory {
                 yield return inst;
 
                 if (inst.Calls(target)) {
+                    matches++;
                     var param = GetParamForMethod(__originalMethod);
                     var index = 1 + param.Position;
 
                     yield return new CodeInstruction(OpCodes.Ldarg, index);
                     yield return new CodeInstruction(OpCodes.Call, insertMethod);
                 }
+            }
+            
+            if (matches != 1) {
+                Log.ErrorOnce($"[Loadout Compositing] {matches} Failed to colonist clicker transpiler, will not be able to click on colonists in the colonist bar & update the gui", 946382);
             }
         }
 

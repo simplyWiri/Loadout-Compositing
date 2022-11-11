@@ -9,7 +9,8 @@ using Verse;
 namespace Inventory
 {
 
-    // bias the apparel score gain significantly in favour of apparel in the pawns loadout
+    // Pawns should automatically drop apparel which they are wearing if it does not meet the criteria of their current
+    // set of apparel speicifed by their loadout (when the mod setting is active).
     [HarmonyPatch(typeof(JobGiver_OptimizeApparel), nameof(JobGiver_OptimizeApparel.TryGiveJob))]
     public static class OptimizeApparel_TryGiveJob_Patch
     {
@@ -26,14 +27,14 @@ namespace Inventory
         // to
         // if ( (!currentOutfit.filter.Allows(wornApparel[i]) || shouldDrop(pawn, wornApparel[i])) && pawn.outfits.forcedHandler.AllowedToAutomaticallyDrop(wornApparel[i]) && !pawn.apparel.IsLocked(wornApparel[i]))
 
-        public static IEnumerable<CodeInstruction> Transpiler(MethodBase __originalMethod, IEnumerable<CodeInstruction> instructions)
-        {
+        public static IEnumerable<CodeInstruction> Transpiler(MethodBase __originalMethod, IEnumerable<CodeInstruction> instructions) {
+            int matches = 0;
             var insts = instructions.ToList();
 
             for (int i = 0; i < insts.Count; i++)
             {
-                if (Matches(insts, i))
-                {
+                if (Matches(insts, i)) {
+                    matches++;
                     yield return new CodeInstruction(OpCodes.Ldarg_1); // pawn : Pawn
                     yield return insts[i - 4]; // wornApparel : List<Apparel>
                     yield return insts[i - 3]; // i : int
@@ -44,6 +45,10 @@ namespace Inventory
                 }
 
                 yield return insts[i];
+            }
+
+            if (matches != 1) {
+                Log.ErrorOnce($"[Loadout Compositing] {matches} Failed to apply patch to enforce pawns dropping apparel not in their loadout if the only wear apparel in loadout setting is active", 485949272);
             }
         }
 
