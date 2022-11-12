@@ -139,6 +139,11 @@ namespace Inventory {
 
         public static string ResearchedItemsDesc => $"{P}ResearchedItemsDesc".TranslateSimple();
         public static string SortThingsByDesc => $"{P}SortThingsByDesc".TranslateSimple();
+        
+        public static string EquippedStatOffsets => $"{P}EquippedStatOffsets".TranslateSimple();
+        public static string EquippedStatOffsetsDesc => $"{P}EquippedStatOffsetsDesc".TranslateSimple();
+
+        
         public static string Options => $"{P}{S}Options".TranslateSimple();
         public static string Keybinds => $"{P}{S}Keybinds".TranslateSimple();
         public static string ItemFilterDefaults => $"{P}{S}ItemFilterDefaults".TranslateSimple();

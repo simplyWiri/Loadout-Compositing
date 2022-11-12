@@ -127,7 +127,7 @@ namespace Inventory {
             return changed;
         }
 
-        public static void ListSeperator(ref Rect rect, string label, bool heading = false, string subHeading = "") {
+        public static void ListSeperator(ref Rect rect, string label, bool heading = false, string subHeading = "", string tooltip = "") {
             
             rect.AdjVertBy(3f);
             GUI.color = Widgets.SeparatorLabelColor;
@@ -136,7 +136,12 @@ namespace Inventory {
             }
             
             var height = Text.CalcHeight(label, rect.width);
-            Widgets.Label(rect.PopTopPartPixels(height), label);
+            var labelRect = rect.PopTopPartPixels(height);
+            Widgets.Label(labelRect, label);
+            if (tooltip != "") {
+                TooltipHandler.TipRegion(labelRect, tooltip);
+            }
+            
             if (heading && subHeading != "")
             {
                 Text.Font = GameFont.Tiny;
