@@ -19,6 +19,8 @@ namespace Inventory
             yield return AccessTools.Method(typeof(ThingSelectionUtility), nameof(ThingSelectionUtility.SelectPreviousColonist));
         }
 
+        // This method basically closes a potentially nested stack of windows and opens a new one with the now correct
+        // pawn to be selected.
         public static void Postfix() {
             var targetWindow = Find.WindowStack.WindowOfType<Dialog_LoadoutEditor>();
             if (targetWindow == null) {

@@ -22,6 +22,8 @@ namespace Inventory
             return !bpcLoaded;
         }
 
+        // Adds the panic state button to the global controls panel in the bottom left of the game, this functionality
+        // is disabled when better pawn control is loaded, as the bpc emergency functionality is instead used.
         public static void Postfix(WidgetRow row, bool worldView)
         {
             if (worldView || row == null) {
