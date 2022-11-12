@@ -29,7 +29,9 @@ namespace Inventory {
         public static readonly Texture2D CornerTex = ContentFinder<Texture2D>.Get("Corner");
         public static readonly Texture2D PanicButtonTex = ContentFinder<Texture2D>.Get("PanicButton");
         public static readonly Texture2D PlaceholderDef = ContentFinder<Texture2D>.Get("PlaceholderDef");
-
+        public static readonly Texture2D SortByStatAscTex = ContentFinder<Texture2D>.Get("SortByStatAsc");
+        public static readonly Texture2D SortByStatDscTex = ContentFinder<Texture2D>.Get("SortByStatDsc");
+        public static readonly Texture2D FilterByResearchedTex = ContentFinder<Texture2D>.Get("FilterByResearched");
     }
 
 }

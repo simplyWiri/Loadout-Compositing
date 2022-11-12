@@ -474,22 +474,23 @@ namespace Inventory {
 
             var topBarRect = r.PopTopPartPixels(UIC.SPACED_HEIGHT);
             
-            var onlyResearchedRect = topBarRect.PopRightPartPixels(UIC.DEFAULT_HEIGHT);
-            if (Widgets.ButtonImage(onlyResearchedRect, TexUI.HighlightTex)) {
+            var onlyResearchedRect = topBarRect.PopRightPartPixels(UIC.DEFAULT_HEIGHT).MiddlePartPixels(Text.LineHeight);
+            onlyResearchedRect.CenterWithWidth(Text.LineHeight);
+            if (Widgets.ButtonImage(onlyResearchedRect, Textures.FilterByResearchedTex)) {
                 onlyResearchedItems = !onlyResearchedItems;
             }
             TooltipHandler.TipRegion(onlyResearchedRect, Strings.ResearchedItemsDesc);
 
             topBarRect.PopRightPartPixels(3f);
             
-            var sortByFilterRect = topBarRect.PopRightPartPixels(UIC.DEFAULT_HEIGHT);
-            if (Widgets.ButtonImage(sortByFilterRect, TexUI.HighlightTex)) {
+            var sortByFilterRect = topBarRect.PopRightPartPixels(UIC.DEFAULT_HEIGHT).MiddlePartPixels(Text.LineHeight);
+            sortByFilterRect.CenterWithWidth(Text.LineHeight);
+            if (Widgets.ButtonImage(sortByFilterRect, ascending ? Textures.SortByStatAscTex : Textures.SortByStatDscTex)) {
                 if (Event.current.button == 1) { // right click
                     // Collate all the set of stats in this list.
                     var stats = defList
                                 .SelectMany(td => td.statBases.Select(sm => sm.stat)
-                                                    .Union(td.equippedStatOffsets?.Select(sm => sm.stat) ?? new List<StatDef>())
-                                                    .Union(DefDatabase<StatDef>.AllDefs.Where(sd => sd.Worker.ShouldShowFor(StatRequest.For(td, td.defaultStuff))).ToList()))
+                                                    .Union(td.equippedStatOffsets?.Select(sm => sm.stat) ?? new List<StatDef>()))
                                 .ToHashSet();
 
                     stats.AddRange(extraStats ?? new List<StatDef>());
