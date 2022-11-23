@@ -21,6 +21,12 @@ namespace Inventory {
 
         }
 
+        enum SortBy
+        {
+            Name,
+            Stat
+        }
+
         private Vector2 curScroll = Vector2.zero;
         private Vector2 curItemScroll = Vector2.zero;
         private Vector2 pawnListScroll = Vector2.zero;
@@ -37,6 +43,15 @@ namespace Inventory {
         private string lastDefFilter = string.Empty;
         private List<ThingDef> lastDefList = null;
 
+        private bool onlyResearchedItems = false;
+        private static Dictionary<ThingDef, float> statCache = new Dictionary<ThingDef, float>();
+        private SortBy sortedByKind = SortBy.Name;
+        private bool ascending = false;
+        private StatDef selectedStat = null;
+        private float statLength = UIC.DEFAULT_HEIGHT;
+        
+        private const float INVALID_STAT_VALUE = -10000;
+
         public Tag curTag = null;
 
         public override Vector2 InitialSize => new Vector2(840, 640);
@@ -51,6 +66,14 @@ namespace Inventory {
             closeOnClickedOutside = true;
             doCloseX = true;
             resizeable = true;
+        }
+
+        void ResetTabState() {
+            sortedByKind = SortBy.Name;
+            selectedStat = null;
+            statLength = UIC.DEFAULT_HEIGHT;
+
+            statCache = new Dictionary<ThingDef, float>();
         }
 
         public void Draw(Rect rect) {
@@ -340,19 +363,18 @@ namespace Inventory {
             var topRect = r.TopPartPixels(UIC.DEFAULT_HEIGHT);
 
             void DrawOptionButton(Texture2D tex, string tooltip, State state) {
-                var optionRect = topRect.LeftPartPixels(UIC.DEFAULT_HEIGHT);
-                GUI.DrawTexture(topRect.LeftPartPixels(UIC.DEFAULT_HEIGHT), tex, ScaleMode.ScaleToFit, true, 1f,
-                    Color.white, 0f, 0f);
+                var optionRect = topRect.PopLeftPartPixels(UIC.DEFAULT_HEIGHT);
+                GUI.DrawTexture(optionRect, tex, ScaleMode.ScaleToFit, true, 1f,
+                                curState == state ? GenUI.MouseoverColor : Color.white, 0f, 0f);
                 TooltipHandler.TipRegion(optionRect, tooltip);
                 if (Widgets.ButtonInvisible(optionRect)) {
                     curState = state;
                     defFilter = string.Empty;
                     lastDefFilter = defFilter;
                     lastDefList = null;
+                    ResetTabState();
                     GUI.FocusControl("Def List Filter");
                 }
-
-                topRect.x += UIC.SPACED_HEIGHT;
             }
 
             r.AdjVertBy(UIC.DEFAULT_HEIGHT);
@@ -363,15 +385,25 @@ namespace Inventory {
             DrawOptionButton(Textures.MedicalTex, "Medicine", State.Medicinal);
             DrawOptionButton(Textures.MiscItemsTex, "Items", State.Items);
 
+            if (selectedStat != null) {
+                Text.Font = GameFont.Tiny;
+                Text.WordWrap = false;
+                var strLen = selectedStat.LabelCap.GetWidthCached();
+                topRect.width = Mathf.Max(topRect.width, strLen);
+                GUIUtility.WithModifiers(topRect, selectedStat.LabelCap, color: Color.gray, anchor: TextAnchor.MiddleRight);
+                Text.Font = GameFont.Small;
+                Text.WordWrap = true;
+            }
+            
             switch (curState) {
                 case State.Apparel:
                     DrawDefList(r, Utility.apparelDefs);
                     break;
                 case State.Melee:
-                    DrawDefList(r, Utility.meleeWeapons);
+                    DrawDefList(r, Utility.meleeWeapons, Dialog_ItemSpecifier.baseWeaponStats.Union(Dialog_ItemSpecifier.meleeWeaponStats).ToList());
                     break;
                 case State.Ranged:
-                    DrawDefList(r, Utility.rangedWeapons);
+                    DrawDefList(r, Utility.rangedWeapons, Dialog_ItemSpecifier.baseWeaponStats.Union(Dialog_ItemSpecifier.rangedWeaponStats).ToList());
                     break;
                 case State.Medicinal:
                     DrawDefList(r, Utility.medicinalDefs);
@@ -382,7 +414,7 @@ namespace Inventory {
             }
         }
 
-        private void DrawDefList(Rect r, IReadOnlyList<ThingDef> defList) {
+        private void DrawDefList(Rect r, IReadOnlyList<ThingDef> defList, List<StatDef> extraStats = null) {
             var itms = curTag.requiredItems.Select(it => it.Def).ToHashSet();
             List<ThingDef> defs = null;
 
@@ -391,15 +423,13 @@ namespace Inventory {
 
             if (defFilter != string.Empty) {
                 if (defFilter == lastDefFilter) {
-                    defs = lastDefList.Where(t => !itms.Contains(t)).ToList();
-                    defs = defs.Where(t => (t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel)).ToList();
+                    defs = lastDefList.Where(t => (t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel)).ToList();
                 } else {
                     var filter = defFilter.ToLower();
                     var acceptedLayers = DefDatabase<ApparelLayerDef>.AllDefsListForReading.Where(l => l.LabelCap.ToString().ToLower().Contains(filter));
                     var stats = DefDatabase<StatDef>.AllDefsListForReading.Where(s => s.LabelCap.ToString()?.ToLowerInvariant().Contains(filter) ?? false).ToHashSet();
 
-                    defs = defList.Where(t => !itms.Contains(t)).ToList();
-                    defs = defs.Where(t => t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel).ToList();
+                    defs = defList.Where(t => t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel).ToList();
                     defs = defs.Where(td => {
                         return (td.LabelCap.ToString()?.ToLowerInvariant().Contains(filter) ?? false)
                                || (td.modContentPack?.Name.ToLowerInvariant().Contains(filter) ?? false)
@@ -413,11 +443,91 @@ namespace Inventory {
                 }
             }
             else {
-                defs = defList.Where(t => !itms.Contains(t)).ToList();
-                defs = defs.Where(t => (t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel)).ToList();
+                defs = defList.Where(t => (t.IsApparel && !slotsUsed.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, t)) || !t.IsApparel)).ToList();
+            }
+            
+            defs = defs.Where(t => !itms.Contains(t)).ToList();
+            
+            if (onlyResearchedItems) {
+                var recipes = DefDatabase<RecipeDef>.AllDefs.Where(recipe => recipe.AvailableNow).ToList();
+                
+                defs = defs.Where(def => def.IsBuildingArtificial || recipes.Any(recipe => recipe.products.Any(pc => pc.thingDef == def))).ToList();
+                defs = defs.Where(def => !def.IsBuildingArtificial || def.IsResearchFinished).ToList();
             }
 
-            var inputFieldRect = r.PopTopPartPixels(UIC.SPACED_HEIGHT).ContractedBy(2f);
+            string NameSelector(ThingDef td) => td.LabelCap.RawText;
+            float StatSelector(ThingDef td) => statCache[td];
+
+            if (ascending) {
+                if (sortedByKind == SortBy.Name) {
+                    defs.SortBy(NameSelector);
+                } else {
+                    defs.SortBy(StatSelector);
+                }
+            } else {
+                if (sortedByKind == SortBy.Name) {
+                    defs.SortByDescending(NameSelector);
+                } else {
+                    defs.SortByDescending(StatSelector);
+                }
+            }
+
+            var topBarRect = r.PopTopPartPixels(UIC.SPACED_HEIGHT);
+            
+            var onlyResearchedRect = topBarRect.PopRightPartPixels(UIC.DEFAULT_HEIGHT).MiddlePartPixels(Text.LineHeight);
+            onlyResearchedRect.CenterWithWidth(Text.LineHeight);
+            if (Widgets.ButtonImage(onlyResearchedRect, Textures.FilterByResearchedTex)) {
+                onlyResearchedItems = !onlyResearchedItems;
+            }
+            TooltipHandler.TipRegion(onlyResearchedRect, Strings.ResearchedItemsDesc);
+
+            topBarRect.PopRightPartPixels(3f);
+            
+            var sortByFilterRect = topBarRect.PopRightPartPixels(UIC.DEFAULT_HEIGHT).MiddlePartPixels(Text.LineHeight);
+            sortByFilterRect.CenterWithWidth(Text.LineHeight);
+            if (Widgets.ButtonImage(sortByFilterRect, ascending ? Textures.SortByStatAscTex : Textures.SortByStatDscTex)) {
+                if (Event.current.button == 1) { // right click
+                    // Collate all the set of stats in this list.
+                    var stats = defList
+                                .SelectMany(td => td.statBases.Select(sm => sm.stat)
+                                                    .Union(td.equippedStatOffsets?.Select(sm => sm.stat) ?? new List<StatDef>()))
+                                .ToHashSet();
+
+                    stats.AddRange(extraStats ?? new List<StatDef>());
+                    
+                    var opts = new List<FloatMenuOption>() {
+                        new FloatMenuOption("Name", () => {
+                            sortedByKind = SortBy.Name;
+                            selectedStat = null;
+                            statLength = UIC.DEFAULT_HEIGHT;
+                        })
+                    };
+                    
+                    foreach (var stat in stats.OrderBy(st => st.LabelCap.RawText)) {
+                        opts.Add(new FloatMenuOption(stat.LabelCap, () => {
+                            sortedByKind = SortBy.Stat;
+                            selectedStat = stat;
+                            statLength = UIC.DEFAULT_HEIGHT;
+                            
+                            foreach(var def in defList) {
+                                var stuff = GenStuff.AllowedStuffsFor(def).FirstOrDefault();
+                                var cachedDrawEntries = def.SpecialDisplayStats(StatRequest.For(def, stuff)).ToList();
+                                cachedDrawEntries.AddRange(StatsReportUtility.StatsToDraw(def, stuff).Where(r => r.ShouldDisplay));
+
+                                var relevant = cachedDrawEntries.FirstOrDefault(s => s.stat == selectedStat);
+                                statCache[def] = relevant?.value ?? INVALID_STAT_VALUE;
+                            }
+                        }));
+                    }
+                    Find.WindowStack.Add(new FloatMenu(opts));
+                } else {
+                    ascending = !ascending;
+                }
+            }
+            
+            TooltipHandler.TipRegion(sortByFilterRect, Strings.SortThingsByDesc);
+
+            var inputFieldRect = topBarRect.ContractedBy(2f);
             GUIUtility.InputField(inputFieldRect, "Def List Filter", ref defFilter);
             TooltipHandler.TipRegion(inputFieldRect, Strings.SearchBarDesc);
 
@@ -438,28 +548,65 @@ namespace Inventory {
                     continue;
                 }
 
-                var descRect = rect.LeftPart(0.85f);
+                var rowRect = rect;
+                rect.y += UIC.DEFAULT_HEIGHT;
+
+                if (sortedByKind == SortBy.Stat) {
+                    var statRect = rowRect.PopLeftPartPixels(statLength);
+
+                    if (StatSelector(defs[0]) == StatSelector(defs[defs.Count - 1])) {
+                        var statValue = StatSelector(defs[0]);
+                        if (statValue != INVALID_STAT_VALUE) {
+                            Widgets.Label(statRect, $"{statValue:0.##}");
+                        }
+                    } else {
+                        var max = StatSelector(defs[ascending ? defs.Count - 1 : 0]);
+                        var min = defs.Min(d => {
+                            // Mathf.Max(max,)don't count invalid things when picking out the min.
+                            var sv = StatSelector(d);
+                            return sv == INVALID_STAT_VALUE ? max : sv;
+                        });
+                        
+                        // max == min may occur if there is only one value, i.e. a stat possessed by only one of the 
+                        // items in the list
+                        float inRange(float x) => (max - min) == 0 ? 1 : (x - min) / (max - min);
+
+                        var statValue = StatSelector(defs[i]);
+                        if (statValue != INVALID_STAT_VALUE) {
+                            var txt = $"{statValue:0.##}";
+                            var textWidth = txt.GetWidthCached();
+
+                            if (textWidth > statLength) {
+                                statLength = textWidth;
+                            }
+
+                            GUI.color = new Color(1 - inRange(statValue), inRange(statValue), 0);
+                            Widgets.Label(statRect, txt);
+                            GUI.color = Color.white;
+                        }
+                    }
+                }
+
+                var descRect = rowRect.LeftPart(0.85f);
                 var def = defs[i];
 
                 Widgets.DefIcon(descRect.LeftPart(.15f), def);
                 Widgets.Label(descRect.RightPart(.85f), def.LabelCap);
-                TooltipHandler.TipRegion(rect, def.DescriptionDetailed);
+                TooltipHandler.TipRegion(rowRect, def.DescriptionDetailed);
 
                 if (Widgets.ButtonInvisible(descRect)) {
                     AddDefToTag(def);
                 }
 
-                if (Widgets.ButtonImageFitted(rect.RightPart(0.15f).ContractedBy(2f), TexButton.Info)) {
+                if (Widgets.ButtonImageFitted(rowRect.RightPart(0.15f).ContractedBy(2f), TexButton.Info)) {
                     var stuff = def.MadeFromStuff ? GenStuff.AllowedStuffsFor(def).First() : null;
                     Find.WindowStack.Add(new Dialog_InfoCard(def, stuff));
                 }
 
                 if (i % 2 == 0)
-                    Widgets.DrawLightHighlight(rect);
+                    Widgets.DrawLightHighlight(rowRect);
 
-                Widgets.DrawHighlightIfMouseover(rect);
-
-                rect.y += UIC.DEFAULT_HEIGHT;
+                Widgets.DrawHighlightIfMouseover(rowRect);
             }
 
             GUI.EndGroup();

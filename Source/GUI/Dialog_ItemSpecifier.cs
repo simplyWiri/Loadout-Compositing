@@ -11,9 +11,9 @@ namespace Inventory {
     public class Dialog_ItemSpecifier : Window {
 
         private static List<StatDef> armorStats;
-        private static List<StatDef> baseWeaponStats;
-        private static List<StatDef> meleeWeaponStats;
-        private static List<StatDef> rangedWeaponStats;
+        internal static List<StatDef> baseWeaponStats;
+        internal static List<StatDef> meleeWeaponStats;
+        internal static List<StatDef> rangedWeaponStats;
         private static List<StatDef> generalItemStats;
 
         private ThingDef stuffPreview;

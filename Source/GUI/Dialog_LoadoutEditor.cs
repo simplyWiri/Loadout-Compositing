@@ -391,39 +391,72 @@ namespace Inventory {
                 Utility.HypotheticalCapacity(pawn, loadoutItems).ToStringMass(),
                 Strings.WeightOverCapacity);
 
-            height += GenUI.GapTiny + UIC.SPACED_HEIGHT;
 
-            // var statBonuses = new Dictionary<StatDef, List<Item>>();
-            // var wornApparel = component.Loadout.HypotheticalWornApparel(pawn.RaceProps.body).ToList();
-            // var heldItems = loadoutItems.Where(item => !item.Def.IsApparel).ToList();
-            //
-            // foreach (var potentialStatBoost in wornApparel.Union(heldItems))
-            // {
-            //     if (!potentialStatBoost.Def?.equippedStatOffsets?.Any() ?? true) continue;
-            //
-            //     foreach (var mod in potentialStatBoost.Def.equippedStatOffsets.Select(m => m.stat)) {
-            //         if (!statBonuses.TryGetValue(mod, out var list)) {
-            //             statBonuses.Add(mod, new List<Item> { potentialStatBoost });
-            //             continue;
-            //         }
-            //         list.Add(potentialStatBoost);
-            //     }
-            // }
+            // Needs more work to get this done. 
+            
             //
             // var apparelBonuses = new List<StatDef> {
-            //     StatDefOf.SharpDamageMultiplier, StatDefOf.ArmorRating_Blunt, StatDefOf.ArmorRating_Heat, 
-            //     StatDefOf.Insulation_Cold, StatDefOf.Insulation_Heat
+            //     StatDefOf.ArmorRating_Sharp, StatDefOf.ArmorRating_Blunt, StatDefOf.ArmorRating_Heat, 
+            //     StatDefOf.Insulation_Cold, StatDefOf.Insulation_Heat, StatDefOf.Flammability
             // };
             //
-            // foreach (var stat in apparelBonuses) {
-            //     statBonuses.Add(stat, wornApparel);
-            // }
-            //
-            // foreach (var statBonus in statBonuses) {
-            //     TryDrawSpoofStatCalculations(ref viewRect, statBonus.Key, statBonus.Value);
-            //     height += GUIUtility.SPACED_HEIGHT;
+            // foreach (var apparelStat in apparelBonuses) {
+            //     var totalScore = 0.0f;
+            //     foreach (var apparel in hypotheticalApparel) {
+            //         totalScore += apparel.Def.GetStatValueAbstract(apparelStat, apparel.RandomStuff);
+            //     }
+            //     
+            //     var statRect = viewRect.PopTopPartPixels(Text.LineHeight);
+            //     
+            //     string statNameStr = $"{apparelStat.LabelCap} "
+            //         , statValueStr = $"{apparelStat.Worker.ValueToString(totalScore, false)}";
+            //     
+            //     GUIUtility.WithModifiers(statRect.PopLeftPartPixels(statNameStr.GetWidthCached()), statNameStr, color: Color.gray);
+            //     Widgets.Label(statRect.PopLeftPartPixels(statValueStr.GetWidthCached() + UIC.SMALL_GAP), statValueStr);
             // }
 
+            Text.Anchor = TextAnchor.MiddleRight;
+            GUIUtility.ListSeperator(ref viewRect, Strings.EquippedStatOffsets + " ", tooltip: Strings.EquippedStatOffsetsDesc);
+            Text.Anchor = TextAnchor.UpperLeft;
+            
+            var statBonuses = new Dictionary<StatDef, List<Item>>();
+            
+            var hypotheticalApparel = component.Loadout.HypotheticalWornApparel(shownState, pawn.def.race.body).ToList();
+            var relevantItems = hypotheticalApparel.Union(loadoutItems.Where(item => !item.Def.IsApparel));
+
+            foreach (var potentialStatBoostingItem in relevantItems) {
+                foreach (var mod in potentialStatBoostingItem.Def.equippedStatOffsets ?? new List<StatModifier>()) {
+                    if (!statBonuses.TryGetValue(mod.stat, out var list)) {
+                        statBonuses.Add(mod.stat, new List<Item> { potentialStatBoostingItem });
+                        continue;
+                    }
+                    list.Add(potentialStatBoostingItem);
+                }
+            }
+
+            foreach (var (stat, items) in statBonuses) {
+                var totalScore = 0.0f;
+                foreach (var item in items) {
+                    totalScore += item.GetStatOffset(stat);
+                }
+
+                var statRect = viewRect.PopTopPartPixels(Text.LineHeight);
+                
+                string statNameStr = $"{stat.LabelCap} "
+                    , statValueStr = $"{stat.Worker.ValueToString(totalScore, false)}";
+                
+                GUIUtility.WithModifiers(statRect.PopLeftPartPixels(statNameStr.GetWidthCached()), statNameStr, color: Color.gray);
+                Widgets.Label(statRect.PopLeftPartPixels(statValueStr.GetWidthCached() + UIC.SMALL_GAP), statValueStr);
+                
+                foreach (var item in items.OrderBy(it => it.GetStatOffset(stat))) {
+                    var iconRect = statRect.PopRightPartPixels(Text.LineHeight);
+                    Widgets.DefIcon(iconRect, item.Def, item.RandomStuff);
+                    TooltipHandler.TipRegion(iconRect, item.Label + " " + stat.Worker.ValueToString(item.GetStatOffset(stat), false));
+                }
+            }
+
+            height += GenUI.GapTiny + UIC.SPACED_HEIGHT + UIC.LIST_SEP_HEIGHT + statBonuses.Count * Text.LineHeight;
+            
             Widgets.EndScrollView();
 
             statsHeight = height;

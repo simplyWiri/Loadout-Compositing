@@ -30,6 +30,8 @@ namespace Inventory {
         private static void LateModPatches() {
 
             if (ModLister.HasActiveModWithName("RPG Style Inventory Revamped")) {
+                Log.Message("[Loadout Compositing] Enabled mod integrations with RPG Style Inventory Revamped, inserting tag menu into pawn ITab.");
+
                 var method = AccessTools.Method("Sandy_Detailed_RPG_GearTab:FillTab");
                 if (method != null) {
                     var hp = new HarmonyMethod(typeof(RPG_Inventory_Patch), nameof(RPG_Inventory_Patch.Transpiler));
@@ -38,6 +40,8 @@ namespace Inventory {
             }
 
             if (ModLister.HasActiveModWithName("[LTO] Colony Groups")) {
+                Log.Message("[Loadout Compositing] Enabled mod integrations with [LTO] Colony Groups, enabling colonist bar hooks.");
+
                 var handleClickMethod = AccessTools.Method("TacticalGroups.ColonistBarColonistDrawer:HandleClicks");
                 if (handleClickMethod != null) {
                     var hp = new HarmonyMethod(typeof(ColonistBarClicker_Patch), nameof(ColonistBarClicker_Patch.Transpiler));

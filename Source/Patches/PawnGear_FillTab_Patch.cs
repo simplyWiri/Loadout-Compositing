@@ -20,9 +20,11 @@ namespace Inventory {
         private static MethodInfo drawTags = AccessTools.Method(typeof(Panel_GearTab), nameof(Panel_GearTab.DrawTags));
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+            var matches = 0;
             var insts = instructions.ToList();
             for (int i = 0; i < insts.Count; i++) {
                 if (Matches(insts, i)) {
+                    matches++;
                     yield return new CodeInstruction(OpCodes.Ldarg_0).MoveLabelsFrom(insts[i]);
                     yield return new CodeInstruction(OpCodes.Call, getPawn);
                     yield return new CodeInstruction(OpCodes.Ldloca_S, insts[i - 8].operand);
@@ -32,6 +34,10 @@ namespace Inventory {
                 }
 
                 yield return insts[i];
+            }
+
+            if (matches != 1) {
+                Log.ErrorOnce($"[Loadout Compositing] {matches} Failed to apply patch which adds tag view to pawn ITab", 395580372);
             }
         }
         

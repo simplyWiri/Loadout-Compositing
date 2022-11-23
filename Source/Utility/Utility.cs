@@ -31,7 +31,7 @@ namespace Inventory {
 
             apparelDefs ??= items.Where(def => def.IsApparel).ToList();
             massBoostingClothes = new Dictionary<ThingDef, Func<QualityCategory, float>>();
-            meleeWeapons ??= items.Where(def => def.IsMeleeWeapon).ToList();
+            meleeWeapons ??= items.Where(def => def.IsMeleeWeapon && !def.IsStuff).ToList();
             rangedWeapons ??= items.Where(def => def.IsRangedWeapon && def.category != ThingCategory.Building).ToList();
             medicinalDefs ??= items.Where(def => def.IsMedicine || def.IsDrug).ToList();
 

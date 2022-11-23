@@ -149,6 +149,20 @@ namespace Inventory {
             Widgets.EndScrollView();
         }
 
+        public override void OnAcceptKeyPressed() {
+            Event.current.Use();
+            if (selectedTags.Any()) {
+                CloseAndSelect();
+                return;
+            }
+            
+            // in the case `searchString` is empty, it will default generate a name like `Placeholder-XXX`
+            var newTag = new Tag(searchString);
+            LoadoutManager.AddTag(newTag);
+            CloseAndSelect(newTag);
+            Find.WindowStack.Add(new Dialog_TagEditor(newTag));
+        }
+        
         public void DrawCreateNewTag(Rect rect) {
             if (selectedTags.Any()) {
                 var edgeLength = Mathf.CeilToInt(rect.width / 24.0f);

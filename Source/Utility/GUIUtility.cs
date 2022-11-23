@@ -6,15 +6,33 @@ using Verse.Sound;
 
 namespace Inventory {
 
-    public static class GUIUtility {
+    public static class GUIUtility
+    {
 
+        public static void WithModifiers(Rect rect, string text, GameFont? font = null, Color? color = null,
+                                         TextAnchor? anchor = null) {
+            WithModifiers(() => Widgets.Label(rect, text), font, color, anchor);
+        }
+
+        public static void WithModifiers(Action lambda, GameFont? font = null, Color? color = null, TextAnchor? anchor = null) {
+            var prevAnch = Text.Anchor;
+            var prevCol = GUI.color;
+            var prevFont = Text.Font;
+
+            Text.Anchor = anchor ?? prevAnch;
+            Text.Font = font ?? prevFont;
+            GUI.color = color ?? prevCol;
+            
+            lambda();
+            
+            Text.Anchor = prevAnch;
+            Text.Font = prevFont;
+            GUI.color = prevCol;
+        }
+        
         public static void FittedDefIconCount(Rect rect, ThingDef def, ThingDef stuff, int quantity) {
             Widgets.DefIcon(rect, def, stuff);
-            Text.Anchor = TextAnchor.LowerCenter;
-            Text.Font = GameFont.Tiny;
-            Widgets.Label(rect, quantity.ToString());
-            Text.Anchor = TextAnchor.UpperLeft;
-            Text.Font = GameFont.Small;
+            WithModifiers(rect, quantity.ToString(), font: GameFont.Tiny, anchor: TextAnchor.LowerCenter);
         }
 
         // returns whether the input field is in focus or not.
@@ -22,9 +40,7 @@ namespace Inventory {
             var inputFieldRect = rect;
 
             if (ShowName) {
-                Text.Anchor = TextAnchor.MiddleCenter;
-                Widgets.Label(rect.LeftPartPixels(name.GetWidthCached()), name);
-                Text.Anchor = TextAnchor.UpperLeft;
+                WithModifiers(rect.LeftPartPixels(name.GetWidthCached()), name, anchor: TextAnchor.MiddleCenter);
 
                 inputFieldRect = rect.RightPartPixels(rect.width - (name.GetWidthCached() + 3));
             }
@@ -111,7 +127,7 @@ namespace Inventory {
             return changed;
         }
 
-        public static void ListSeperator(ref Rect rect, string label, bool heading = false, string subHeading = "") {
+        public static void ListSeperator(ref Rect rect, string label, bool heading = false, string subHeading = "", string tooltip = "") {
             
             rect.AdjVertBy(3f);
             GUI.color = Widgets.SeparatorLabelColor;
@@ -120,7 +136,12 @@ namespace Inventory {
             }
             
             var height = Text.CalcHeight(label, rect.width);
-            Widgets.Label(rect.PopTopPartPixels(height), label);
+            var labelRect = rect.PopTopPartPixels(height);
+            Widgets.Label(labelRect, label);
+            if (tooltip != "") {
+                TooltipHandler.TipRegion(labelRect, tooltip);
+            }
+            
             if (heading && subHeading != "")
             {
                 Text.Font = GameFont.Tiny;

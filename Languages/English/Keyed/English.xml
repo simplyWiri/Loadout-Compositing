@@ -149,6 +149,12 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.WarningItemFilterDependsOnModSave>Can not load filter item {0}</CompositableLoadouts.WarningItemFilterDependsOnModSave> 
 	<CompositableLoadouts.WarningItemFilterDependsOnModSaveDesc>This item will be dropped from the filter automatically, its mod is most likely not loaded.</CompositableLoadouts.WarningItemFilterDependsOnModSaveDesc> 
 
+	<CompositableLoadouts.ResearchedItemsDesc>Filter only to show things which have already been researched (hide non-researched things)</CompositableLoadouts.ResearchedItemsDesc> 
+	<CompositableLoadouts.SortThingsByDesc>Choose an attribute to sort the things listed by, right click to specify what attribute, left click to switch between ascending/descending</CompositableLoadouts.SortThingsByDesc> 
+
+	<CompositableLoadouts.EquippedStatOffsets>Equipped stat offsets</CompositableLoadouts.EquippedStatOffsets> 
+	<CompositableLoadouts.EquippedStatOffsetsDesc>Stat bonuses which will be applied when the items in this loadout are equipped</CompositableLoadouts.EquippedStatOffsetsDesc> 
+
 	<CompositableLoadouts.Settings.Options>Options</CompositableLoadouts.Settings.Options>
 	<CompositableLoadouts.Settings.Keybinds>Keybinds</CompositableLoadouts.Settings.Keybinds>
 	<CompositableLoadouts.Settings.ItemFilterDefaults>Tag-item filter defaults</CompositableLoadouts.Settings.ItemFilterDefaults>

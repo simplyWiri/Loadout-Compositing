@@ -19,7 +19,9 @@ namespace Inventory {
         private static FieldInfo w_PerTag = AccessTools.Field(typeof(Inventory.InvBillRepeatModeDefOf), nameof(InvBillRepeatModeDefOf.W_PerTag));
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
-            ILGenerator generator) {
+            ILGenerator generator)
+        {
+            var matches = 0;
             var insts = instructions.ToList();
 
             for (int i = 0; i < insts.Count; i++) {
@@ -37,10 +39,15 @@ namespace Inventory {
                     yield return new CodeInstruction(OpCodes.Call, drawConfig);
 
                     yield return insts[i].WithLabels(label);
-                }
-                else {
+
+                    matches++;
+                } else {
                     yield return insts[i];
                 }
+            }
+
+            if (matches != 1) {
+                Log.ErrorOnce($"[Loadout Compositing] {matches} Failed to apply bill config transpiler, no option to enable 'X per tag' bills will be available in the dropdown", 245629);
             }
         }
         

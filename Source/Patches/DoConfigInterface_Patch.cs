@@ -46,6 +46,10 @@ namespace Inventory {
                     yield return insts[i];
                 }
             }
+
+            if (occurence != 2) {
+                Log.ErrorOnce("[Loadout Compositing] Failed to apply bill config UI patch, +/- buttons may not appear for the 'X per tag' bill type.", 8739405);
+            }
         }
 
         public static void PlusButton(Bill_Production __instance) {
