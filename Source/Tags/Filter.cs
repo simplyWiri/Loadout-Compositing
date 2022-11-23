@@ -96,7 +96,7 @@ namespace Inventory {
             // Check the thing is equal to `forThing`
             if (thing.def != forThing.Def) return false;
             // is it made from the correct stuff
-            if (thing.def.MadeFromStuff && !stuffs.EnumerableNullOrEmpty() && !stuffs.Contains(new SafeDef(thing.Stuff))) return false;
+            if (thing.def.MadeFromStuff && !stuffs.EnumerableNullOrEmpty() && thing.Stuff is not null && !stuffs.Contains(new SafeDef(thing.Stuff))) return false;
             // does it have the correct number of hit points
             if (thing.def.useHitPoints && (!allowedHpRange.IncludesEpsilon(Mathf.Clamp01(thing.HitPoints / (float)thing.MaxHitPoints)))) return false;
             // does it fall within the quality range?
