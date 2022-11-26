@@ -103,9 +103,12 @@ namespace Inventory {
 
             var middlePanel = inRect.PopLeftPartPixels(WIDTH - Margin);
 
-            // 45 = 35 + 10, 35 = `ListSeperator` height, 10 = arbitrary buffer
-            var tagsRect = middlePanel.PopTopPartPixels(Mathf.Min(45 + UIC.SPACED_HEIGHT * 2 + tagsHeight, middlePanel.height - (statsHeight + UIC.LIST_SEP_HEIGHT)));
+            var maxStatHeight = Mathf.Min(150f, statsHeight);
+            var tagsRect = middlePanel.PopTopPartPixels(Mathf.Min(45 + UIC.SPACED_HEIGHT * 2 + tagsHeight, middlePanel.height - (maxStatHeight + UIC.LIST_SEP_HEIGHT)));
             DrawTags(tagsRect);
+            
+            middlePanel.AdjVertBy(GenUI.GapTiny);
+
             DrawStatistics(middlePanel);
 
             if (coveragePanel.ShouldDraw) {
@@ -369,6 +372,9 @@ namespace Inventory {
         }
 
         public void DrawStatistics(Rect rect) {
+            rect.PopRightPartPixels(UIC.SCROLL_WIDTH);
+            rect.height -= UIC.SMALL_GAP;
+            
             var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, statsHeight);
 
             var height = 0f;
@@ -390,7 +396,6 @@ namespace Inventory {
                 Utility.HypotheticalGearAndInventoryMass(pawn, loadoutItems).ToString("0.#") + "/" +
                 Utility.HypotheticalCapacity(pawn, loadoutItems).ToStringMass(),
                 Strings.WeightOverCapacity);
-
 
             // Needs more work to get this done. 
             
@@ -415,14 +420,19 @@ namespace Inventory {
             //     Widgets.Label(statRect.PopLeftPartPixels(statValueStr.GetWidthCached() + UIC.SMALL_GAP), statValueStr);
             // }
 
+            var hypotheticalApparel = component.Loadout.HypotheticalWornApparel(shownState, pawn.def.race.body).ToList();
+            var relevantItems = hypotheticalApparel.Union(loadoutItems.Where(item => !item.Def.IsApparel)).ToList();
+
+            if ((hypotheticalApparel.Count + relevantItems.Count) < 0) {
+                statsHeight = GenUI.GapTiny + UIC.SPACED_HEIGHT;
+                return;
+            } 
+                
             Text.Anchor = TextAnchor.MiddleRight;
             GUIUtility.ListSeperator(ref viewRect, Strings.EquippedStatOffsets + " ", tooltip: Strings.EquippedStatOffsetsDesc);
             Text.Anchor = TextAnchor.UpperLeft;
             
             var statBonuses = new Dictionary<StatDef, List<Item>>();
-            
-            var hypotheticalApparel = component.Loadout.HypotheticalWornApparel(shownState, pawn.def.race.body).ToList();
-            var relevantItems = hypotheticalApparel.Union(loadoutItems.Where(item => !item.Def.IsApparel));
 
             foreach (var potentialStatBoostingItem in relevantItems) {
                 foreach (var mod in potentialStatBoostingItem.Def.equippedStatOffsets ?? new List<StatModifier>()) {
@@ -435,10 +445,7 @@ namespace Inventory {
             }
 
             foreach (var (stat, items) in statBonuses) {
-                var totalScore = 0.0f;
-                foreach (var item in items) {
-                    totalScore += item.GetStatOffset(stat);
-                }
+                var totalScore = items.Sum(item => item.GetStatOffset(stat));
 
                 var statRect = viewRect.PopTopPartPixels(Text.LineHeight);
                 
@@ -455,7 +462,7 @@ namespace Inventory {
                 }
             }
 
-            height += GenUI.GapTiny + UIC.SPACED_HEIGHT + UIC.LIST_SEP_HEIGHT + statBonuses.Count * Text.LineHeight;
+            height += GenUI.GapTiny + UIC.SPACED_HEIGHT + (2 * UIC.LIST_SEP_HEIGHT) + (statBonuses.Count * Text.LineHeight);
             
             Widgets.EndScrollView();
 
