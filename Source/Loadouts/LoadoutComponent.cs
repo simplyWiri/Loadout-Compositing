@@ -32,6 +32,9 @@ namespace Inventory {
                     icon = Textures.DropInventoryGizmoTex,
                     alsoClickIfOtherInGroupClicked = true
                 };
+
+                yield return new Command_AddTag();
+                yield return new Command_RemoveTag();
             }
         }
         
@@ -61,6 +64,29 @@ namespace Inventory {
                     
             Loadout.UpdateState(element, false);
         }
+
+        public void RemoveTag(Tag tag) {
+            var element = Loadout.elements.FirstOrDefault(element => element.Tag == tag);
+            if (element == null) return;
+            RemoveTag(element);
+        }
+
+        public bool HasTag(Tag tag) {
+            if (!LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) return false;
+            return pList.pawns.Contains(Pawn);
+        }
+
+        public List<Tag> Tags {
+            get {
+                var result = new List<Tag>();
+                LoadoutManager.Tags.ForEach(tag => {
+                    if (!HasTag(tag)) return;
+                    result.Add(tag);
+                });
+                return result;
+            }
+        }
+           
 
         public override void PostExposeData() {
             Scribe_Deep.Look(ref loadout, nameof(loadout));
