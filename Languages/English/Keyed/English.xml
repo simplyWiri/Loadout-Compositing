@@ -153,7 +153,12 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.SortThingsByDesc>Choose an attribute to sort the things listed by, right click to specify what attribute, left click to switch between ascending/descending</CompositableLoadouts.SortThingsByDesc> 
 
 	<CompositableLoadouts.EquippedStatOffsets>Equipped stat offsets</CompositableLoadouts.EquippedStatOffsets> 
-	<CompositableLoadouts.EquippedStatOffsetsDesc>Stat bonuses which will be applied when the items in this loadout are equipped</CompositableLoadouts.EquippedStatOffsetsDesc> 
+	<CompositableLoadouts.EquippedStatOffsetsDesc>Stat bonuses which will be applied when the items in this loadout are equipped</CompositableLoadouts.EquippedStatOffsetsDesc>
+
+	<CompositableLoadouts.CommandAddTagLabel>Add tags</CompositableLoadouts.CommandAddTagLabel>
+	<CompositableLoadouts.CommandAddTagDesc>Adds the specified tag to all pawns currently selected</CompositableLoadouts.CommandAddTagDesc> 
+	<CompositableLoadouts.CommandRemoveTagLabel>Remove tags</CompositableLoadouts.CommandRemoveTagLabel>
+	<CompositableLoadouts.CommandRemoveTagDesc>Removes the specified tags from the currently selected pawns. Does not affect pawns who don't have the tag in question</CompositableLoadouts.CommandRemoveTagDesc>
 
 	<CompositableLoadouts.Settings.Options>Options</CompositableLoadouts.Settings.Options>
 	<CompositableLoadouts.Settings.Keybinds>Keybinds</CompositableLoadouts.Settings.Keybinds>

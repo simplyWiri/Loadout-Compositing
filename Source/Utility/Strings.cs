@@ -143,7 +143,11 @@ namespace Inventory {
         public static string EquippedStatOffsets => $"{P}EquippedStatOffsets".TranslateSimple();
         public static string EquippedStatOffsetsDesc => $"{P}EquippedStatOffsetsDesc".TranslateSimple();
 
-        
+        public static string CommandAddTagLabel => $"{P}CommandAddTagLabel".TranslateSimple();
+        public static string CommandAddTagDesc => $"{P}CommandAddTagDesc".TranslateSimple();
+        public static string CommandRemoveTagLabel => $"{P}CommandRemoveTagLabel".TranslateSimple();
+        public static string CommandRemoveTagDesc => $"{P}CommandRemoveTagDesc".TranslateSimple();
+
         public static string Options => $"{P}{S}Options".TranslateSimple();
         public static string Keybinds => $"{P}{S}Keybinds".TranslateSimple();
         public static string ItemFilterDefaults => $"{P}{S}ItemFilterDefaults".TranslateSimple();
