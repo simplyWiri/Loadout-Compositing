@@ -22,6 +22,14 @@ namespace Inventory {
                         list.Pawns.Add(__instance);
                     }
                 }
+
+                if (comp.Loadout.elements.Count == 0) {
+                    foreach (var tag in LoadoutManager.Tags) {
+                        if (tag.defaultEnabled) {
+                            comp.AddTag(tag);
+                        }
+                    }
+                }
             } else {
                 var comp = __instance.TryGetComp<LoadoutComponent>();
                 if (comp == null) return;

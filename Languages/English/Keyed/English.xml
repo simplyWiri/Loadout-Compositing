@@ -155,6 +155,9 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.EquippedStatOffsets>Equipped stat offsets</CompositableLoadouts.EquippedStatOffsets> 
 	<CompositableLoadouts.EquippedStatOffsetsDesc>Stat bonuses which will be applied when the items in this loadout are equipped</CompositableLoadouts.EquippedStatOffsetsDesc> 
 
+	<CompositableLoadouts.EnableTagByDefault>Enable by default: </CompositableLoadouts.EnableTagByDefault> 
+	<CompositableLoadouts.EnableTagByDefaultDesc>New pawns which join your colony will have this tag added automatically</CompositableLoadouts.EnableTagByDefaultDesc> 
+
 	<CompositableLoadouts.Settings.Options>Options</CompositableLoadouts.Settings.Options>
 	<CompositableLoadouts.Settings.Keybinds>Keybinds</CompositableLoadouts.Settings.Keybinds>
 	<CompositableLoadouts.Settings.ItemFilterDefaults>Tag-item filter defaults</CompositableLoadouts.Settings.ItemFilterDefaults>
