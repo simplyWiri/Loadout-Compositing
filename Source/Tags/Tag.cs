@@ -13,6 +13,7 @@ namespace Inventory {
 
         public List<Item> requiredItems = null;
         public string name = null;
+        public bool defaultEnabled = false;
         public int uniqueId = -1;
 
         // What & Why?
@@ -101,6 +102,7 @@ namespace Inventory {
             Scribe_Collections.Look(ref requiredItems, nameof(requiredItems));
             Scribe_Values.Look(ref name, nameof(name));
             Scribe_Values.Look(ref uniqueId, nameof(uniqueId));
+            Scribe_Values.Look(ref defaultEnabled, nameof(defaultEnabled), false);
 
             if (!GenericLoad && idType != "GenericTag_") {
                 var count = requiredItems.RemoveAll(item => item.Def == null);

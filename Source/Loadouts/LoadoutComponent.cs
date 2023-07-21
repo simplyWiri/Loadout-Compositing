@@ -42,7 +42,7 @@ namespace Inventory {
             }
 
             pList.pawns.Add(Pawn);
-            Loadout.elements.Add(new LoadoutElement(tag, null));
+            Loadout.elements.Insert(0, new LoadoutElement(tag, null));
 
             foreach (var item in tag.requiredItems.Where(item => item.Def.IsApparel)) {
                 if (Pawn.outfits.CurrentOutfit.filter.Allows(item.Def)) continue;

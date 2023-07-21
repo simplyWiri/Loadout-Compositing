@@ -214,6 +214,19 @@ namespace Inventory {
 
             if (curTag == null) return;
 
+            var defaultOnRect = r.TopPartPixels(30).RightHalf();
+            TooltipHandler.TipRegion(defaultOnRect, Strings.EnableTagByDefaultDesc);
+            defaultOnRect.PopTopPartPixels(3);
+            var defaultOnRectButton = defaultOnRect.PopRightPartPixels(20).TopPartPixels(20);
+            defaultOnRect.PopRightPartPixels(5);
+
+            GUIUtility.DraggableCheckbox(defaultOnRectButton, defaultOnRectButton, ref curTag.defaultEnabled);
+            Text.Anchor = TextAnchor.UpperRight;
+            GUI.color = Color.gray;
+            Widgets.Label(defaultOnRect, Strings.EnableTagByDefault);
+            GUI.color = Color.white;
+            Text.Anchor = TextAnchor.UpperRight;
+
             Widgets.ListSeparator(ref r.m_YMin, r.width, Strings.Modify + " " + curTag.name);
 
             // [ Tag Name ] [ Edit Name ] 
