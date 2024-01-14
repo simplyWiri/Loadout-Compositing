@@ -382,8 +382,7 @@ namespace Inventory {
                 TooltipHandler.TipRegion(optionRect, tooltip);
                 if (Widgets.ButtonInvisible(optionRect)) {
                     curState = state;
-                    defFilter = string.Empty;
-                    lastDefFilter = defFilter;
+                    lastDefFilter = string.Empty;
                     lastDefList = null;
                     ResetTabState();
                     GUI.FocusControl("Def List Filter");
