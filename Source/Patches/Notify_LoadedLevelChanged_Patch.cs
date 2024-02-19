@@ -11,13 +11,14 @@ namespace Inventory {
         private static bool patchedDefs = false;
 
         private static void Postfix() {
-            if (patchedDefs) return;
+            if (patchedDefs) 
+				return;
 
-            foreach (var thing in DefDatabase<PawnKindDef>.AllDefs.Where(t => t.race.race.Humanlike)) {
-                var race = thing.race;
-                if (race.comps.Any(c => c.compClass == typeof(LoadoutComponent))) continue;
+            foreach (var thing in DefDatabase<ThingDef>.AllDefsListForReading.Where(t => t.race?.Humanlike == true)) {
+                if (thing.comps.Any(c => c.compClass == typeof(LoadoutComponent))) 
+					continue;
 
-                race.comps.Add(new CompProperties(typeof(LoadoutComponent)));
+				thing.comps.Add(new CompProperties(typeof(LoadoutComponent)));
             }
 
             Utility.CalculateDefLists();
