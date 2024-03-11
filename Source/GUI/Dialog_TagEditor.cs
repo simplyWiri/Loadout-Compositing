@@ -604,7 +604,7 @@ namespace Inventory {
 
                 Widgets.DefIcon(descRect.LeftPart(.15f), def);
                 Widgets.Label(descRect.RightPart(.85f), def.LabelCap);
-                TooltipHandler.TipRegion(rowRect, def.DescriptionDetailed);
+                TooltipHandler.TipRegion(rowRect, () => def.DescriptionDetailed, def.GetHashCode());
 
                 if (Widgets.ButtonInvisible(descRect)) {
                     AddDefToTag(def);
