@@ -18,9 +18,15 @@ namespace Inventory {
 
                 foreach (var tag in comp.Loadout.AllTags) {
                     var list = LoadoutManager.PawnsWithTags[tag];
+#if VERSION_1_4
                     if (!list.Pawns.Contains(__instance)) {
                         list.Pawns.Add(__instance);
                     }
+#elif VERSION_1_5
+                    if (!list.Contains(__instance)) {
+                        list.Add(__instance);
+                    }
+#endif
                 }
 
                 if (comp.Loadout.elements.Count == 0) {
@@ -37,9 +43,15 @@ namespace Inventory {
                 
                 foreach (var tag in tags) {
                     var list = LoadoutManager.PawnsWithTags[tag];
+#if VERSION_1_4
                     if (list.Pawns.Contains(__instance)) {
                         list.Pawns.Remove(__instance);
                     }
+#elif VERSION_1_5
+                    if (list.Contains(__instance)) {
+                        list.Remove(__instance);
+                    }
+#endif
                 }
             }
         }
