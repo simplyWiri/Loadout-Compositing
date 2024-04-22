@@ -27,6 +27,8 @@ namespace Inventory {
         private static MethodInfo target = AccessTools.Method(typeof(CameraJumper), nameof(CameraJumper.TryJump), new Type[] { typeof(GlobalTargetInfo) });
 #elif VERSION_1_4
         private static MethodInfo target = AccessTools.Method(typeof(CameraJumper), nameof(CameraJumper.TryJump), new Type[] { typeof(GlobalTargetInfo), typeof(CameraJumper.MovementMode) });
+#elif VERSION_1_5
+        private static MethodInfo target = AccessTools.Method(typeof(CameraJumper), nameof(CameraJumper.TryJump), new Type[] { typeof(GlobalTargetInfo), typeof(CameraJumper.MovementMode) });
 #endif
         private static MethodInfo insertMethod = AccessTools.Method(typeof(ColonistBarClicker_Patch), "ChangeWindowTo");
         

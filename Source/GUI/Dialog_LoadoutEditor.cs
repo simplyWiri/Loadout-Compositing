@@ -152,8 +152,12 @@ namespace Inventory {
 
                 TooltipHandler.TipRegion(editButtonRect, $"Edit {tag.name}");
 
+#if VERSION_1_4
                 if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT), TexButton.DeleteX)) {
-                    component.RemoveTag(element);
+#elif VERSION_1_5
+                if (Widgets.ButtonImageFitted(tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(UIC.SPACED_HEIGHT), TexButton.Delete)) {
+#endif
+                component.RemoveTag(element);
                 }
 
                 var dRect = tagRect.PopLeftPartPixels(UIC.SMALL_GAP);
