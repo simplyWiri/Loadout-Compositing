@@ -98,8 +98,11 @@ namespace Inventory {
         public static string InvalidStateName => $"{P}InvalidStateName".TranslateSimple();
         public static string SearchBarDesc => $"{P}SearchBarDesc".TranslateSimple();
         public static string MassAssign => $"{P}MassAssign".TranslateSimple();
-        
+#if VERSION_1_4
         public static string OutfitDisallowsKit(Pawn p, Outfit outfit, ThingDef apparelDef, Tag tag) => $"{P}OutfitDisallowsKit".Translate(p.LabelShort, outfit.label, apparelDef.LabelCap, tag.name);
+#elif VERSION_1_5
+        public static string OutfitDisallowsKit(Pawn p, ApparelPolicy outfit, ThingDef apparelDef, Tag tag) => $"{P}OutfitDisallowsKit".Translate(p.LabelShort, outfit.label, apparelDef.LabelCap, tag.name);
+#endif
 
         public static string PanicState => $"{P}PanicState".TranslateSimple();
         public static string PanicStateDesc => $"{P}PanicStateDesc".TranslateSimple();
