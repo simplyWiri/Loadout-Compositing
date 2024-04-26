@@ -35,7 +35,7 @@ namespace Inventory {
             rangedWeapons ??= items.Where(def => def.IsRangedWeapon && def.category != ThingCategory.Building).ToList();
             medicinalDefs ??= items.Where(def => def.IsMedicine || def.IsDrug).ToList();
 
-            if (ModLister.HasActiveModWithName("Vanilla Apparel Expanded — Accessories")) {
+            /*if (ModLister.HasActiveModWithName("Vanilla Apparel Expanded — Accessories")) {
                 Log.Message("[Loadout Compositing] Enabled mod integrations with Vanilla Apparel Expanded — Accessories, biasing mass carrying clothes...");
 
                 var type = AccessTools.TypeByName("VAE_Accessories.CaravanCapacityApparelDef");
@@ -58,7 +58,7 @@ namespace Inventory {
                         });
                     }
                 }
-            }
+            }*/
         }
 
         public static QualityCategory Next(this QualityCategory qc) {
