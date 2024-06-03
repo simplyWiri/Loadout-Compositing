@@ -7,5 +7,8 @@ namespace Inventory
 	public class InvStatDefOf
 	{
 		public static StatDef MeleeWeapon_AverageArmorPenetration;
+
+		public static StatDef VEF_MassCarryCapacity;
+
 	}
 }
