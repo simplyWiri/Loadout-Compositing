@@ -143,7 +143,11 @@ namespace Inventory {
 
             Scribe_Collections.Look(ref tags, nameof(tags), LookMode.Deep);
             Scribe_Collections.Look(ref states, nameof(states), LookMode.Deep);
+#if VERSION_1_4
             Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Deep, ref pTagsLoading, ref pPawnLoading);
+#elif VERSION_1_5
+            Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Reference, ref pTagsLoading, ref pPawnLoading);
+#endif
             Scribe_Collections.Look(ref billToTag, nameof(billToTag), LookMode.Reference, LookMode.Reference);
             Scribe_References.Look(ref panicState, nameof(panicState));
             Scribe_Values.Look(ref inPanicState, nameof(inPanicState));

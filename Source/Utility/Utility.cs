@@ -35,15 +35,12 @@ namespace Inventory {
             rangedWeapons ??= items.Where(def => def.IsRangedWeapon && def.category != ThingCategory.Building).ToList();
             medicinalDefs ??= items.Where(def => def.IsMedicine || def.IsDrug).ToList();
 
-            if (ModLister.HasActiveModWithName("Vanilla Apparel Expanded — Accessories")) {
-                Log.Message("[Loadout Compositing] Enabled mod integrations with Vanilla Apparel Expanded — Accessories, biasing mass carrying clothes...");
+            if (ModLister.HasActiveModWithName("Vanilla Expanded Framework")) {
+                Log.Message("[Loadout Compositing] Enabled mod integrations with Vanilla Expanded Framework, biasing mass carrying clothes...");
 
-                var type = AccessTools.TypeByName("VAE_Accessories.CaravanCapacityApparelDef");
-                var field = type.GetField("carryingCapacity", BindingFlags.Instance | BindingFlags.Public);
-                
                 foreach (var def in apparelDefs) {
-                    if (def.GetType() == type) {
-                        var carryingCapacity = (float)field.GetValue(def);
+                    if (def.equippedStatOffsets?.Any(statModifier => statModifier.stat == InvStatDefOf.VEF_MassCarryCapacity) ?? false) {
+                        var carryingCapacity = def.equippedStatOffsets.First(statModifier => statModifier.stat == InvStatDefOf.VEF_MassCarryCapacity).value;
                         massBoostingClothes.Add(def, (QualityCategory quality) => {
                             return carryingCapacity * quality switch {
                                 QualityCategory.Awful      => 0.5f,
