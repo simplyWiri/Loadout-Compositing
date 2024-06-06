@@ -13,7 +13,7 @@ namespace Inventory {
         private static void Postfix() {
             if (patchedDefs) return;
 
-            foreach (var thing in DefDatabase<ThingDef>.AllDefs.Where(t => t.race?.Humanlike == true)) {
+            foreach (var thing in DefDatabase<ThingDef>.AllDefs.Where(t => t.race?.Humanlike == true && !t.IsCorpse)) {
                 if (thing.comps.Any(c => c.compClass == typeof(LoadoutComponent))) continue;
 
                 thing.comps.Add(new CompProperties(typeof(LoadoutComponent)));
