@@ -8,6 +8,7 @@ namespace Inventory
 	{
 		public static StatDef MeleeWeapon_AverageArmorPenetration;
 
+		[MayRequire("OskarPotocki.VanillaFactionsExpanded.Core")]
 		public static StatDef VEF_MassCarryCapacity;
 
 	}
