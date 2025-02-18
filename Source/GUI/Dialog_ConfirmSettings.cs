@@ -33,7 +33,7 @@ namespace Inventory
             height = warningStrs.Sum(str => Text.CalcHeight(str.message, (360 - 2 * Margin) - UIC.SCROLL_WIDTH));
         }
 
-        public override Vector2 InitialSize => new Vector2(360, Mathf.Max(height, 240));
+        public override Vector2 InitialSize => new Vector2(360, Mathf.Max(Mathf.Min(height, 500), 240));
 
         public override void DoWindowContents(Rect rect) {
             Text.Anchor = TextAnchor.MiddleCenter;
