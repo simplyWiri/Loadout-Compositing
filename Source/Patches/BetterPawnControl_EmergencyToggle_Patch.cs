@@ -20,7 +20,8 @@ namespace Inventory
         public static void TryPatch(Harmony harmonyInstance)
         {
             var bpcLoaded = LoadedModManager.RunningModsListForReading.Any(m => m.PackageId.ToLowerInvariant() == "VouLT.BetterPawnControl".ToLowerInvariant());
-            if ( bpcLoaded && !patched ) {
+            bool oldBpc = AccessTools.PropertyGetter("BetterPawnControl.Widget_ModsAvailable:CompositableAvailable") == null;
+            if ( bpcLoaded && !patched && oldBpc ) {
                 var method = AccessTools.Method("BetterPawnControl.Patches.PlaySettings_DoPlaySettingsGlobalControls:EmergencyToogleON");
                 harmonyInstance.Patch(method, postfix: new HarmonyMethod(typeof(BetterPawnControl_EmergencyToggle_Patch), nameof(ToggleOn)));
                 
