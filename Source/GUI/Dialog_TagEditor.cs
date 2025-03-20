@@ -49,6 +49,8 @@ namespace Inventory {
         private bool ascending = false;
         private StatDef selectedStat = null;
         private float statLength = UIC.DEFAULT_HEIGHT;
+        private Color conflictingApparelColour = new Color(.75f, 0.2f, 0.0f, .8f);
+        private ThingDef hoveredDef = null;
         
         private const float INVALID_STAT_VALUE = -10000;
 
@@ -554,6 +556,9 @@ namespace Inventory {
             var viewFrustum = r.AtZero();
             viewFrustum.y += curScroll.y;
 
+            hoveredDef = null;
+            var rectCopy = rect;
+
             for (int i = 0; i < defs.Count; i++) {
                 if (!rect.Overlaps(viewFrustum)) {
                     rect.y += UIC.DEFAULT_HEIGHT;
@@ -604,7 +609,22 @@ namespace Inventory {
 
                 Widgets.DefIcon(descRect.LeftPart(.15f), def);
                 Widgets.Label(descRect.RightPart(.85f), def.LabelCap);
-                TooltipHandler.TipRegion(rowRect, () => def.DescriptionDetailed, def.GetHashCode());
+
+                if (Mouse.IsOver(rowRect) && def.IsApparel)
+                {
+                    hoveredDef = def;
+                    conflictingApparelColour.a = (Mathf.Sin((float)(DateTime.Now.TimeOfDay.TotalMilliseconds % 3000) / 3000 * Mathf.PI * 2) * 0.25f) + 0.75f;
+                }
+                
+                TooltipHandler.TipRegion(rowRect, () =>
+                {
+                    if (def.IsApparel)
+                    {
+                        return $"{def.DescriptionDetailed}\n\nIf equipped, {def.LabelCap} would prevent any {"highlighted".Colorize(conflictingApparelColour)} apparel being worn";
+                    }
+                    
+                    return def.DescriptionDetailed;
+                }, def.GetHashCode());
 
                 if (Widgets.ButtonInvisible(descRect)) {
                     AddDefToTag(def);
@@ -619,6 +639,36 @@ namespace Inventory {
                     Widgets.DrawLightHighlight(rowRect);
 
                 Widgets.DrawHighlightIfMouseover(rowRect);
+            }
+
+            if (hoveredDef != null)
+            {
+                var coveringSlots = ApparelSlotMaker.Create(BodyDefOf.Human, hoveredDef);
+                
+                void DrawHighlightIfConflicts(ThingDef otherDef, Rect rect)
+                {
+                    if (!otherDef.IsApparel || !coveringSlots.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, otherDef)))
+                        return;
+
+                    if (otherDef == hoveredDef)
+                        return;
+                    
+                    GUI.color = conflictingApparelColour;
+                    GUI.DrawTexture(rect, TexUI.RectHighlight);
+                    GUI.color = Color.white;
+                }
+                
+                // Do a second pass where we draw a highlight over the "conflicting" apparel;
+                foreach (var t in defs)
+                {
+                    if (!rectCopy.Overlaps(viewFrustum)) {
+                        rectCopy.y += UIC.DEFAULT_HEIGHT;
+                        continue;
+                    }
+
+                    DrawHighlightIfConflicts(t, rectCopy);
+                    rectCopy.y += UIC.DEFAULT_HEIGHT;
+                }                
             }
 
             GUI.EndGroup();
