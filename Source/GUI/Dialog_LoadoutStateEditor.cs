@@ -14,7 +14,10 @@ namespace Inventory {
         
         public override Vector2 InitialSize => new Vector2(320, 320);
         
-        public Dialog_LoadoutStateEditor(List<LoadoutState> states) {
+        public Dialog_LoadoutStateEditor(List<LoadoutState> states)
+        {
+            doCloseButton = true;
+            doCloseX = true;
             this.states = states.Select(s => new Pair<LoadoutState, bool>(s, false))
                 .OrderByDescending(s => s.First.name)
                 .ToList();
@@ -84,16 +87,18 @@ namespace Inventory {
                 
                 viewRect.AdjVertBy(UIC.SMALL_GAP);
             }
-            
+
+            // If we remove a state, update the UI immediately.
+            states.RemoveAll(pair => !LoadoutManager.States.Contains(pair.First));
             Widgets.EndScrollView();
         }
 
         public void DrawSetPanicState(ref Rect rect) {
-            var topRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(Text.LineHeight);
+            var topRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT).TopPartPixels(Text.LineHeight).LeftPartPixels(rect.width - 28);
             TooltipHandler.TipRegion(topRect, Strings.PanicStateDesc);
             Widgets.Label(topRect.PopLeftPartPixels(Strings.PanicState.GetWidthCached() + UIC.SMALL_GAP), Strings.PanicState);
 
-            if ( LoadoutManager.States.Except(LoadoutManager.PanicState).Count() >= 1 ) {
+            if ( LoadoutManager.States.Except(LoadoutManager.PanicState).Any() ) {
                Widgets.Dropdown(topRect, LoadoutManager.PanicState, (p) => p, GenerateMenuFor, LoadoutManager.PanicState?.name ?? Strings.DefaultStateName, paintable: true);
             } else {
                 GUI.color = Color.gray;
