@@ -198,10 +198,10 @@ namespace Inventory {
         }
 
         private Job FindItem(Pawn pawn, Item item, int count) {
-            var things = item.ThingsOnMap(pawn.Map);
+            var things = item.ThingsOnMap(pawn.Map).ToList();
 
             var orderedList = count == 1
-                ? things.OrderBy(t => t.Position.DistanceToSquared(pawn.Position))
+                ? DecideItemPriority(pawn, things)
                 : things.OrderByDescending(t => t.stackCount);
             
             foreach (var thing in orderedList) {
@@ -221,6 +221,51 @@ namespace Inventory {
             }
 
             return null;
+        }
+
+        // Mostly for better bio-coded weapon integration.
+        private IOrderedEnumerable<Thing> DecideItemPriority(Pawn pawn, List<Thing> things)
+        {
+            var example = things.First();
+
+            if (example.def.IsWeapon)
+            {
+                // If the things are bio-codable, if any are coded to the pawn - we should prioritize that one - if they
+                // are coded to another person, we should ignore it.
+                if (example.TryGetComp<CompBiocodable>()?.Biocodable ?? false)
+                {
+                    // Remove each thing which is bio-coded to a pawn other than the target    
+                    things.RemoveAll(t =>
+                    {
+                        var comp = t.TryGetComp<CompBiocodable>();
+                        return comp != null && comp.CodedPawn != null && comp.CodedPawn != pawn;
+                    });
+                
+                    // If there exists a weapon which is coded to our pawn, lets equip that instead of an uncoded one, 
+                    // otherwise pick the closest occurence.
+                    var marked = things.Where(t => t.TryGetComp<CompBiocodable>()?.CodedPawn == pawn).ToList();
+                    if (marked.Any())
+                    {
+                        things = marked;
+                        // Special case the case we have a bonded weapon, but its forbidden
+                        if (things.All(t => t.IsForbidden(pawn)))
+                        {
+                            Messages.Message(new Message(
+                                $"{pawn.Name} cannot equip {string.Join(", ", things.Select(t => t.LabelShort))} as it is forbidden.", 
+                                MessageTypeDefOf.SilentInput,
+                                things
+                            ));
+                        }
+                    }
+                }
+
+                if (example.def.IsMeleeWeapon)
+                {
+                    return things.OrderByDescending(t => t.GetStatValueForPawn(StatDefOf.MeleeWeapon_AverageDPS, pawn));
+                }
+            }
+  
+            return things.OrderBy(t => t.InteractionCell.DistanceToSquared(pawn.InteractionCell));
         }
 
         private Job RemoveItem(List<Thing> pawnGear, Item item, int count) {
