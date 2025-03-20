@@ -12,11 +12,11 @@ namespace Inventory {
         public static void SetLoadoutById(Pawn pawn, int id) {
             foreach( LoadoutState state in LoadoutManager.States ) {
                 if( state.id == id) {
-                    pawn.SetActiveState(state);
+                    pawn.SetActiveState(state, immediatelyResolve: BetterPawnControl_EmergencyToggle_Patch.emergencyActive);
                     return;
                 }
             }
-            pawn.SetActiveState(null);
+            pawn.SetActiveState(null, immediatelyResolve: BetterPawnControl_EmergencyToggle_Patch.emergencyActive);
         }
     }
 }
