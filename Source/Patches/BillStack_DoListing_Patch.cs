@@ -72,6 +72,8 @@ namespace Inventory
                 bill.repeatMode = InvBillRepeatModeDefOf.W_PerTag;
                 bill.targetCount = 1;
                 bill.repeatCount = 0;
+                bill.includeEquipped = true;
+                bill.limitToAllowedStuff = true;
                         
                 item.Filter.CopyTo(bill.ingredientFilter);
                 bill.limitToAllowedStuff = !item.Filter.Generic;
