@@ -226,8 +226,12 @@ namespace Inventory {
         // Mostly for better bio-coded weapon integration.
         private IOrderedEnumerable<Thing> DecideItemPriority(Pawn pawn, List<Thing> things)
         {
+            if (things.Empty())
+            {
+                return new List<Thing>().OrderByDescending(t => t.stackCount);
+            }
+            
             var example = things.First();
-
             if (example.def.IsWeapon)
             {
                 // If the things are bio-codable, if any are coded to the pawn - we should prioritize that one - if they

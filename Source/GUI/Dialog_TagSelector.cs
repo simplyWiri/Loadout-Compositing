@@ -27,6 +27,7 @@ namespace Inventory {
             this.onSelect = onSelect;
             this.multiSelect = multiSelect;
             this.customTitleSuffix = customTitleSuffix;
+            this.doCloseX = true;
             this.selectedTags = new List<Tag>();
 
             closeOnClickedOutside = true;

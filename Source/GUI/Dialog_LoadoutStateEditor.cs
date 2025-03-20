@@ -16,7 +16,6 @@ namespace Inventory {
         
         public Dialog_LoadoutStateEditor(List<LoadoutState> states)
         {
-            doCloseButton = true;
             doCloseX = true;
             this.states = states.Select(s => new Pair<LoadoutState, bool>(s, false))
                 .OrderByDescending(s => s.First.name)
