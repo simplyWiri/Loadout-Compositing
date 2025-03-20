@@ -13,12 +13,12 @@ namespace Inventory {
     class CopiedTags {
 
         public Pawn fromPawn = null;
-        public List<Tag> tagsToCopy;
+        public List<LoadoutElement> elemsToCopy;
         public bool replace = true;
 
-        public CopiedTags(Pawn pawn, List<Tag> tags, bool replace = true) {
+        public CopiedTags(Pawn pawn, List<LoadoutElement> elems, bool replace = true) {
             this.fromPawn = pawn;
-            this.tagsToCopy = tags;
+            this.elemsToCopy = elems;
             this.replace = replace;
         }
         
@@ -30,14 +30,14 @@ namespace Inventory {
                     pComp.RemoveTag(elem);
                 }
 
-                foreach (var tag in tagsToCopy) {
-                    pComp.AddTag(tag);
+                foreach (var tag in elemsToCopy) {
+                    pComp.AddElement(tag);
                 }
             } else {
                 var heldTags = pComp.Loadout.AllTags.ToList();
-                var tagsToApply = tagsToCopy.Where(tag => !heldTags.Contains(tag));
+                var tagsToApply = elemsToCopy.Where(elem => !heldTags.Contains(elem.Tag));
                 foreach (var tag in tagsToApply) {
-                    pComp.AddTag(tag);
+                    pComp.AddElement(tag);
                 }  
             }
         }
@@ -47,10 +47,10 @@ namespace Inventory {
 
             var pawnTags = pawn.GetComp<LoadoutComponent>().Loadout.AllTags.ToList();
             if (replace) {
-                return !(tagsToCopy.All(t => pawnTags.Contains(t)) && tagsToCopy.Count == pawnTags.Count);
+                return !(elemsToCopy.All(t => pawnTags.Contains(t.Tag)) && elemsToCopy.Count == pawnTags.Count);
             } 
             
-            return !tagsToCopy.All(t => pawnTags.Contains(t));
+            return !elemsToCopy.All(t => pawnTags.Contains(t.Tag));
         }
     }
     
@@ -120,33 +120,41 @@ namespace Inventory {
             var pasteRect = rect.RightHalf();
 
             Widgets.DrawTextureFitted(copyRect, TexButton.Copy, 1f);
-            if (Mouse.IsOver(copyRect)) {
+            if (Mouse.IsOver(copyRect))
+            {
+                var loadout = pawn.GetComp<LoadoutComponent>().Loadout;
+                var elems = loadout.AllElements.ToList();
+                
                 if (Input.GetMouseButtonDown(0)) {
-                    copiedTags = new CopiedTags(pawn, pawn.GetComp<LoadoutComponent>().Loadout.AllTags.ToList());
+                    copiedTags = new CopiedTags(pawn, elems);
                     hasCopyPrimed = true;
                 } else if (Input.GetMouseButtonDown(1)) {
                     copiedTags = null;
-                    var tags = pawn.GetComp<LoadoutComponent>().Loadout.AllTags.ToList();
+                    var tags = loadout.AllTags.ToList();
                     var opts = new List<FloatMenuOption>() {
                         new FloatMenuOption(Strings.CopyAllTagsFrom + pawn.LabelShort + Strings.ReplaceOnPaste, () => {
-                            copiedTags = new CopiedTags(pawn, tags, true);
+                            copiedTags = new CopiedTags(pawn, elems, true);
                             hasCopyPrimed = true;
                         }),
                         new FloatMenuOption(Strings.CopyAllTagsFrom + pawn.LabelShort + Strings.AddOnPaste, () => {
-                            copiedTags = new CopiedTags(pawn, tags, false);
+                            copiedTags = new CopiedTags(pawn, elems, false);
                             hasCopyPrimed = true;
                         }),
                         new FloatMenuOption(Strings.SelectTagsFrom + pawn.LabelShort + Strings.ReplaceOnPaste, () => {
                             Find.WindowStack.Add(new Dialog_TagSelector(tags, tag => {
-                                copiedTags ??= new CopiedTags(pawn, new List<Tag>(), true);
-                                copiedTags.tagsToCopy.Add(tag);
+                                var elem = elems.FirstOrDefault(e => e.Tag == tag);
+                                
+                                copiedTags ??= new CopiedTags(pawn, new List<LoadoutElement>(), true);
+                                copiedTags.elemsToCopy.Add(elem);
                                 hasCopyPrimed = true;
                             }, customTitleSuffix: Strings.ToCopy));
                         }),     
                         new FloatMenuOption(Strings.SelectTagsFrom + pawn.LabelShort + Strings.AddOnPaste, () => {
                             Find.WindowStack.Add(new Dialog_TagSelector(tags, tag => {
-                                copiedTags ??= new CopiedTags(pawn, new List<Tag>(), false);
-                                copiedTags.tagsToCopy.Add(tag);
+                                var elem = elems.FirstOrDefault(e => e.Tag == tag);
+
+                                copiedTags ??= new CopiedTags(pawn, new List<LoadoutElement>(), false);
+                                copiedTags.elemsToCopy.Add(elem);
                                 hasCopyPrimed = true;
                             }, customTitleSuffix: Strings.ToCopy));
                         })

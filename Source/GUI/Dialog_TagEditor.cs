@@ -278,11 +278,7 @@ namespace Inventory {
 
                 // Remove
                 var removeButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
-#if VERSION_1_4
-                if (Widgets.ButtonImageFitted(removeButton.ContractedBy(1f), TexButton.DeleteX)) {
-#elif VERSION_1_5
                 if (Widgets.ButtonImageFitted(removeButton.ContractedBy(1f), TexButton.Delete)) {
-#endif
                     curTag.requiredItems.Remove(item);
                 }
 
@@ -528,11 +524,7 @@ namespace Inventory {
                             foreach(var def in defList) {
                                 var stuff = GenStuff.AllowedStuffsFor(def).FirstOrDefault();
                                 var cachedDrawEntries = def.SpecialDisplayStats(StatRequest.For(def, stuff)).ToList();
-#if VERSION_1_4
-                                cachedDrawEntries.AddRange(StatsReportUtility.StatsToDraw(def, stuff).Where(r => r.ShouldDisplay));
-#elif VERSION_1_5
                                 cachedDrawEntries.AddRange(StatsReportUtility.StatsToDraw(def, stuff).Where(r => r.ShouldDisplay()));
-#endif
 
                                 var relevant = cachedDrawEntries.FirstOrDefault(s => s.stat == selectedStat);
                                 statCache[def] = relevant?.value ?? INVALID_STAT_VALUE;

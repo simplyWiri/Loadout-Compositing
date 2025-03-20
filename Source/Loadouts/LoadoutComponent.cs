@@ -37,29 +37,32 @@ namespace Inventory {
         
         public void AddTag(Tag tag) {
             if (!LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) {
-#if VERSION_1_4
-                pList = new SerializablePawnList(new List<Pawn>());
-#elif VERSION_1_5
                 pList = new List<Pawn>();
-#endif
                 LoadoutManager.PawnsWithTags.Add(tag, pList);
             }
 
-#if VERSION_1_4
-            pList.pawns.Add(Pawn);
-#elif VERSION_1_5
             pList.Add(Pawn);
-#endif
             Loadout.elements.Insert(0, new LoadoutElement(tag, null));
 
             foreach (var item in tag.requiredItems.Where(item => item.Def.IsApparel)) {
-#if VERSION_1_4
-                if (Pawn.outfits.CurrentOutfit.filter.Allows(item.Def)) continue;
-                Messages.Message(Strings.OutfitDisallowsKit(Pawn, Pawn.outfits.CurrentOutfit, item.Def, tag), Pawn, MessageTypeDefOf.CautionInput, false);
-#elif VERSION_1_5
                 if (Pawn.outfits.CurrentApparelPolicy.filter.Allows(item.Def)) continue;
                 Messages.Message(Strings.OutfitDisallowsKit(Pawn, Pawn.outfits.CurrentApparelPolicy, item.Def, tag), Pawn, MessageTypeDefOf.CautionInput, false);
-#endif
+                return;
+            }
+        }
+        
+        public void AddElement(LoadoutElement elem) {
+            if (!LoadoutManager.PawnsWithTags.TryGetValue(elem.Tag, out var pList)) {
+                pList = new List<Pawn>();
+                LoadoutManager.PawnsWithTags.Add(elem.Tag, pList);
+            }
+
+            pList.Add(Pawn);
+            Loadout.elements.Add(elem);
+
+            foreach (var item in elem.Tag.requiredItems.Where(item => item.Def.IsApparel)) {
+                if (Pawn.outfits.CurrentApparelPolicy.filter.Allows(item.Def)) continue;
+                Messages.Message(Strings.OutfitDisallowsKit(Pawn, Pawn.outfits.CurrentApparelPolicy, item.Def, elem.Tag), Pawn, MessageTypeDefOf.CautionInput, false);
                 return;
             }
         }
@@ -68,11 +71,7 @@ namespace Inventory {
             Loadout.elements.Remove(element);
 
             if (LoadoutManager.PawnsWithTags.TryGetValue(element.Tag, out var pList)) {
-#if VERSION_1_4
-                pList.pawns.Remove(Pawn);
-#elif VERSION_1_5
                 pList.Remove(Pawn);
-#endif
             }
                     
             Loadout.UpdateState(element, false);

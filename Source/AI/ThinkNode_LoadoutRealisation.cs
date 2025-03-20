@@ -150,11 +150,7 @@ namespace Inventory {
         }
 
         private bool ValidApparelFor(Apparel apparel, Pawn pawn) {
-#if VERSION_1_4
-            if (!pawn.outfits.CurrentOutfit.filter.Allows(apparel)) return false;
-#elif VERSION_1_5
             if (!pawn.outfits.CurrentApparelPolicy.filter.Allows(apparel)) return false;
-#endif
             if (apparel.def.apparel.gender != Gender.None && apparel.def.apparel.gender != pawn.gender) return false;
             if (!RimWorld.ApparelUtility.HasPartsToWear(pawn, apparel.def)) return false;
 

@@ -119,11 +119,7 @@ namespace Inventory
             var buttonRect = rect.PopRightPartPixels(UIC.SMALL_ICON);
 
             TooltipHandler.TipRegion(buttonRect, Strings.DeleteSavedTag);
-#if VERSION_1_4
-            if (Widgets.ButtonImage(buttonRect, TexButton.DeleteX)) {
-#elif VERSION_1_5
             if (Widgets.ButtonImage(buttonRect, TexButton.Delete)) {
-#endif
                 Find.WindowStack.Add(new Dialog_ConfirmSettings(() => {
                     savedTags.Remove(tag);
                     ModBase.settings.Write();

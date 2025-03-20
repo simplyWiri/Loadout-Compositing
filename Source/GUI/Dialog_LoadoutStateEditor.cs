@@ -58,11 +58,7 @@ namespace Inventory {
                     Widgets.DrawLightHighlight(rowRect);
                 }
 
-#if VERSION_1_4
-                if(Widgets.ButtonImage(rowRect.PopRightPartPixels(UIC.SMALL_ICON), TexButton.DeleteX)) {
-#elif VERSION_1_5
                 if(Widgets.ButtonImage(rowRect.PopRightPartPixels(UIC.SMALL_ICON), TexButton.Delete)) {
-#endif
                     LoadoutManager.RemoveState(state);
                 }
 

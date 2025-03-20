@@ -48,11 +48,7 @@ namespace Inventory {
             baseWeaponStats = new List<StatDef>() {
                 StatDefOf.MaxHitPoints,
                 StatDefOf.MeleeWeapon_AverageDPS,
-#if VERSION_1_4
-                StatDefOf.MeleeWeapon_AverageArmorPenetration,
-#elif VERSION_1_5
                 InvStatDefOf.MeleeWeapon_AverageArmorPenetration,
-#endif
                 StatDefOf.Mass,
             };
 

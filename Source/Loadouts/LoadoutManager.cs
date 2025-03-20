@@ -16,21 +16,13 @@ namespace Inventory {
         private int backCompat = CURRENT_BACK_COMPAT_VERSION;
         private int nextTagId;
         private int nextStateId;
-#if VERSION_1_4
-        private List<SerializablePawnList> pPawnLoading = null;
-#elif VERSION_1_5
         private List<List<Pawn>> pPawnLoading = null;
-#endif
         private List<Tag> pTagsLoading = null;
 
         // pseudo-static lists.
         private List<Tag> tags = new List<Tag>();
         private List<LoadoutState> states = new List<LoadoutState>();
-#if VERSION_1_4
-        private Dictionary<Tag, SerializablePawnList> pawnTags = new Dictionary<Tag, SerializablePawnList>();
-#elif VERSION_1_5
         private Dictionary<Tag, List<Pawn>> pawnTags = new Dictionary<Tag, List<Pawn>>();
-#endif
         private Dictionary<Bill_Production, Tag> billToTag = new Dictionary<Bill_Production, Tag>();
 
         private LoadoutState panicState = null;
@@ -38,11 +30,7 @@ namespace Inventory {
 
         public static List<Tag> Tags => instance.tags;
         public static List<LoadoutState> States => instance.states;
-#if VERSION_1_4
-        public static Dictionary<Tag, SerializablePawnList> PawnsWithTags => instance.pawnTags;
-#elif VERSION_1_5
         public static Dictionary<Tag, List<Pawn>> PawnsWithTags => instance.pawnTags;
-#endif
         public static LoadoutState PanicState => instance.panicState;
 
         public static int GetNextTagId() => UniqueIDsManager.GetNextID(ref instance.nextTagId);
@@ -62,26 +50,16 @@ namespace Inventory {
             // state to be in).
             var tag = TagFor(bill);
             if (tag == null) return 0;
-#if VERSION_1_4
-            instance.pawnTags[tag].pawns.RemoveAll(p => p is null || p.Dead || !p.IsValidLoadoutHolder());
-
-            return instance.pawnTags[tag].Pawns.Count(p => p.Map == bill.Map && p.HostFaction is null);
-#elif VERSION_1_5
+            
             instance.pawnTags[tag].RemoveAll(p => p is null || p.Dead || !p.IsValidLoadoutHolder());
-
             return instance.pawnTags[tag].Count(p => p.Map == bill.Map && p.HostFaction is null);
-#endif
         }
 
         public LoadoutManager(Game game) { }
 
         public static void AddTag(Tag tag) {
             instance.tags.Add(tag);
-#if VERSION_1_4
-            PawnsWithTags.Add(tag, new SerializablePawnList(new List<Pawn>()));
-#elif VERSION_1_5
             PawnsWithTags.Add(tag, new List<Pawn>());
-#endif
         }
 
         public static void RemoveTag(Tag tag) {
@@ -135,20 +113,12 @@ namespace Inventory {
         public override void ExposeData() {
             if (Scribe.mode == LoadSaveMode.Saving) {
                 billToTag?.RemoveAll(kv => kv.Key.InvalidBill() || kv.Key.repeatMode != InvBillRepeatModeDefOf.W_PerTag);
-#if VERSION_1_4
-                pawnTags?.Do(kv => pawnTags[kv.Key]?.pawns?.RemoveAll(p => p is null || p.Dead || !p.IsValidLoadoutHolder()));
-#elif VERSION_1_5
                 pawnTags?.Do(kv => pawnTags[kv.Key]?.RemoveAll(p => p is null || p.Dead || !p.IsValidLoadoutHolder()));
-#endif
             }
 
             Scribe_Collections.Look(ref tags, nameof(tags), LookMode.Deep);
             Scribe_Collections.Look(ref states, nameof(states), LookMode.Deep);
-#if VERSION_1_4
-            Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Deep, ref pTagsLoading, ref pPawnLoading);
-#elif VERSION_1_5
             Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Reference, ref pTagsLoading, ref pPawnLoading);
-#endif
             Scribe_Collections.Look(ref billToTag, nameof(billToTag), LookMode.Reference, LookMode.Reference);
             Scribe_References.Look(ref panicState, nameof(panicState));
             Scribe_Values.Look(ref inPanicState, nameof(inPanicState));
@@ -167,11 +137,7 @@ namespace Inventory {
             }
 
             tags ??= new List<Tag>();
-#if VERSION_1_4
-            pawnTags ??= new Dictionary<Tag, SerializablePawnList>();
-#elif VERSION_1_5
             pawnTags ??= new Dictionary<Tag, List<Pawn>>();
-#endif
             billToTag ??= new Dictionary<Bill_Production, Tag>();
             states ??= new List<LoadoutState>();
         }
