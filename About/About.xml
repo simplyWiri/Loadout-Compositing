@@ -14,6 +14,7 @@
 - Create tags containing items which a pawn will wear / pick up / equip automatically
 - Create loadouts consisting of multiple tags for flexibility (composition)
 - Create bills which make `x` number of items, where `x` is the number of pawns with the tag `y`
+- Automatically create bills in a given workbench for all created tags
 - Share tags across multiple saves
 
 &lt;size=24&gt;Mod Integrations:&lt;/size&gt;

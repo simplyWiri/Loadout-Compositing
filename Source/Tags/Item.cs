@@ -62,10 +62,6 @@ namespace Inventory {
             return stringBuilder.ToString();
         }
 
-        //public Thing MakeDummyThingNoId() {
-        //    return Utility.MakeThingWithoutID(Def, RandomStuff, RandomQuality);
-        //}
-
         public Item() {
             this.def = null;
             this.filter = null;
@@ -84,13 +80,6 @@ namespace Inventory {
             if (things.NullOrEmpty()) yield break;
             foreach (var thing in things.Where(Allows)) {
                 yield return thing;
-            }
-        }
-        
-        public void SetQuantity(int quantity) {
-            this.quantity = quantity;
-            if (quantity <= 0) {
-                this.quantity = 1;
             }
         }
 

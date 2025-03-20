@@ -57,6 +57,18 @@ namespace Inventory {
             thingFilter.allowedDefs = stuffs.Count == 0 ? GenStuff.AllowedStuffsFor(forThing).ToHashSet() : AllowedStuffs.Select(d => d.Def).ToHashSet();
         }
 
+        public bool SupersetOf(Bill_Production other)
+        {
+            var stuffSuperset = stuffs.Count == 0
+                ? other.ingredientFilter.allowedDefs.IsSupersetOf(GenStuff.AllowedStuffsFor(forThing))
+                : other.ingredientFilter.allowedDefs.IsSupersetOf(stuffs.Select(d => d.Def));
+
+            var qualitySuperset = QualityRange.max <= other.qualityRange.max && QualityRange.min >= other.qualityRange.min;
+            var hpSuperset = HpRange.max <= other.hpRange.max && HpRange.min >= other.hpRange.min;
+
+            return stuffSuperset && qualitySuperset && hpSuperset;
+        }
+
         public static Filter CopyFrom(Filter from, Filter to) {
             var newFilter = new Filter(to.Thing);
             if (newFilter.Thing.MadeFromStuff && from.Thing.MadeFromStuff) {

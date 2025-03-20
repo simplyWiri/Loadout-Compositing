@@ -106,7 +106,7 @@ namespace Inventory {
         public static LoadoutState GetActiveState(this Pawn p) {
             var comp = p.TryGetComp<LoadoutComponent>();
             
-            return comp is not null ? comp.Loadout.CurrentState : null;
+            return comp?.Loadout.CurrentState;
         }
 
         public static void SetActiveState(this Pawn p, LoadoutState state, bool immediatelyResolve = false) {

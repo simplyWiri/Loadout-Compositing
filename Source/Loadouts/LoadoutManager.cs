@@ -129,6 +129,7 @@ namespace Inventory {
 
             // Ugly workaround detailed on the type itself.
             BetterPawnControl_EmergencyToggle_Patch.TryPatch(ModBase.harmony);
+            BWM_DoWindowContentsPatch_Patch.TryPatch(ModBase.harmony);
         }
 
         public override void ExposeData() {
