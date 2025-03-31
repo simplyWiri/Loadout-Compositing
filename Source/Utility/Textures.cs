@@ -32,6 +32,7 @@ namespace Inventory {
         public static readonly Texture2D SortByStatAscTex = ContentFinder<Texture2D>.Get("SortByStatAsc");
         public static readonly Texture2D SortByStatDscTex = ContentFinder<Texture2D>.Get("SortByStatDsc");
         public static readonly Texture2D FilterByResearchedTex = ContentFinder<Texture2D>.Get("FilterByResearched");
+        public static readonly Texture2D BillsGizmoTex = ContentFinder<Texture2D>.Get("BillsGizmo");
     }
 
 }

@@ -24,10 +24,10 @@ namespace Inventory
             if (Find.Selector.SingleSelectedThing is not Building_WorkTable workTable) return;
             
             var ws = ITab_Bills.WinSize;
-            var buttonRect = new Rect(ws.x - (ITab_Bills.PasteX + 4 + (ITab_Bills.PasteSize + 4) * (bwmLoaded ? 3 : 0)), 0, ITab_Bills.PasteSize, ITab_Bills.PasteSize);
+            var buttonRect = new Rect(ws.x - ((ITab_Bills.PasteX + 4) * 2 + (ITab_Bills.PasteSize + 4) * (bwmLoaded ? 2 : 0)), 0, ITab_Bills.PasteSize, ITab_Bills.PasteSize);
                 
-            TooltipHandler.TipRegion(buttonRect, "Automatically create bills for all tags on pawns on the current map");
-            if (!Widgets.ButtonImageFitted(buttonRect, Textures.PanicButtonTex, Color.white)) return;
+            TooltipHandler.TipRegion(buttonRect, Strings.AutomaticBillDesc);
+            if (!Widgets.ButtonImageFitted(buttonRect, Textures.BillsGizmoTex, Color.white)) return;
 
             var map = workTable.Map;
             var pawns = map.mapPawns.FreeColonists;
@@ -87,7 +87,7 @@ namespace Inventory
                         
                 workTable.BillStack.AddBill(bill);
                 
-                Messages.Message($"Bill added for {item.Print()} of {tag.name}", MessageTypeDefOf.SilentInput);
+                Messages.Message(Strings.BillAddedFlavour(item.Print(), tag.name), MessageTypeDefOf.SilentInput);
             }
         }
     }

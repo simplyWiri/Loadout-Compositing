@@ -158,6 +158,11 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.EnableTagByDefault>Enable by default: </CompositableLoadouts.EnableTagByDefault> 
 	<CompositableLoadouts.EnableTagByDefaultDesc>New pawns which join your colony will have this tag added automatically</CompositableLoadouts.EnableTagByDefaultDesc> 
 
+	<CompositableLoadouts.AutomaticBillTooltip>Automatically create bills for all tags on pawns on the current map</CompositableLoadouts.AutomaticBillTooltip> 
+	<CompositableLoadouts.BillAddedFlavour>Bill added for {0} from {1}</CompositableLoadouts.BillAddedFlavour> 
+
+	<CompositableLoadouts.ApparelOverlapFlavour>If equipped, {0} would prevent the highlighted apparel being worn</CompositableLoadouts.ApparelOverlapFlavour> 
+
 	<CompositableLoadouts.Settings.Options>Options</CompositableLoadouts.Settings.Options>
 	<CompositableLoadouts.Settings.Keybinds>Keybinds</CompositableLoadouts.Settings.Keybinds>
 	<CompositableLoadouts.Settings.ItemFilterDefaults>Tag-item filter defaults</CompositableLoadouts.Settings.ItemFilterDefaults>

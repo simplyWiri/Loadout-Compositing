@@ -150,7 +150,7 @@ namespace Inventory {
         }
 
         private void DrawPawnList(Rect rect) {
-            var pawns = Find.Maps.SelectMany(map => map.mapPawns.AllPawns.Where(p => p.IsValidLoadoutHolder())).ToList();
+            var pawns = Find.Maps.SelectMany(map => map.mapPawns.AllPawns.Where(p => p.IsValidLoadoutHolder())).ToList().OrderByDescending(p => p.Name.ToString()).ToList() ;
 
             var height = pawns.Count * UIC.DEFAULT_HEIGHT;
             var width = rect.width - (rect.height > height ? 0 : UIC.SCROLL_WIDTH);
@@ -620,7 +620,7 @@ namespace Inventory {
                 {
                     if (def.IsApparel)
                     {
-                        return $"{def.DescriptionDetailed}\n\nIf equipped, {def.LabelCap} would prevent any {"highlighted".Colorize(conflictingApparelColour)} apparel being worn";
+                        return $"{def.DescriptionDetailed}\n\n" + Strings.ApparelOverlapFlavour(def.LabelCap, Strings.Highlighted.Colorize(conflictingApparelColour));
                     }
                     
                     return def.DescriptionDetailed;

@@ -145,7 +145,10 @@ namespace Inventory {
         public static string EnableTagByDefault => $"{P}EnableTagByDefault".TranslateSimple();
         public static string EnableTagByDefaultDesc => $"{P}EnableTagByDefaultDesc".TranslateSimple();
 
-        
+        public static string AutomaticBillDesc => $"{P}AutomaticBillTooltip".TranslateSimple();
+        public static string BillAddedFlavour(string item, string tagName) => $"{P}BillAddedFlavour".Translate(item, tagName);
+        public static string ApparelOverlapFlavour(string defDesc) => $"{P}ApparelOverlapFlavour".Translate(defDesc);
+
         public static string Options => $"{P}{S}Options".TranslateSimple();
         public static string Keybinds => $"{P}{S}Keybinds".TranslateSimple();
         public static string ItemFilterDefaults => $"{P}{S}ItemFilterDefaults".TranslateSimple();
@@ -165,6 +168,7 @@ namespace Inventory {
         public static string DisableCustomScrollDesc => $"{P}{S}DisableCustomScrollDesc".TranslateSimple();
         public static string NoPanicAlert => $"{P}{S}NoPanicAlert".TranslateSimple();
         public static string NoPanicAlertDesc => $"{P}{S}NoPanicAlertDesc".TranslateSimple();
+        
     }
 
 }

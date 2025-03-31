@@ -62,17 +62,3 @@ namespace Inventory
         }
     }
 }
-
-
-// call 0x400 (ETC)
-
-// 0x400: mov rax, 5
-// 0x401: mov rbx, 8
-
-// 0x4xx: ret
-
-// *0x400 = jmp, my_code_address
-
-// my_code_address:     xxxx
-// my_code_address+xxx: ret
-
