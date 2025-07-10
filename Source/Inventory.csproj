@@ -7,26 +7,26 @@
 		<LangVersion>9.0</LangVersion>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<OutputPath>..\$(Configuration)\Assemblies</OutputPath>
-		<Configurations>1.5</Configurations>
+		<Configurations>1.6</Configurations>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Krafs.Publicizer" Version="2.2.1">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="Lib.Harmony" Version="2.3.3" ExcludeAssets="runtime" />
+		<PackageReference Include="Lib.Harmony" Version="2.3.6" ExcludeAssets="runtime" />
 		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.3">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 	</ItemGroup>
 
-	<PropertyGroup Condition="$(Configuration) == '1.5'">
-		<DefineConstants>$(DEFINE_CONSTANTS);VERSION_1_5</DefineConstants>
+	<PropertyGroup Condition="$(Configuration) == '1.6'">
+		<DefineConstants>$(DEFINE_CONSTANTS);VERSION_1_6</DefineConstants>
 	</PropertyGroup>
 	
-	<ItemGroup Condition="$(Configuration) == '1.5'">
-		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.5.*-*" />
+	<ItemGroup Condition="$(Configuration) == '1.6'">
+		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4516-beta" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -10,14 +10,11 @@ Global
 		1.4|Any CPU = 1.4|Any CPU
 		1.5|Any CPU = 1.5|Any CPU
 		Release|Any CPU = Release|Any CPU
+		1.6|Any CPU = 1.6|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{77199E3A-A57E-4952-A82E-713A95F62040}.1.4|Any CPU.ActiveCfg = 1.4|Any CPU
-		{77199E3A-A57E-4952-A82E-713A95F62040}.1.4|Any CPU.Build.0 = 1.4|Any CPU
-		{77199E3A-A57E-4952-A82E-713A95F62040}.1.5|Any CPU.ActiveCfg = 1.5|Any CPU
-		{77199E3A-A57E-4952-A82E-713A95F62040}.1.5|Any CPU.Build.0 = 1.5|Any CPU
-		{77199E3A-A57E-4952-A82E-713A95F62040}.Release|Any CPU.ActiveCfg = 1.3|Any CPU
-		{77199E3A-A57E-4952-A82E-713A95F62040}.Release|Any CPU.Build.0 = 1.3|Any CPU
+		{77199E3A-A57E-4952-A82E-713A95F62040}.1.6|Any CPU.ActiveCfg = 1.6|Any CPU
+		{77199E3A-A57E-4952-A82E-713A95F62040}.1.6|Any CPU.Build.0 = 1.6|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

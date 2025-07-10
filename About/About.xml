@@ -4,9 +4,8 @@
 	<author>Wiri</author>
 	<packageId>Wiri.compositableloadouts</packageId>
 	<supportedVersions>
-		<li>1.3</li>
-		<li>1.4</li>
 		<li>1.5</li>
+		<li>1.6</li>
 	</supportedVersions>
 	<description>Mix and match multiple 'tags' on a single pawn, allowing for composition of loadouts.
 
@@ -27,10 +26,10 @@
 - Combat Extended: This mod will be integrated into Combat Extended replacing their existing loadout system in the near (ish) future
 
 &lt;size=24&gt;Credits:&lt;/size&gt;
-- DrowsyCorgi ( NotooShabby ) for their incredible work on Awesome Inventory. I hope that it is visible the influence their mod has had; with regards to both the functionality of the mod, and the aesthetics of the GUI.  
+- DrowsyCorgi ( NotooShabby ) for their incredible work on Awesome Inventory. I hope that it is visible the influence their mod has had; with regards to both the functionality of the mod, and the aesthetics of the GUI.
 - Madman666 for their work creating the custom textures which this mod uses
 - All those who helped test, and gave feedback - it all helps
-	</description> 
+	</description>
 	<url>https://github.com/simplyWiri/Loadout-Compositing</url>
 
 	<modDependencies>
@@ -47,7 +46,7 @@
 
 	<incompatibleWith>
 		<li>CETeam.CombatExtended</li>
-		<li>NotooShabby.AwesomeInventoryForked</li>		
+		<li>NotooShabby.AwesomeInventoryForked</li>
 	</incompatibleWith>
 
 </ModMetaData>

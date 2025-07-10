@@ -620,7 +620,7 @@ namespace Inventory {
                 {
                     if (def.IsApparel)
                     {
-                        return $"{def.DescriptionDetailed}\n\n" + Strings.ApparelOverlapFlavour(def.LabelCap, Strings.Highlighted.Colorize(conflictingApparelColour));
+                        return $"{def.DescriptionDetailed}\n\n" + Strings.ApparelOverlapFlavour(def.LabelCap);
                     }
                     
                     return def.DescriptionDetailed;

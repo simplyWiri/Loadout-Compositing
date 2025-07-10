@@ -76,7 +76,7 @@ namespace Inventory {
 
             var wornApparel = component.Loadout.HypotheticalWornApparelWithTag(parent.shownState, def).ToList();
 
-            foreach (var category in ApparelUtility.GetBodyPartGroupFor(def).GetCategories()
+            foreach (var category in ApparelUtility.GetBodyPartGroupFor(def).categories
                          .OrderByDescending(t => t.First().def.listOrder)) {
                 var layers = category.SelectMany(c => c.GetLayers()).Distinct().OrderByDescending(d => d.drawOrder)
                     .ToList();

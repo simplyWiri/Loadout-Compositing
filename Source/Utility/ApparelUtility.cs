@@ -27,6 +27,7 @@ namespace Inventory {
         public BodyPartGroupDef def;
         public List<ApparelLayerDef> layers;
         public List<BodyPartGroup> children;
+        public List<List<BodyPartGroup>> categories;
 
         public void PopulateLayers(Dictionary<BodyPartGroupDef, HashSet<ApparelLayerDef>> dict) {
             // recursively set the `layers` field for all children
@@ -170,6 +171,7 @@ namespace Inventory {
 
             var bpg = BuildTree(bodyPartToLayersCovered.Keys.ToList());
             bpg.PopulateLayers(bodyPartToLayersCovered);
+            bpg.categories = bpg.GetCategories().ToList();
             return bpg;
         }
 

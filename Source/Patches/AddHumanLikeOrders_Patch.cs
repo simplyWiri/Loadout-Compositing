@@ -22,10 +22,14 @@ namespace Inventory {
         }
 
         public static MethodInfo TargetMethod() {
-            return AccessTools.Method(typeof(FloatMenuMakerMap), "AddHumanlikeOrders");
+            return AccessTools.Method(typeof(FloatMenuMakerMap), "GetOptions");
         }
 
-        public static void Postfix(Vector3 clickPos, Pawn pawn, List<FloatMenuOption> opts) {
+        public static void Postfix(List<Pawn> selectedPawns, Vector3 clickPos, List<FloatMenuOption> __result) {
+            if (selectedPawns.Count != 1) 
+                return;
+
+            var pawn = selectedPawns[0];
             if (pawn.IsQuestLodger())
                 return;
 
@@ -50,7 +54,8 @@ namespace Inventory {
                             pawn.jobs.TryTakeOrderedJob(job);
                         }),
                     pawn, item);
-                opts.Add(option);
+                
+                __result.Add(option);
             }
         }
 

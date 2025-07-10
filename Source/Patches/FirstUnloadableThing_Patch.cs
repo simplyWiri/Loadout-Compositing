@@ -21,24 +21,24 @@ namespace Inventory {
 
         /*
  <Before>
-        * for (int j = 0; j < this.innerContainer.Count; j++)
-        * {
-        *       if (!this.innerContainer[j].def.IsDrug)
-        *           ...   
+        * foreach (Thing thing in this.innerContainer) {
+        *     int index1 = -1;
+        *     ...
         *
  <After>
-        * for (int j = 0; j < this.innerContainer.Count; j++)
+        * foreach (Thing thing in this.innerContainer) {
         * {
-        *       if ( ThingInLoadout(this, j) )
+        *       if ( ThingInLoadout(this, thing) ) {
         *           ThingCount tempCount;
-        *           if ( ShouldDropThing(this, j, ref tempCount) ) {
+        *           if ( ShouldDropThing(this, thing, ref tempCount) ) {
         *               return tempCount;
         *           } else {
         *               continue;
         *           }
+        *       } 
         *
-        *      if (!this.innerContainer[j].def.IsDrug)
-        *           ...   
+        *       int index1 = -1
+        *       ...   
         */
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
@@ -51,6 +51,8 @@ namespace Inventory {
 
             for (int i = 0; i < insts.Count; i++) {
                 if (Matches(insts, i)) {
+                    var thing = insts[i - 1].operand as LocalBuilder;
+                    
                     for (int j = i; j < insts.Count; j++) {
                         if (MatchesBranchCondition(insts, j)) {
                             insts[j].labels.Add(breakLoopLabel);
@@ -59,14 +61,14 @@ namespace Inventory {
                     }
 
                     yield return new CodeInstruction(OpCodes.Ldarg_0).MoveLabelsFrom(insts[i]); // this
-                    yield return new CodeInstruction(insts[i + 2]); // j
+                    yield return new CodeInstruction(OpCodes.Ldloc_S, thing.LocalIndex); // thing
                     yield return new CodeInstruction(OpCodes.Call, inLoadout);
                     yield return new CodeInstruction(OpCodes.Brfalse_S, continueExecutingLabel);
 
                     // if we are here, the item is from our loadout, and we now want to see if it is here in
                     // excess, and as such should be removed
                     yield return new CodeInstruction(OpCodes.Ldarg_0); // this
-                    yield return new CodeInstruction(insts[i + 2]); // j
+                    yield return new CodeInstruction(OpCodes.Ldloc_S, thing.LocalIndex); // thing
                     yield return new CodeInstruction(OpCodes.Ldloca, localCount); // ref thingCount
                     yield return new CodeInstruction(OpCodes.Call, shouldDrop);
                     yield return new CodeInstruction(OpCodes.Brfalse_S, breakLoopLabel);
@@ -87,41 +89,33 @@ namespace Inventory {
         }
 
         public static bool Matches(List<CodeInstruction> instructions, int index) {
-            return index < instructions.Count - 7
-                   && instructions[index + 0].opcode == OpCodes.Ldarg_0
-                   && instructions[index + 1].opcode == OpCodes.Ldfld
-                   && instructions[index + 2].opcode == OpCodes.Ldloc_3
-                   && instructions[index + 3].opcode == OpCodes.Callvirt
-                   && instructions[index + 4].opcode == OpCodes.Ldfld
-                   && instructions[index + 5].opcode == OpCodes.Callvirt
-                   && instructions[index + 6].opcode == OpCodes.Brtrue_S;
+            return index > 1 && index < instructions.Count - 2
+                   && instructions[index - 1].opcode == OpCodes.Stloc_S
+                   && instructions[index + 0].opcode == OpCodes.Ldc_I4_M1
+                   && instructions[index + 1].opcode == OpCodes.Stloc_S;
         }
 
         public static bool MatchesBranchCondition(List<CodeInstruction> instructions, int index) {
-            return index < instructions.Count - 9
-                   && instructions[index + 0].opcode == OpCodes.Ldloc_3
-                   && instructions[index + 1].opcode == OpCodes.Ldc_I4_1
-                   && instructions[index + 2].opcode == OpCodes.Add
-                   && instructions[index + 3].opcode == OpCodes.Stloc_3
-                   && instructions[index + 4].opcode == OpCodes.Ldloc_3
-                   && instructions[index + 5].opcode == OpCodes.Ldarg_0
-                   && instructions[index + 6].opcode == OpCodes.Ldfld
-                   && instructions[index + 7].opcode == OpCodes.Callvirt
-                   && instructions[index + 8].opcode == OpCodes.Blt;
+            // Looking for the end of the main loop - MoveNext call
+            // IL_031d: ldloca.s     V_8
+            // IL_031f: call         instance bool valuetype [mscorlib]System.Collections.Generic.List`1/Enumerator<class Verse.Thing>::MoveNext()
+            // IL_0324: brtrue       IL_014b
+            return index < instructions.Count - 3
+                   && instructions[index + 0].opcode == OpCodes.Ldloca_S
+                   && instructions[index + 1].opcode == OpCodes.Call
+                   && instructions[index + 1].operand.ToString().Contains("MoveNext")
+                   && instructions[index + 2].opcode == OpCodes.Brtrue;
         }
 
-        public static bool ThingInLoadout(Pawn_InventoryTracker inventory, int thingIndex) {
+        public static bool ThingInLoadout(Pawn_InventoryTracker inventory, Thing thing) {
             if (!inventory.pawn.IsValidLoadoutHolder()) return false;
 
-            var thing = inventory.innerContainer.innerList[thingIndex];
             var comp = inventory.pawn.TryGetComp<LoadoutComponent>();
-
             return comp?.Loadout?.Desires(thing, true) ?? false;
         }
 
         // precondition: the thing pointed to by `thingIndex` must be in the pawns loadout
-        public static bool ShouldDropThing(Pawn_InventoryTracker inventory, int thingIndex, ref ThingCount count) {
-            var thing = inventory.innerContainer.innerList[thingIndex];
+        public static bool ShouldDropThing(Pawn_InventoryTracker inventory, Thing thing, ref ThingCount count) {
             var comp = inventory.pawn.GetComp<LoadoutComponent>();
 
             var item = comp.Loadout.ItemsAccepting(thing).FirstOrDefault();

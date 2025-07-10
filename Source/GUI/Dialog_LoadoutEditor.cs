@@ -84,7 +84,7 @@ namespace Inventory {
             if (Event.current.type == EventType.KeyDown && Event.current.keyCode != KeyCode.None) {
                 if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.Comma)) {
                     Event.current.Use();
-                    ThingSelectionUtility.SelectNextColonist();
+                    ThingSelectionUtility.SelectPreviousColonist();
                     return;
                 }
 

@@ -52,7 +52,7 @@ namespace Inventory {
                 Text.Anchor = TextAnchor.UpperLeft;
 
                 TooltipHandler.TipRegion(skillRect,
-                    new TipSignal(SkillUI.GetSkillDescription(skill), skill.def.GetHashCode() * 397945));
+                    new TipSignal(() => SkillUI.GetSkillDescription(skill), skill.def.GetHashCode() * 397945));
             }
 
             GUIUtility.ListSeperator(ref rect, Strings.PawnTraits);
