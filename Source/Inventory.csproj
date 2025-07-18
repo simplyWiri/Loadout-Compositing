@@ -8,6 +8,7 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<OutputPath>..\$(Configuration)\Assemblies</OutputPath>
 		<Configurations>1.6</Configurations>
+		<DefineConstants>$(DEFINE_CONSTANTS);VERSION_1_6</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Krafs.Publicizer" Version="2.2.1">
@@ -19,14 +20,7 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-	</ItemGroup>
-
-	<PropertyGroup Condition="$(Configuration) == '1.6'">
-		<DefineConstants>$(DEFINE_CONSTANTS);VERSION_1_6</DefineConstants>
-	</PropertyGroup>
-	
-	<ItemGroup Condition="$(Configuration) == '1.6'">
-		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4516-beta" />
+		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
 	</ItemGroup>
 
 	<ItemGroup>

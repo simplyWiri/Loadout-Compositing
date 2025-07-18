@@ -47,6 +47,9 @@ namespace Inventory {
             }
         }
         
+        // if (ExtendedBillDataStorage.CanOutputBeFiltered(billProduction) && billProduction.repeatMode == BillRepeatModeDefOf.TargetCount)
+        // Gets changed to
+        // if (ExtendedBillDataStorage.CanOutputBeFiltered(billProduction) && ShouldCountAway(billProduction))
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             var matches = 0;
@@ -61,7 +64,6 @@ namespace Inventory {
                     ++matches;
 
                     yield return new CodeInstruction(OpCodes.Call, insertMethod);
-                    yield return new CodeInstruction(OpCodes.Brtrue, insts[i + 3].operand);
 
                     i += 3;
                 }
@@ -79,8 +81,7 @@ namespace Inventory {
                    && instructions[i + 0].opcode == OpCodes.Ldloc_0
                    && instructions[i + 1].opcode == OpCodes.Ldfld
                    && instructions[i + 2].opcode == OpCodes.Ldsfld
-                   && instructions[i + 3].opcode == OpCodes.Beq_S
-                   && instructions[i + 4].opcode == OpCodes.Ret;
+                   && instructions[i + 3].opcode == OpCodes.Ceq;
         }
 
         public static bool ShouldCountAway(Bill_Production billProduction)

@@ -5,7 +5,7 @@
         <insertTag>Humanlike_PostDuty</insertTag>
         <insertPriority>100</insertPriority>
         <thinkRoot Class="Inventory.ThinkNode_LoadoutRealisation"> 
-            <subNodes> </subNodes>
+            <subNodes/>
         </thinkRoot>
     </ThinkTreeDef>
 </Defs>

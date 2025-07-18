@@ -192,12 +192,12 @@ namespace Inventory {
                 return;
             }
 
-            var pawns = targetMap.mapPawns.FreeColonistsSpawned.Where(p => p.IsValidLoadoutHolder());
-            var activatePanicState = panicState ?? !pawns.Any(p => p.TryGetComp<LoadoutComponent>().Loadout.InPanicMode);
+            var pawns = targetMap.mapPawns.FreeColonistsSpawned.Where(p => p.IsValidLoadoutHolder()).ToList();
+            instance.inPanicState = panicState ?? !instance.inPanicState;
 
             foreach (var pawn in pawns) {
                 var comp = pawn.TryGetComp<LoadoutComponent>();
-                if (activatePanicState) {
+                if (instance.inPanicState) {
                     // No tags, don't interrupt their work.
                     if ( comp.Loadout.AllTags.Count() == 0 ) {
                         continue;
@@ -216,10 +216,8 @@ namespace Inventory {
                         pawn.jobs.ClearQueuedJobs();
                         pawn.jobs.CleanupCurrentJob(Verse.AI.JobCondition.InterruptForced, true);
                     }
-                    instance.inPanicState = true;
                 } else {
                     comp.Loadout.DeactivatePanicMode();
-                    instance.inPanicState = false;
                 }
             }
         }

@@ -38,7 +38,11 @@ namespace Inventory {
 
             // This is a relatively high priority node on the thinknode, so we do some sanity safeguards to check that the pawn
             // isn't shirking 'more important' responsibilities, like eating when they are starving, or walking around while they are dying!
-            if ( (pawn.needs.food?.CurLevelPercentage < pawn.needs.food?.PercentageThreshUrgentlyHungry) || (HealthUtility.TicksUntilDeathDueToBloodLoss(pawn) < 45000) ) {
+            if (HealthUtility.TicksUntilDeathDueToBloodLoss(pawn) < 45000) {
+                return ThinkResult.NoJob;
+            }
+
+            if (pawn.needs.food is not null && pawn.needs.food.CurLevelPercentage < pawn.needs.food.PercentageThreshUrgentlyHungry) {
                 return ThinkResult.NoJob;
             }
 

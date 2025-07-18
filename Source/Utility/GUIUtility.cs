@@ -233,13 +233,13 @@ namespace Inventory {
             rect.width = width;
         }
 
-        public static bool ColoredButtonIcon(this WidgetRow row, Texture2D tex, string tooltip, Color color)
+        public static bool ColoredButtonIcon(this WidgetRow row, Texture2D tex, Func<String> tooltip, Color color)
         {
             row.IncrementYIfWillExceedMaxWidth(24f);
             var rect = new Rect(row.LeftX(24f), row.curY, 24f, 24f);
             var result = Widgets.ButtonImage(rect, tex, color, GenUI.MouseoverColor);
             row.IncrementPosition(24f);
-            TooltipHandler.TipRegion(rect, tooltip);
+            TooltipHandler.TipRegion(rect, tooltip, 938142143);
             return result;
         }
 

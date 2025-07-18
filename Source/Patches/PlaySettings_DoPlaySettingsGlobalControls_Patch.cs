@@ -31,11 +31,10 @@ namespace Inventory
             }
 
             var activePanicState = LoadoutManager.ActivePanicState();
-            var msg = activePanicState ? Strings.DeactivePanicState : Strings.ActivatePanicState(LoadoutManager.PanicState);
             var col = activePanicState ? Color.red : Color.white;
-
+            
             GUI.color = col;
-            if (row.ColoredButtonIcon(Textures.PanicButtonTex, msg, col)) {
+            if (row.ColoredButtonIcon(Textures.PanicButtonTex, () => activePanicState ? Strings.DeactivePanicState : Strings.ActivatePanicState(LoadoutManager.PanicState), col)) {
                 LoadoutManager.TogglePanicMode();
             }
             GUI.color = Color.white;
