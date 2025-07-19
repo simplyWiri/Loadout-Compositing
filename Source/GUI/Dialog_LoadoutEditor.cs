@@ -133,6 +133,8 @@ namespace Inventory {
 
             var frustum = rect;
             frustum.y += Mathf.FloorToInt(tagScroll.y);
+            
+            var longestName = elements.Max(elem => elem.Tag.name.GetWidthCached());
 
             foreach (var element in elements.ToList()) {
                 var tag = element.Tag;
@@ -175,23 +177,26 @@ namespace Inventory {
                     Find.WindowStack.Add(new Dialog_SetTagLoadoutState(pawn.GetComp<LoadoutComponent>().Loadout, element));
                 }
 
-                var iconsRect = tagRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 4);
-
                 tagRect.AdjHorzBy(3f);
-                if(tag.name.GetWidthCached() + UIC.SMALL_GAP > tagRect.width) {
+
+                if(longestName + UIC.SMALL_GAP > (tagRect.width - UIC.SPACED_HEIGHT * 4)) {
                     int idx = tag.name.Length;
                     var truncatedName = tag.name;
                     do {
                         idx -= 1;
                         truncatedName = truncatedName.Substring(0, idx);
                     }
-                    while (truncatedName.GetWidthCached() + UIC.SMALL_GAP > tagRect.width);
+                    while (truncatedName.GetWidthCached() + UIC.SMALL_GAP > (tagRect.width - UIC.SPACED_HEIGHT * 4));
 
-                    Widgets.Label(tagRect, truncatedName);
-                    TooltipHandler.TipRegion(tagRect, tag.name);
+                    var nameRect = tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + UIC.SMALL_GAP);
+                    Widgets.Label(nameRect, truncatedName);
+                    TooltipHandler.TipRegion(nameRect, tag.name);
                 } else {
-                    Widgets.Label(tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + UIC.SMALL_GAP), tag.name);
+                    var nameRect = tagRect.PopLeftPartPixels(longestName + UIC.SMALL_GAP);
+                    Widgets.Label(nameRect, tag.name);
                 }
+
+                var iconsRect = tagRect.PopLeftPartPixels(UIC.SPACED_HEIGHT * 4);
 
                 // draw required items in blocks of 4
                 for (int i = 0; i < tag.requiredItems.Count; i += 4) {
