@@ -65,6 +65,7 @@ namespace Inventory {
                     ++matches;
 
                     yield return new CodeInstruction(OpCodes.Call, insertMethod);
+                    yield return new CodeInstruction(OpCodes.Brfalse, insts[i + 3]);
 
                     i += 3;
                 }
@@ -82,7 +83,7 @@ namespace Inventory {
                    && instructions[i + 0].opcode == OpCodes.Ldloc_0
                    && instructions[i + 1].opcode == OpCodes.Ldfld
                    && instructions[i + 2].opcode == OpCodes.Ldsfld
-                   && instructions[i + 3].opcode == OpCodes.Ceq;
+                   && instructions[i + 3].opcode == OpCodes.Bne_Un;
         }
 
         public static bool ShouldCountAway(Bill_Production billProduction)
