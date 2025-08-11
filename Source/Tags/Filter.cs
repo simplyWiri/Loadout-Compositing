@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -90,7 +89,7 @@ namespace Inventory {
 
         public void ExposeData() {
             Scribe_Values.Look(ref forThing, nameof(forThing));
-            Scribe_Collections.Look(ref stuffs, nameof(stuffs));
+            Scribe_Collections.Look(ref stuffs, nameof(stuffs), LookMode.Value);
             Scribe_Values.Look(ref allowedHpRange, nameof(allowedHpRange));
             Scribe_Values.Look(ref allowedQualities, nameof(allowedQualities));
         }

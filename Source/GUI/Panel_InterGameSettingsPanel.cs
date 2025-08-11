@@ -155,6 +155,7 @@ namespace Inventory
 
             foreach (var item in tag.requiredItems)
             {
+                item.WrappedDef.Load();
                 if (!item.WrappedDef.Valid)
                 {
                     warnings.Add(new Warning() {
@@ -165,6 +166,7 @@ namespace Inventory
                 }
                 foreach (var defFilter in item.filter.AllowedStuffs)
                 {
+                    defFilter.Load();
                     if (!defFilter.Valid)
                     {
                         warnings.Add(new Warning() {

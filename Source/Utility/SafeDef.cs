@@ -36,12 +36,11 @@ namespace Inventory
             this.defName = defName;
         }
 
-        public ThingDef Load() {
-            if (DefDatabase<ThingDef>.defsByName.TryGetValue(defName, out var foundDef) ){
-                this.def = foundDef;
-            }
+        public ThingDef Load()
+        {
+            DefDatabase<ThingDef>.defsByName.TryGetValue(defName, out def);
             hasLoaded = true;
-            return this.def;
+            return def;
         }
 
         public override string ToString()

@@ -205,11 +205,11 @@ namespace Inventory {
                 LoadoutManager.AddTag(curTag);
             }
 
-            if (Widgets.ButtonText(topRect.RightHalf(), Strings.DeleteTag)) {
-                Find.WindowStack.Add(new Dialog_TagSelector( new List<Tag>{ curTag }, tag => {
-                    LoadoutManager.RemoveTag(tag);
+            if (curTag != null && Widgets.ButtonText(topRect.RightHalf(), Strings.DeleteTag)) {
+                Find.WindowStack.Add(new Dialog_Confirm($"{Strings.DeleteTag} {curTag.name}", () => {
+                    LoadoutManager.RemoveTag(curTag);
                     curTag = null;
-                }, false));
+                }));
             }
 
             r.AdjVertBy(UIC.DEFAULT_HEIGHT);
@@ -501,8 +501,7 @@ namespace Inventory {
             sortByFilterRect.CenterWithWidth(Text.LineHeight);
             if (Widgets.ButtonImage(sortByFilterRect, ascending ? Textures.SortByStatAscTex : Textures.SortByStatDscTex)) {
                 if (Event.current.button == 1) { // right click
-                    // Collate all the set of stats in this list.
-                    var stats = defList
+                    var stats = defs
                                 .SelectMany(td => td.statBases.Select(sm => sm.stat)
                                                     .Union(td.equippedStatOffsets?.Select(sm => sm.stat) ?? new List<StatDef>()))
                                 .ToHashSet();

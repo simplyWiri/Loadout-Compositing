@@ -125,6 +125,8 @@ namespace Inventory {
 
             GUIUtility.ListSeperator(ref rect, Strings.AppliedTags); 
             
+            if (elements.Empty()) return;
+
             tagsHeight = elements.Sum(elem => UIC.SPACED_HEIGHT * Mathf.Max(1, (Mathf.CeilToInt(elem.Tag.requiredItems.Count / 4.0f))));
             var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, tagsHeight);
             Widgets.BeginScrollView(rect, ref tagScroll, viewRect);
