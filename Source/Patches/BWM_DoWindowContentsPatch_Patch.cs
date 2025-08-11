@@ -65,8 +65,7 @@ namespace Inventory {
                     ++matches;
 
                     yield return new CodeInstruction(OpCodes.Call, insertMethod);
-                    yield return new CodeInstruction(OpCodes.Brfalse, insts[i + 3]);
-
+                    yield return new CodeInstruction(OpCodes.Brfalse, insts[i + 3].operand);
                     i += 3;
                 }
             }

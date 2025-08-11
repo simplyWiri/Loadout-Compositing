@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -56,16 +57,19 @@ namespace Inventory {
             thingFilter.allowedDefs = stuffs.Count == 0 ? GenStuff.AllowedStuffsFor(forThing).ToHashSet() : AllowedStuffs.Select(d => d.Def).ToHashSet();
         }
 
-        public bool SupersetOf(Bill_Production other)
+        public bool SubsetOf(Bill_Production other)
         {
-            var stuffSuperset = stuffs.Count == 0
-                ? other.ingredientFilter.allowedDefs.IsSupersetOf(GenStuff.AllowedStuffsFor(forThing))
-                : other.ingredientFilter.allowedDefs.IsSupersetOf(stuffs.Select(d => d.Def));
+            var filterStuff = other.ingredientFilter.allowedDefs;  
+            
+            var stuff = stuffs.Count == 0
+                ? GenStuff.AllowedStuffsFor(forThing).All(t => other.ingredientFilter.Allows(t))
+                : filterStuff.All(t => other.ingredientFilter.Allows(t));
 
-            var qualitySuperset = QualityRange.max <= other.qualityRange.max && QualityRange.min >= other.qualityRange.min;
-            var hpSuperset = HpRange.max <= other.hpRange.max && HpRange.min >= other.hpRange.min;
+            // Other
+            var quality = other.qualityRange.max >= QualityRange.max && other.qualityRange.min <= QualityRange.min;
+            var hp = other.hpRange.max >= HpRange.max && other.hpRange.min <= HpRange.min;
 
-            return stuffSuperset && qualitySuperset && hpSuperset;
+            return stuff && quality && hp;
         }
 
         public static Filter CopyFrom(Filter from, Filter to) {

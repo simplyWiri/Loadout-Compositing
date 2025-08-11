@@ -54,7 +54,7 @@ namespace Inventory
                 if (existingBill is not Bill_Production bp) continue;
                 if (bp.repeatMode != InvBillRepeatModeDefOf.W_PerTag) continue;
                         
-                items.RemoveAll(kp => bp.recipe.ProducedThingDef == kp.Key.Def && kp.Key.Filter.SupersetOf(bp));
+                items.RemoveAll(kp => bp.recipe.ProducedThingDef == kp.Key.Def && kp.Key.Filter.SubsetOf(bp));
             }
 
             foreach (var (item, tag) in items)
