@@ -18,7 +18,8 @@ namespace Inventory {
         public static void TryPatch(Harmony harmonyInstance)
         {
             var bpcLoaded = LoadedModManager.RunningModsListForReading.Any(m => m.PackageId.ToLowerInvariant() == "falconne.bwm".ToLowerInvariant());
-            var ebgoLoaded = LoadedModManager.RunningModsListForReading.Any(m => m.PackageId.ToLowerInvariant() == "uuugggg.everybodygetsone".ToLowerInvariant());
+            var ebgoLoaded = LoadedModManager.RunningModsListForReading.Any(m => m.PackageId.ToLowerInvariant() == "uuugggg.everybodygetsone".ToLowerInvariant())
+                || LoadedModManager.RunningModsListForReading.Any(m => m.PackageId.ToLowerInvariant() == "memegoddess.everybodygetsone".ToLowerInvariant());
 
             if ( bpcLoaded && !ebgoLoaded && !patched ) {
                 var method = AccessTools.Method("ImprovedWorkbenches.BillConfig_DoWindowContents_Patch:DrawFilters");
