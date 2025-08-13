@@ -43,17 +43,6 @@ namespace Inventory {
             return layers.Union(children.SelectMany(c => c.GetLayers())).Distinct();
         }
 
-        private IEnumerable<BodyPartGroupDef> GetGroupParts() {
-            // Recursively fetches all defs which are held in this sub-tree,
-            // there is inherently going to be no duplication, because each node
-            // contains a unique BodyPartGroupDef
-            if (def != null)
-                yield return def;
-
-            foreach (var child in children.SelectMany(c => c.GetGroupParts()))
-                yield return child;
-        }
-
         public IEnumerable<List<BodyPartGroup>> GetCategories() {
             // These are root children.
             var lays = new List<Tuple<BodyPartGroup, HashSet<ApparelLayerDef>>>();

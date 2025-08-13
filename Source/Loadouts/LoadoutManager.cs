@@ -69,7 +69,7 @@ namespace Inventory {
                 if (loadout == null) continue;
 
                 loadout.Loadout.elements.RemoveAll(elem => elem.Tag == tag);
-                Messages.Message($"Removing {tag.name} from {pawn.LabelShort}", new LookTargets(pawn), MessageTypeDefOf.NeutralEvent, false);
+                Messages.Message(Strings.RemovingDeletedTagPawn(tag.name, pawn.LabelShort), new LookTargets(pawn), MessageTypeDefOf.NeutralEvent, false);
             }
             PawnsWithTags.Remove(tag);
             
@@ -81,7 +81,7 @@ namespace Inventory {
                 var billGiver = bill.billStack?.billGiver;
                 bill.suspended = true;
 
-                Messages.Message($"Suspending bill {bill.RenamableLabel} in {billGiver?.LabelShort ?? "Unknown location"}  as it referenced {tag.name}", MessageTypeDefOf.NeutralEvent, false);
+                Messages.Message(Strings.RemovingDeletedTagBill(bill.RenamableLabel, billGiver?.LabelShort ?? Strings.UnknownLocation, tag.name), MessageTypeDefOf.NeutralEvent, false);
             }
             instance.billToTag.RemoveAll((pair) => pair.Value == tag);
             

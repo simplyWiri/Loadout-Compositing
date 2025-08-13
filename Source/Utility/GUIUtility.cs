@@ -212,20 +212,6 @@ namespace Inventory {
             Widgets.Label(rect, overlayText);
             Text.Anchor = TextAnchor.UpperLeft;
         }
-        
-        public static void DrawBoxAroundAndShrink(this ref Rect rect) {
-            GUI.color = Widgets.SeparatorLineColor;
-            
-            Widgets.DrawLineHorizontal(rect.x, rect.y, rect.width);
-            Widgets.DrawLineHorizontal(rect.x, rect.yMax, rect.width);
-            
-            Widgets.DrawLineVertical(rect.x, rect.y, rect.height);
-            Widgets.DrawLineVertical(rect.xMax, rect.y, rect.height);
-
-            rect = rect.ContractedBy(UIC.SMALL_GAP);
-
-            GUI.color = Color.white;
-        }
 
         public static void CenterWithWidth(this ref Rect rect, float width) {
             var c = rect.center;

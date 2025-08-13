@@ -70,22 +70,6 @@ namespace Inventory {
             }
         }
 
-        // for a given list of items, return the number of elements which this tag can claim ownership of
-        // I.e.
-        // Tag: 50 wood, 5 herbal meds,
-        // Things: Wood x 75, Wood x 75, Herbal Meds x3
-        // Result: 50 wood, 3 herbal meds 
-        public IEnumerable<ThingCount> ThingsAcceptedInList(List<Thing> things) {
-            foreach (var thing in things) {
-                var items = ItemsMatching(thing).ToList();
-                if (items.Count == 0) continue;
-
-                var expectedQuantity = items.Sum(i => i.Quantity);
-
-                yield return new ThingCount(thing, Mathf.Max(thing.stackCount, thing.stackCount - expectedQuantity));
-            }
-        }
-
         public bool HasThingDef(ThingDef def, out Item item) {
             item = null;
             foreach (var i in requiredItems) {
