@@ -113,7 +113,9 @@ namespace Inventory {
         public override void ExposeData() {
             if (Scribe.mode == LoadSaveMode.Saving) {
                 billToTag?.RemoveAll(kv => kv.Key.InvalidBill() || kv.Key.repeatMode != InvBillRepeatModeDefOf.W_PerTag);
-                pawnTags?.Do(kv => pawnTags[kv.Key]?.RemoveAll(p => p is null || p.Dead || !p.IsValidLoadoutHolder()));
+                // Even if our pawn is no longer a loadout holder, we should keep saving tags. This is due to "borrowed"
+                // pawns being temporarily considered quest pawns, then being returned. 
+                pawnTags?.Do(kv => pawnTags[kv.Key]?.RemoveAll(p => p is null || p.Dead));
             }
 
             Scribe_Collections.Look(ref tags, nameof(tags), LookMode.Deep);
@@ -125,16 +127,6 @@ namespace Inventory {
             Scribe_Values.Look(ref nextTagId, nameof(nextTagId));
             Scribe_Values.Look(ref nextStateId, nameof(nextStateId));
             Scribe_Values.Look(ref backCompat, nameof(backCompat));
-
-            if (Scribe.mode != LoadSaveMode.Saving && backCompat != CURRENT_BACK_COMPAT_VERSION) {
-                
-                if (backCompat == 0 && CURRENT_BACK_COMPAT_VERSION == 1) {
-                    billToTag?.Do(kv => kv.Key.repeatCount = 0);
-                    backCompat = 1;
-                    Log.Message("[Loadout Compositing] Successfully migrated save data from version v1.1 to v1.2");
-                }
-  
-            }
 
             tags ??= new List<Tag>();
             pawnTags ??= new Dictionary<Tag, List<Pawn>>();
