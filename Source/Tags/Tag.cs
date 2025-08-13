@@ -61,6 +61,13 @@ namespace Inventory {
 
         public void Add(ThingDef thing) {
             requiredItems.Add(new Item(thing));
+
+            var pawns = LoadoutManager.PawnsWithTags[this];
+            foreach (var pawn in pawns) {
+                if (pawn.outfits.CurrentApparelPolicy.filter.Allows(thing)) continue;
+                
+                Messages.Message(Strings.OutfitDisallowsKit(pawn, pawn.outfits.CurrentApparelPolicy, thing, this), pawn, MessageTypeDefOf.CautionInput, false);
+            }
         }
 
         // for a given list of items, return the number of elements which this tag can claim ownership of
