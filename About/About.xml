@@ -23,7 +23,8 @@
 
 &lt;size=24&gt;Incompatibilies:&lt;/size&gt;
 - Awesome Inventory: Both mods work in the same space, and will never be compatible. Sorry.
-- Combat Extended: This mod will be integrated into Combat Extended replacing their existing loadout system in the near (ish) future
+- Combat Extended: Has its own conflicting loadout system with differing requirements.
+- [MUS]太空基地家具Space Base Furniture: Adds new ways for pawns to seek out apparel, bypassing this mod entirely
 
 &lt;size=24&gt;Credits:&lt;/size&gt;
 - DrowsyCorgi ( NotooShabby ) for their incredible work on Awesome Inventory. I hope that it is visible the influence their mod has had; with regards to both the functionality of the mod, and the aesthetics of the GUI.
@@ -45,6 +46,7 @@
 	</loadAfter>
 
 	<incompatibleWith>
+        <li>mingtuwuxiang.SpaceBaseDecorative</li>
 		<li>CETeam.CombatExtended</li>
 		<li>NotooShabby.AwesomeInventoryForked</li>
 	</incompatibleWith>

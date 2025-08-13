@@ -51,8 +51,7 @@ namespace Inventory {
             var tag = TagFor(bill);
             if (tag == null) return 0;
             
-            instance.pawnTags[tag].RemoveAll(p => p is null || p.Dead || !p.IsValidLoadoutHolder());
-            return instance.pawnTags[tag].Count(p => p.Map == bill.Map && p.HostFaction is null);
+            return instance.pawnTags[tag].Count(p => p.Map == bill.Map && p.IsValidLoadoutHolder());
         }
 
         public LoadoutManager(Game game) { }
@@ -63,19 +62,31 @@ namespace Inventory {
         }
 
         public static void RemoveTag(Tag tag) {
-            instance.tags.Remove(tag);
-
-            if (PawnsWithTags.ContainsKey(tag))
-                PawnsWithTags.Remove(tag);
-
-            instance.billToTag.RemoveAll((pair) => pair.Value == tag);
-
-            foreach (var pawn in Find.Maps.SelectMany(map => map.mapPawns.FreeColonistsSpawned).Where(p => p.IsValidLoadoutHolder())) {
+            // Remove `tag` from all pawns we know about containing a reference to `Tag`.
+            var pawns = PawnsWithTags[tag];
+            foreach (var pawn in pawns) {
                 var loadout = pawn.TryGetComp<LoadoutComponent>();
                 if (loadout == null) continue;
 
                 loadout.Loadout.elements.RemoveAll(elem => elem.Tag == tag);
+                Messages.Message($"Removing {tag.name} from {pawn.LabelShort}", new LookTargets(pawn), MessageTypeDefOf.NeutralEvent, false);
             }
+            PawnsWithTags.Remove(tag);
+            
+            // Remove the `tag` from all bills we know about which may contain a reference to `Tag`.
+            foreach (var (bill, billTag) in instance.billToTag)
+            {
+                if (billTag != tag) continue;
+
+                var billGiver = bill.billStack?.billGiver;
+                bill.suspended = true;
+
+                Messages.Message($"Suspending bill {bill.RenamableLabel} in {billGiver?.LabelShort ?? "Unknown location"}  as it referenced {tag.name}", MessageTypeDefOf.NeutralEvent, false);
+            }
+            instance.billToTag.RemoveAll((pair) => pair.Value == tag);
+            
+            // Remove our stored information about this tag.
+            instance.tags.Remove(tag);
         }
 
         public static void RemoveState(LoadoutState state) {
@@ -115,7 +126,7 @@ namespace Inventory {
                 billToTag?.RemoveAll(kv => kv.Key.InvalidBill() || kv.Key.repeatMode != InvBillRepeatModeDefOf.W_PerTag);
                 // Even if our pawn is no longer a loadout holder, we should keep saving tags. This is due to "borrowed"
                 // pawns being temporarily considered quest pawns, then being returned. 
-                pawnTags?.Do(kv => pawnTags[kv.Key]?.RemoveAll(p => p is null || p.Dead));
+                pawnTags?.Do(kv => kv.Value?.RemoveAll(p => p is null));
             }
 
             Scribe_Collections.Look(ref tags, nameof(tags), LookMode.Deep);

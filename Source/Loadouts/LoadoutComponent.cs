@@ -82,6 +82,11 @@ namespace Inventory {
 
             // for adding to an existing save
             loadout ??= new Loadout();
+
+            // Fix prior save-corruption related issues. 
+            if (Scribe.mode == LoadSaveMode.PostLoadInit)  {
+                loadout.elements.RemoveAll(e => e.Tag == null);   
+            }
         }
     }
 
