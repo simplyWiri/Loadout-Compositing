@@ -24,17 +24,21 @@ namespace Inventory {
                     yield return new CodeInstruction(OpCodes.Ldloca_S, matches == 0 ? 11 : 8); // viewRect
                     yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(Rect), nameof(Rect.width)));
                     yield return new CodeInstruction(OpCodes.Call, targetMethod);
-
+                    yield return new CodeInstruction(OpCodes.Ldarg_0);
+                    yield return new CodeInstruction(OpCodes.Dup);
+                    yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field("Sandy_Detailed_RPG_GearTab:scrollViewHeight"));
+                    yield return new CodeInstruction(OpCodes.Ldc_R4, 47.0f);
+                    yield return new CodeInstruction(OpCodes.Add);
+                    yield return new CodeInstruction(OpCodes.Stfld, AccessTools.Field("Sandy_Detailed_RPG_GearTab:scrollViewHeight"));
                     ++matches;
                 }
                 yield return insts[i];
             }
             
                     
-            if (matches != 1) {
+            if (matches != 2) {
                 Utility.TranspilerError(__originalMethod, "RPG Inventory Compatibility");
             }
-
         }
 
     }

@@ -172,8 +172,11 @@ namespace Inventory {
             sb.AppendLine($"[Loadout Compositing] Error in transpiler for {method.DeclaringType.Name}.{method.Name} - {functionality} will not work. Possible conflicts: ");
             
             var patches = Harmony.GetPatchInfo(method);
-            foreach (var transpiler in patches.Transpilers) {
-                sb.AppendLine($"\t- {transpiler.PatchMethod.DeclaringType.AssemblyQualifiedName}");
+            if (patches is not null)
+            {
+                foreach (var transpiler in patches?.Transpilers) {
+                    sb.AppendLine($"\t- {transpiler.PatchMethod.DeclaringType.AssemblyQualifiedName}");
+                }
             }
             
             Log.ErrorOnce(sb.ToString(), method.GetHashCode());
