@@ -49,7 +49,7 @@ namespace Inventory {
             }
             
             if (matches != 1) {
-                Log.ErrorOnce($"[Loadout Compositing] {matches} Failed to colonist clicker transpiler, will not be able to click on colonists in the colonist bar & update the gui", 946382);
+                Utility.TranspilerError(__originalMethod, "Click on colonists in the colonist bar & update the gui");
             }
         }
 

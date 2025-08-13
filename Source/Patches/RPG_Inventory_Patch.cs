@@ -13,7 +13,7 @@ namespace Inventory {
 
         private static MethodInfo targetMethod = AccessTools.Method(typeof(Panel_GearTab), nameof(Panel_GearTab.DrawTags));
 
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+        public static IEnumerable<CodeInstruction> Transpiler(MethodBase __originalMethod, IEnumerable<CodeInstruction> instructions) {
             int matches = 0;
             var insts = instructions.ToList();
             for (int i = 0; i < insts.Count; i++) {
@@ -29,6 +29,12 @@ namespace Inventory {
                 }
                 yield return insts[i];
             }
+            
+                    
+            if (matches != 1) {
+                Utility.TranspilerError(__originalMethod, "RPG Inventory Compatibility");
+            }
+
         }
 
     }

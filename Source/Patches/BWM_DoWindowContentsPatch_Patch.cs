@@ -51,7 +51,7 @@ namespace Inventory {
         // if (ExtendedBillDataStorage.CanOutputBeFiltered(billProduction) && billProduction.repeatMode == BillRepeatModeDefOf.TargetCount)
         // Gets changed to
         // if (ExtendedBillDataStorage.CanOutputBeFiltered(billProduction) && ShouldCountAway(billProduction))
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        public static IEnumerable<CodeInstruction> Transpiler(MethodBase __originalMethod, IEnumerable<CodeInstruction> instructions)
         {
             var matches = 0;
             var insts = instructions.ToList();
@@ -71,8 +71,7 @@ namespace Inventory {
             }
             
             if (matches != 1) {
-                Log.ErrorOnce($"[Loadout Compositing] {matches} Failed to apply Better Workbench Management's workbench transpiler, " +
-                              $"will not be able to count pawns that are off map", 946382);
+                Utility.TranspilerError(__originalMethod, "Will not be able to count pawns that are off map");
             }
         }
 

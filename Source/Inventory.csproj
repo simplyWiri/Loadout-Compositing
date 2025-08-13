@@ -9,7 +9,13 @@
 		<OutputPath>..\$(Configuration)\Assemblies</OutputPath>
 		<Configurations>1.6</Configurations>
 		<DefineConstants>$(DEFINE_CONSTANTS);VERSION_1_6</DefineConstants>
+		<DebugType>full</DebugType>
+		
+		<!-- We want to use local assemblies when they're available - this helps with debugging & goto definition -->
+		<!-- Assume we are in `{install_folder}/Mods/Loadout-Compositing/Source/`: -->
+		<LocalPath>../../../Contents/Resources/Data/Managed</LocalPath>
 	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Krafs.Publicizer" Version="2.2.1">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -20,7 +26,37 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
+
+		<!-- Fallback to Krafs package -->
+		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" Condition="!Exists('$(LocalPath)/Assembly-CSharp.dll')" />
+	</ItemGroup>
+
+	<!-- Prefer local RimWorld assemblies if the path exists -->
+	<ItemGroup Condition="Exists('$(LocalPath)')">
+		<Reference Include="Assembly-CSharp">
+			<HintPath>$(LocalPath)/Assembly-CSharp.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>$(LocalPath)/UnityEngine.CoreModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.IMGUIModule">
+			<HintPath>$(LocalPath)/UnityEngine.IMGUIModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.InputLegacyModule">
+			<HintPath>$(LocalPath)/UnityEngine.InputLegacyModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.UI">
+			<HintPath>$(LocalPath)/UnityEngine.UI.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.TextRenderingModule">
+			<HintPath>$(LocalPath)/UnityEngine.TextRenderingModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
 	</ItemGroup>
 
 	<ItemGroup>

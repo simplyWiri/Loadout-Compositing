@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text;
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
@@ -18,7 +19,7 @@ namespace Inventory {
         private static FieldInfo repeatMode = AccessTools.Field(typeof(Bill_Production), nameof(Bill_Production.repeatMode));
         private static FieldInfo w_PerTag = AccessTools.Field(typeof(Inventory.InvBillRepeatModeDefOf), nameof(InvBillRepeatModeDefOf.W_PerTag));
 
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
+        public static IEnumerable<CodeInstruction> Transpiler(MethodBase __originalMethod, IEnumerable<CodeInstruction> instructions,
             ILGenerator generator)
         {
             var matches = 0;
@@ -47,7 +48,7 @@ namespace Inventory {
             }
 
             if (matches != 1) {
-                Log.ErrorOnce($"[Loadout Compositing] {matches} Failed to apply bill config transpiler, no option to enable 'X per tag' bills will be available in the dropdown", 245629);
+                Utility.TranspilerError(__originalMethod, "Option to enable 'X per tag' bills in bill configuration");
             }
         }
         

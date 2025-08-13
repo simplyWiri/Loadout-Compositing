@@ -23,7 +23,7 @@ namespace Inventory {
         private static MethodInfo plusButton = AccessTools.Method(typeof(DoConfigInterface_Patch), nameof(DoConfigInterface_Patch.PlusButton));
         private static MethodInfo minusButton = AccessTools.Method(typeof(DoConfigInterface_Patch), nameof(DoConfigInterface_Patch.MinusButton));
 
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
+        public static IEnumerable<CodeInstruction> Transpiler(MethodBase __originalMethod, IEnumerable<CodeInstruction> instructions,
             ILGenerator generator) {
             int occurence = 0;
             var insts = instructions.ToList();
@@ -48,7 +48,7 @@ namespace Inventory {
             }
 
             if (occurence != 2) {
-                Log.ErrorOnce("[Loadout Compositing] Failed to apply bill config UI patch, +/- buttons may not appear for the 'X per tag' bill type.", 8739405);
+                Utility.TranspilerError(__originalMethod, "+/- buttons for the 'X per tag' bill type");
             }
         }
 

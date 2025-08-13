@@ -41,7 +41,7 @@ namespace Inventory {
         *       ...   
         */
 
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
+        public static IEnumerable<CodeInstruction> Transpiler(MethodBase __originalMethod, IEnumerable<CodeInstruction> instructions,
             ILGenerator iLGenerator) {
             int matches = 0, branchMatches = 0;
             var insts = instructions.ToList();
@@ -84,7 +84,7 @@ namespace Inventory {
             }
 
             if (matches != 1 || branchMatches != 1) {
-                Log.ErrorOnce($"[Loadout Compositing] {matches} {branchMatches} Failed to apply transpiler which prevents pawns from automatically dropping items in their Loadout", 384932);
+                Utility.TranspilerError(__originalMethod, "Stopping pawns continuously dropping items from their loadout");
             }
         }
 

@@ -19,7 +19,7 @@ namespace Inventory {
         private static MethodInfo rectWidth = AccessTools.PropertyGetter(typeof(Rect), nameof(Rect.width));
         private static MethodInfo drawTags = AccessTools.Method(typeof(Panel_GearTab), nameof(Panel_GearTab.DrawTags));
 
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+        public static IEnumerable<CodeInstruction> Transpiler(MethodBase __originalMethod, IEnumerable<CodeInstruction> instructions) {
             var matches = 0;
             var insts = instructions.ToList();
             for (int i = 0; i < insts.Count; i++) {
@@ -37,7 +37,7 @@ namespace Inventory {
             }
 
             if (matches != 1) {
-                Log.ErrorOnce($"[Loadout Compositing] {matches} Failed to apply patch which adds tag view to pawn ITab", 395580372);
+                Utility.TranspilerError(__originalMethod, "Tag view to the pawn 'Gear' tab");
             }
         }
         

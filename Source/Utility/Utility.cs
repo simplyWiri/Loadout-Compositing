@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
@@ -163,6 +164,19 @@ namespace Inventory {
             if (firstUnloadableThing == default) return;
 
             pawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(InvJobDefOf.CL_UnloadInventory), JobTag.DraftedOrder, true);
+        }
+
+        public static void TranspilerError(MethodBase method, string functionality)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"[Loadout Compositing] Error in transpiler for {method.DeclaringType.Name}.{method.Name} - {functionality} will not work. Possible conflicts: ");
+            
+            var patches = Harmony.GetPatchInfo(method);
+            foreach (var transpiler in patches.Transpilers) {
+                sb.AppendLine($"\t- {transpiler.PatchMethod.DeclaringType.AssemblyQualifiedName}");
+            }
+            
+            Log.ErrorOnce(sb.ToString(), method.GetHashCode());
         }
     }
 

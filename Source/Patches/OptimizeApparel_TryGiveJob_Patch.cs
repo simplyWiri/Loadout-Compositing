@@ -48,7 +48,7 @@ namespace Inventory
             }
 
             if (matches != 1) {
-                Log.ErrorOnce($"[Loadout Compositing] {matches} Failed to apply patch to enforce pawns dropping apparel not in their loadout if the only wear apparel in loadout setting is active", 485949272);
+                Utility.TranspilerError(__originalMethod, "Pawns drop apparel from outside their loadout if the setting is set");
             }
         }
 

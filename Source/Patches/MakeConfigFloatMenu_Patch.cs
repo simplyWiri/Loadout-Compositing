@@ -36,7 +36,7 @@ namespace Inventory {
             }
 
             if (matches != 1) {
-                Log.ErrorOnce($"[Loadout Compositing] {matches} Failed to add 'X per tag' option to float menu map options", 49500384);
+                Utility.TranspilerError(__originalMethod, "'X per tag' option to float menu map options");
             }
         }
 
