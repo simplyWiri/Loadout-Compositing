@@ -36,9 +36,7 @@ namespace Inventory
                 if (Matches(insts, i)) {
                     matches++;
                     yield return new CodeInstruction(OpCodes.Ldarg_1); // pawn : Pawn
-                    yield return insts[i - 4]; // wornApparel : List<Apparel>
-                    yield return insts[i - 3]; // i : int
-                    yield return insts[i - 2]; // wornApparel[i]
+                    yield return insts[i - 2]; // apparel
                     yield return new CodeInstruction(OpCodes.Call, injectMethod); // shouldDrop(pawn, apparel[i]);
                     yield return new CodeInstruction(OpCodes.Not);
                     yield return new CodeInstruction(OpCodes.And);
@@ -65,13 +63,10 @@ namespace Inventory
 
         public static bool Matches(List<CodeInstruction> instructions, int i)
         {
-            return i >= 6
-                && instructions[i - 6].opcode == OpCodes.Ldloc_1
-                && instructions[i - 5].opcode == OpCodes.Ldfld
-                && instructions[i - 4].opcode == OpCodes.Ldloc_2
-                && instructions[i - 3].opcode == OpCodes.Ldloc_S
-                && instructions[i - 2].opcode == OpCodes.Callvirt
-                && instructions[i - 1].opcode == OpCodes.Callvirt
+            return i >= 4
+                && instructions[i - 4].opcode == OpCodes.Ldloc_1
+                && instructions[i - 3].opcode == OpCodes.Ldfld
+                && instructions[i - 2].opcode == OpCodes.Ldloc_S
                 && instructions[i - 1].Calls(targetMethod)
                 && instructions[i + 0].opcode == OpCodes.Brtrue_S;
         }
