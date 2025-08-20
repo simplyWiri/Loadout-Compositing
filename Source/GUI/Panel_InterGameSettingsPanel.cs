@@ -66,17 +66,26 @@ namespace Inventory
 
             var iconRect = buttonRect.PopRightPartPixels(Mathf.Max(UIC.SPACED_HEIGHT * 3, Strings.Load.GetWidthCached() + 5f));
 
-            if (Widgets.ButtonText(iconRect, Strings.Load) && !existingWithSameName) {
-                Find.WindowStack.Add(new Dialog_ConfirmSettings(() => {
+            if (Widgets.ButtonText(iconRect, Strings.Load) && !existingWithSameName)  {
+                Action loadTagToGame = () => {
                     var newTag = tag.MakeCopy();
                     newTag.name = currentTagNextName;
                     newTag.requiredItems = tag.requiredItems.Where((item) => item.WrappedDef.Valid).ToList();
-                    foreach(var item in newTag.requiredItems) {
+                    foreach (var item in newTag.requiredItems) {
                         item.Filter.ClearInvalidStuffs();
                     }
+
                     newTag.uniqueId = LoadoutManager.GetNextTagId();
                     loadedTags.Add(newTag);
-                }, Strings.LoadTagDialogue(tag.name, currentTagNextName), MakeLoadWarnings(tag)));
+                };
+                
+                var warnings = MakeLoadWarnings(tag);
+                if (warnings.Count > 0) {
+                    Find.WindowStack.Add(new Dialog_ConfirmSettings(loadTagToGame, Strings.LoadTagDialogue(tag.name, currentTagNextName), warnings));
+                }  else {
+                    loadTagToGame();
+                }
+                
             }
 
             if (existingWithSameName) {
