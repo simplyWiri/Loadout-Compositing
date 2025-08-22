@@ -51,6 +51,8 @@ namespace Inventory {
         private float statLength = UIC.DEFAULT_HEIGHT;
         private Color conflictingApparelColour = new Color(.75f, 0.2f, 0.0f, .8f);
         private ThingDef hoveredDef = null;
+
+        private LoadoutElement nextElement = null;
         
         private const float INVALID_STAT_VALUE = -10000;
 
@@ -130,6 +132,9 @@ namespace Inventory {
 
             if (Widgets.ButtonImageFitted(grabRect.RightPartPixels(grabRect.height), collapsedPanel ? TexButton.Plus : TexButton.Minus)) {
                 collapsedPanel = !collapsedPanel;
+                if (!collapsedPanel && nextElement is null) {
+                    nextElement = new LoadoutElement(curTag, null);
+                }
             }
 
             var mousePos = Event.current.mousePosition;
@@ -152,11 +157,20 @@ namespace Inventory {
         private void DrawPawnList(Rect rect) {
             var pawns = Find.Maps.SelectMany(map => map.mapPawns.AllPawns.Where(p => p.IsValidLoadoutHolder())).ToList().OrderByDescending(p => p.Name.ToString()).ToList() ;
 
-            var height = pawns.Count * UIC.DEFAULT_HEIGHT;
+            var height = (1 + pawns.Count) * UIC.DEFAULT_HEIGHT;
             var width = rect.width - (rect.height > height ? 0 : UIC.SCROLL_WIDTH);
             var viewRect = new Rect(rect.x, rect.y, width, height);
             
             Widgets.BeginScrollView(rect, ref pawnListScroll, viewRect);
+
+
+            // We want to draw a little gizmo below the heading so people can select a `State` to assign, along with the
+            // tag.
+            var loadoutStateRect = viewRect.PopTopPartPixels(UIC.DEFAULT_HEIGHT);
+            
+            GUI.color = Color.gray;
+            Dialog_SetTagLoadoutState.Draw(loadoutStateRect, nextElement);
+            GUI.color = Color.white;
             
             rect.y += pawnListScroll.y;
             var i = 0;
@@ -182,7 +196,7 @@ namespace Inventory {
                     if (!hasThing) {
                         component.RemoveTag(component.Loadout.AllElements.FirstOrDefault(elem => elem.Tag == curTag));
                     } else {
-                        component.AddTag(curTag);  
+                        component.AddTag(curTag, nextElement.State, nextElement.ActiveCondition);  
                     }
                 }
             }
@@ -196,7 +210,11 @@ namespace Inventory {
             var topRect = r.TopPartPixels(UIC.DEFAULT_HEIGHT);
 
             if (Widgets.ButtonText(topRect.LeftPart(0.33f), Strings.SelectTag)) {
-                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(curTag).ToList(), tag => curTag = tag, false));
+                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(curTag).ToList(), tag =>
+                {
+                    curTag = tag;
+                    nextElement = new LoadoutElement(curTag, null);;
+                }, false));
             }
 
             topRect.AdjHorzBy(topRect.width * 0.33f);
@@ -375,10 +393,10 @@ namespace Inventory {
 
         // [ Apparel ] [ Melee ] [ Ranged ] [ Medical / Drugs ] 
         public void DrawItemColumns(Rect r) {
-            var topRect = r.TopPartPixels(UIC.DEFAULT_HEIGHT);
+            var topRect = r.PopTopPartPixels(UIC.DEFAULT_HEIGHT * 2);
 
             void DrawOptionButton(Texture2D tex, string tooltip, State state) {
-                var optionRect = topRect.PopLeftPartPixels(UIC.DEFAULT_HEIGHT);
+                var optionRect = topRect.PopLeftPartPixels(UIC.DEFAULT_HEIGHT * 2);
                 GUI.DrawTexture(optionRect, tex, ScaleMode.ScaleToFit, true, 1f,
                                 curState == state ? GenUI.MouseoverColor : Color.white, 0f, 0f);
                 TooltipHandler.TipRegion(optionRect, tooltip);
@@ -390,8 +408,6 @@ namespace Inventory {
                     GUI.FocusControl("Def List Filter");
                 }
             }
-
-            r.AdjVertBy(UIC.DEFAULT_HEIGHT);
 
             DrawOptionButton(Textures.ApparelTex, "Apparel", State.Apparel);
             DrawOptionButton(Textures.MeleeTex, "Melee", State.Melee);

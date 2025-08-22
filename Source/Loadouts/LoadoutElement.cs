@@ -2,6 +2,11 @@
 using Verse;
 
 namespace Inventory {
+    
+    public enum ActiveCondition : byte {
+        StateInactive = 0,
+        StateActive = 1
+    }
 
     public class LoadoutElement : IExposable {
 
@@ -9,48 +14,54 @@ namespace Inventory {
         internal LoadoutState state;
         // if switchValue is true, this element is only active when `currentState` == state, 
         // otherwise, it is only active when `currentState` != state
-        private bool switchValue;
+        private ActiveCondition activeCondition;
 
         public Tag Tag => tag;
         public LoadoutState State => state;
-        public bool Switch => switchValue;
+        public ActiveCondition ActiveCondition => activeCondition;
 
-        public string StateName => State is null ? Strings.DefaultStateNameInUse : (Switch ? "" : "not ") + State.name;
+        public string StateName => State is null ? Strings.DefaultStateNameInUse : (ActiveCondition == ActiveCondition.StateActive ? "" : $"{Strings.Not} ") + State.name;
         
         public bool Active(LoadoutState currentState) {
             if (state == null) return true;
-            
-            if (switchValue && Equals(currentState, state)) {
-                return true;
+
+            switch (activeCondition) {
+                case ActiveCondition.StateActive: return Equals(currentState, state);
+                case ActiveCondition.StateInactive: return !Equals(currentState, state);
             }
 
-            return !switchValue && !Equals(currentState, state);
+            // unreachable
+            return false;
         }
 
-        public void SetTo(Loadout loadout, LoadoutState state, bool switchValue) {
-            var currentState = Active(loadout.CurrentState);
+        public void SetLoadoutState(LoadoutState state, ActiveCondition activeCondition) {
             this.state = state;
-            this.switchValue = switchValue;
-            
-            if (currentState != Active(loadout.CurrentState)) {
-                loadout.UpdateState(this, Active(loadout.CurrentState));
-            }
+            this.activeCondition = activeCondition;
         }
 
         // for creating instances when loading/saving
         public LoadoutElement() {
             
         }
-        public LoadoutElement(Tag tag, LoadoutState state, bool switchValue = true) {
+        public LoadoutElement(Tag tag, LoadoutState state, ActiveCondition activeCondition = ActiveCondition.StateActive) {
             this.tag = tag;
             this.state = state;
-            this.switchValue = switchValue;
+            this.activeCondition = activeCondition;
         }
         
         public void ExposeData() {
             Scribe_References.Look(ref tag, nameof(tag));
             Scribe_References.Look(ref state, nameof(state));
-            Scribe_Values.Look(ref switchValue, nameof(switchValue));
+            Scribe_Values.Look(ref activeCondition, nameof(activeCondition));
+            
+            if (Scribe.mode == LoadSaveMode.LoadingVars) {
+                bool? switchValue = null;
+                Scribe_Values.Look(ref switchValue, nameof(switchValue));
+                
+                if (switchValue is not null) {
+                    activeCondition = switchValue.Value ? ActiveCondition.StateActive : ActiveCondition.StateInactive;
+                }
+            }
         }
     }
 

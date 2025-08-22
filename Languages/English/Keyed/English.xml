@@ -95,6 +95,7 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.Active>Active</CompositableLoadouts.Active>
 	<CompositableLoadouts.Inactive>Inactive</CompositableLoadouts.Inactive>
 	<CompositableLoadouts.Is>is</CompositableLoadouts.Is>
+    <CompositableLoadouts.Not>not </CompositableLoadouts.Not>
 	<CompositableLoadouts.StateActive>state is active</CompositableLoadouts.StateActive>
 	<CompositableLoadouts.ActiveWhen>Active when</CompositableLoadouts.ActiveWhen>
 	<CompositableLoadouts.MassAssign>Mass Assign to Pawns</CompositableLoadouts.MassAssign>

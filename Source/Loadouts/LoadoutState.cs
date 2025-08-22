@@ -3,6 +3,11 @@ using Verse;
 
 namespace Inventory {
 
+    public enum LoadoutStateActive
+    {
+        
+    }
+
     public class LoadoutState : IExposable, ILoadReferenceable {
 
         public string name;

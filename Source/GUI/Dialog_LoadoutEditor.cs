@@ -176,7 +176,7 @@ namespace Inventory {
                 var elemName = $" {element.StateName} ";
                 var width = Mathf.Min(elemName.GetWidthCached() + 5, tagRect.width - UIC.SPACED_HEIGHT * 4);
                 if (Widgets.ButtonText(tagRect.PopRightPartPixels(width).TopPartPixels(UIC.SPACED_HEIGHT), elemName)) {
-                    Find.WindowStack.Add(new Dialog_SetTagLoadoutState(pawn.GetComp<LoadoutComponent>().Loadout, element));
+                    Find.WindowStack.Add(new Dialog_SetTagLoadoutState(element));
                 }
 
                 tagRect.AdjHorzBy(3f);
@@ -322,7 +322,7 @@ namespace Inventory {
             }
 
             if (Widgets.ButtonText(buttonRect.LeftHalf(), Strings.AddTag)) {
-                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(elements.Select(elem => elem.Tag)).ToList(), component.AddTag));
+                Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(elements.Select(elem => elem.Tag)).ToList(), t => component.AddTag(t)));
             }
 
             if (Widgets.ButtonText(buttonRect.RightHalf(), coveragePanel.ShouldDraw ? Strings.HideCoverage : Strings.ShowCoverage)) {

@@ -88,6 +88,7 @@ namespace Inventory {
         public static string Active => $"{P}Active".TranslateSimple();
         public static string Inactive => $"{P}Inactive".TranslateSimple();
         public static string Is => $"{P}Is".TranslateSimple();
+        public static string Not => $"{P}Not".TranslateSimple();
         public static string StateActive => $"{P}StateActive".TranslateSimple();
         public static string ActiveWhen => $"{P}ActiveWhen".TranslateSimple();
 
