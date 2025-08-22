@@ -30,27 +30,29 @@ namespace Inventory {
                     pComp.RemoveTag(elem);
                 }
 
-                foreach (var tag in elemsToCopy) {
-                    pComp.AddElement(tag);
+                foreach (var elem in elemsToCopy) {
+                    pComp.AddTag(elem.Tag, elem.State, elem.ActiveCondition); 
                 }
             } else {
-                var heldTags = pComp.Loadout.AllTags.ToList();
-                var tagsToApply = elemsToCopy.Where(elem => !heldTags.Contains(elem.Tag));
-                foreach (var tag in tagsToApply) {
-                    pComp.AddElement(tag);
-                }  
+                var elems = pComp.Loadout.AllElements.ToList();
+                foreach (var elem in elemsToCopy) {
+                    var existing = elems.FirstOrFallback(existing => existing.Tag == elem.Tag);
+                    if (existing != null) { existing.SetLoadoutState(elem.State, elem.ActiveCondition); }
+                    else { pComp.AddTag(elem.Tag, elem.State, elem.ActiveCondition); }
+                }
             }
         }
 
         public bool ApplicableTo(Pawn pawn) {
             if (pawn == fromPawn) return false;
 
-            var pawnTags = pawn.GetComp<LoadoutComponent>().Loadout.AllTags.ToList();
+            var elements = pawn.GetComp<LoadoutComponent>().Loadout.AllElements.ToList();
+            
             if (replace) {
-                return !(elemsToCopy.All(t => pawnTags.Contains(t.Tag)) && elemsToCopy.Count == pawnTags.Count);
+                return !(elemsToCopy.All(t => elements.Any(e => e.Equivalent(t))) && elemsToCopy.Count == elements.Count);
             } 
             
-            return !elemsToCopy.All(t => pawnTags.Contains(t.Tag));
+            return !elemsToCopy.All(t => elements.Any(e => e.Equivalent(t)));
         }
     }
     
