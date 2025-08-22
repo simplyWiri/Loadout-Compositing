@@ -188,7 +188,7 @@ namespace Inventory {
                 i++;
                 
                 var component = pawn.GetComp<LoadoutComponent>();
-                var hasThing = component.Loadout.AllTags.Contains(curTag);
+                var hasThing = component.Loadout.AllElements.Any(e => e.Equivalent(nextElement));
 
                 Widgets.Label(pRect, pawn.LabelShort);
                 

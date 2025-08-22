@@ -48,6 +48,11 @@ namespace Inventory {
             this.state = state;
             this.activeCondition = activeCondition;
         }
+
+        public bool Equivalent(LoadoutElement other)
+        {
+            return tag == other.tag && state == other.state && activeCondition == other.activeCondition;
+        }
         
         public void ExposeData() {
             Scribe_References.Look(ref tag, nameof(tag));
