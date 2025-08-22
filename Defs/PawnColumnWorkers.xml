@@ -7,5 +7,12 @@
     <workerClass>Inventory.PawnColumnWorker_LoadoutState</workerClass>
     <sortable>true</sortable>
   </PawnColumnDef>
+  
+  <PawnColumnDef>
+    <defName>CL_ViewLoadoutState</defName>
+    <label>loadout overview</label>
+    <workerClass>Inventory.PawnColumnWorker_TagSummary</workerClass>
+    <sortable>true</sortable>
+  </PawnColumnDef>
 
 </Defs>

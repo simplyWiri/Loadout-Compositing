@@ -35,14 +35,21 @@ namespace Inventory {
             }
         }
         
-        public void AddTag(Tag tag, LoadoutState state = null, ActiveCondition activeCondition = ActiveCondition.StateActive) {
+        public void AddTag(Tag tag, LoadoutState state = null, ActiveCondition activeCondition = ActiveCondition.StateActive, bool insertAtStart = true) {
             if (!LoadoutManager.PawnsWithTags.TryGetValue(tag, out var pList)) {
                 pList = new List<Pawn>();
                 LoadoutManager.PawnsWithTags.Add(tag, pList);
             }
 
             pList.Add(Pawn);
-            Loadout.elements.Insert(0, new LoadoutElement(tag, state, activeCondition));
+            if (insertAtStart)
+            {
+                Loadout.elements.Insert(0, new LoadoutElement(tag, state, activeCondition));
+            }
+            else
+            {
+                Loadout.elements.Add(new LoadoutElement(tag, state, activeCondition));
+            }
 
             foreach (var item in tag.requiredItems.Where(item => item.Def.IsApparel)) {
                 if (Pawn.outfits.CurrentApparelPolicy.filter.Allows(item.Def)) continue;

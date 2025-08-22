@@ -31,14 +31,14 @@ namespace Inventory {
                 }
 
                 foreach (var elem in elemsToCopy) {
-                    pComp.AddTag(elem.Tag, elem.State, elem.ActiveCondition); 
+                    pComp.AddTag(elem.Tag, elem.State, elem.ActiveCondition, false); 
                 }
             } else {
                 var elems = pComp.Loadout.AllElements.ToList();
                 foreach (var elem in elemsToCopy) {
                     var existing = elems.FirstOrFallback(existing => existing.Tag == elem.Tag);
                     if (existing != null) { existing.SetLoadoutState(elem.State, elem.ActiveCondition); }
-                    else { pComp.AddTag(elem.Tag, elem.State, elem.ActiveCondition); }
+                    else { pComp.AddTag(elem.Tag, elem.State, elem.ActiveCondition, false); }
                 }
             }
         }
