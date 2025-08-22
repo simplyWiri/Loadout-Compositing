@@ -152,6 +152,8 @@ namespace Inventory {
         public static string RemovingDeletedTagPawn(string tag, string pawn) => $"{P}RemovingDeletedTagPawn".Translate(tag, pawn);
         public static string RemovingDeletedTagBill(string bill, string building, string tag) => $"{P}RemovingDeletedTagBill".Translate(bill, building, tag);
         public static string UnknownLocation => $"{P}UnknownLocation".TranslateSimple();
+        
+        public static string HasRightClick => $"{P}HasRightClick".TranslateSimple();
 
         public static string Options => $"{P}{S}Options".TranslateSimple();
         public static string Keybinds => $"{P}{S}Keybinds".TranslateSimple();

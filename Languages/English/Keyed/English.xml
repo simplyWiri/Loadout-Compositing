@@ -167,6 +167,8 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.RemovingDeletedTagBill>Suspending bill {0} in {1} as it referenced {2}</CompositableLoadouts.RemovingDeletedTagBill>
 	<CompositableLoadouts.UnknownLocation>Unknown building</CompositableLoadouts.UnknownLocation>
 
+    <CompositableLoadouts.HasRightClick>Right click for advanced copy options</CompositableLoadouts.HasRightClick>
+	    
 	<CompositableLoadouts.Settings.Options>∂Options</CompositableLoadouts.Settings.Options>
 	<CompositableLoadouts.Settings.Keybinds>Keybinds</CompositableLoadouts.Settings.Keybinds>
 	<CompositableLoadouts.Settings.ItemFilterDefaults>Tag-item filter defaults</CompositableLoadouts.Settings.ItemFilterDefaults>

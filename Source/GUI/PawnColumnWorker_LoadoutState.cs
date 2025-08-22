@@ -164,6 +164,7 @@ namespace Inventory {
                     Find.WindowStack.Add(new FloatMenu(opts));
                 }
             }
+            TooltipHandler.TipRegion(copyRect, () => Strings.HasRightClick, 986789547);
 
             if (!hasCopyPrimed) return;
             
