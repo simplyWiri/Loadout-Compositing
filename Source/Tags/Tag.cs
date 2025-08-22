@@ -14,6 +14,8 @@ namespace Inventory {
         public List<Item> requiredItems = null;
         public string name = null;
         public bool defaultEnabled = false;
+        public string defaultState = null;
+        public ActiveCondition defaultCondition = ActiveCondition.StateActive;
         public int uniqueId = -1;
 
         // What & Why?
@@ -94,6 +96,8 @@ namespace Inventory {
             Scribe_Values.Look(ref name, nameof(name));
             Scribe_Values.Look(ref uniqueId, nameof(uniqueId));
             Scribe_Values.Look(ref defaultEnabled, nameof(defaultEnabled), false);
+            Scribe_Values.Look(ref defaultState, nameof(defaultState), null);
+            Scribe_Values.Look(ref defaultCondition, nameof(defaultCondition), ActiveCondition.StateActive);
 
             if (!GenericLoad && idType != "GenericTag_") {
                 var count = requiredItems.RemoveAll(item => item.Def == null);

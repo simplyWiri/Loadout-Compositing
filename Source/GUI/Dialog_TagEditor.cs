@@ -52,7 +52,9 @@ namespace Inventory {
         private Color conflictingApparelColour = new Color(.75f, 0.2f, 0.0f, .8f);
         private ThingDef hoveredDef = null;
 
-        private LoadoutElement nextElement = null;
+        private LoadoutElement massAssignElement = null;
+        private LoadoutElement dummySavedElement = null;
+        
         
         private const float INVALID_STAT_VALUE = -10000;
 
@@ -132,8 +134,8 @@ namespace Inventory {
 
             if (Widgets.ButtonImageFitted(grabRect.RightPartPixels(grabRect.height), collapsedPanel ? TexButton.Plus : TexButton.Minus)) {
                 collapsedPanel = !collapsedPanel;
-                if (!collapsedPanel && nextElement is null) {
-                    nextElement = new LoadoutElement(curTag, null);
+                if (!collapsedPanel && massAssignElement is null) {
+                    massAssignElement = new LoadoutElement(curTag, null);
                 }
             }
 
@@ -169,7 +171,7 @@ namespace Inventory {
             var loadoutStateRect = viewRect.PopTopPartPixels(UIC.DEFAULT_HEIGHT);
             
             GUI.color = Color.gray;
-            Dialog_SetTagLoadoutState.Draw(loadoutStateRect, nextElement);
+            Dialog_SetTagLoadoutState.Draw(loadoutStateRect, massAssignElement);
             GUI.color = Color.white;
             
             rect.y += pawnListScroll.y;
@@ -188,7 +190,7 @@ namespace Inventory {
                 i++;
                 
                 var component = pawn.GetComp<LoadoutComponent>();
-                var hasThing = component.Loadout.AllElements.Any(e => e.Equivalent(nextElement));
+                var hasThing = component.Loadout.AllElements.Any(e => e.Equivalent(massAssignElement));
 
                 Widgets.Label(pRect, pawn.LabelShort);
                 
@@ -196,7 +198,7 @@ namespace Inventory {
                     if (!hasThing) {
                         component.RemoveTag(component.Loadout.AllElements.FirstOrDefault(elem => elem.Tag == curTag));
                     } else {
-                        component.AddTag(curTag, nextElement.State, nextElement.ActiveCondition);  
+                        component.AddTag(curTag, massAssignElement.State, massAssignElement.ActiveCondition);  
                     }
                 }
             }
@@ -213,7 +215,8 @@ namespace Inventory {
                 Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(curTag).ToList(), tag =>
                 {
                     curTag = tag;
-                    nextElement = new LoadoutElement(curTag, null);;
+                    massAssignElement = new LoadoutElement(curTag, null);
+                    dummySavedElement = null;
                 }, false));
             }
 
@@ -234,15 +237,31 @@ namespace Inventory {
 
             if (curTag == null) return;
 
-            var defaultOnRect = r.TopPartPixels(30).RightHalf();
-            TooltipHandler.TipRegion(defaultOnRect, Strings.EnableTagByDefaultDesc);
+            Text.Anchor = TextAnchor.UpperRight;
+
+            var defaultOnRect = r.TopPartPixels(30);
             defaultOnRect.PopTopPartPixels(3);
-            var defaultOnRectButton = defaultOnRect.PopRightPartPixels(20).TopPartPixels(20);
+            if (curTag.defaultEnabled) {
+                var existingState = LoadoutManager.States.FirstOrDefault(e => e.name == curTag.defaultState);
+                dummySavedElement ??= new LoadoutElement(curTag, existingState, curTag.defaultCondition);
+                
+                GUI.color = Color.gray;
+                var rightPart = defaultOnRect
+                    .PopRightPartPixels(Dialog_SetTagLoadoutState.GetWidthAbsolute(dummySavedElement))
+                    .TopPartPixels(20);
+                Dialog_SetTagLoadoutState.Draw(rightPart, dummySavedElement);
+                GUI.color = Color.white;
+                
+                curTag.defaultState = dummySavedElement.State?.name ?? null;
+                curTag.defaultCondition = dummySavedElement.ActiveCondition;
+            }
+            
+            var defaultOnRectButton = defaultOnRect.PopRightPartPixels(20);
             defaultOnRect.PopRightPartPixels(5);
 
             GUIUtility.DraggableCheckbox(defaultOnRectButton, defaultOnRectButton, ref curTag.defaultEnabled);
-            Text.Anchor = TextAnchor.UpperRight;
             GUI.color = Color.gray;
+            TooltipHandler.TipRegion(defaultOnRect, Strings.EnableTagByDefaultDesc);
             Widgets.Label(defaultOnRect, Strings.EnableTagByDefault);
             GUI.color = Color.white;
             Text.Anchor = TextAnchor.UpperRight;

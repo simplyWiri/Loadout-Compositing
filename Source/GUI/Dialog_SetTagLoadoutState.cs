@@ -15,14 +15,17 @@ namespace Inventory
         private Vector2 center;
 
         public override float Margin => 6f;
-        public override Vector2 InitialSize => new(GetWidth, UIC.SPACED_HEIGHT + 12f);
-        public float GetWidth => (element.state == null ? NullWidth : NonNullWidth) + 20 + 12;
+        public override Vector2 InitialSize => new(GetWidth(element), UIC.SPACED_HEIGHT + 12f);
 
-        private float NullWidth => Strings.ActiveWhen.GetWidthCached() + 5
+        public static float GetWidthAbsolute(LoadoutElement element) => (element.state == null ? NullWidth(element) : NonNullWidth(element));
+        
+        public static float GetWidth(LoadoutElement element) => (element.state == null ? NullWidth(element) : NonNullWidth(element)) + 20 + 12;
+
+        private static float NullWidth(LoadoutElement element) => Strings.ActiveWhen.GetWidthCached() + 5
                                                                        + StateName(element.State).GetWidthCached() + 5
                                                                        + Strings.StateActive.GetWidthCached() + 5;
 
-        private float NonNullWidth => Strings.ActiveWhen.GetWidthCached() + 5
+        private static float NonNullWidth(LoadoutElement element) => Strings.ActiveWhen.GetWidthCached() + 5
                                                                           + StateName(element.State).GetWidthCached() +
                                                                           5
                                                                           + Strings.Is.GetWidthCached() + 5
@@ -54,7 +57,7 @@ namespace Inventory
         public override void SetInitialSizeAndPosition()
         {
             var vector = UI.MousePositionOnUIInverted;
-            vector.x -= GetWidth / 2.0f;
+            vector.x -= GetWidth(element) / 2.0f;
             if (vector.x + InitialSize.x > UI.screenWidth)
             {
                 vector.x = UI.screenWidth - InitialSize.x;
@@ -90,7 +93,6 @@ namespace Inventory
 
         public static void Draw(Rect rect, LoadoutElement element)
         {
-            Text.Anchor = TextAnchor.MiddleCenter;
             Text.Font = GameFont.Small;
 
             // "Active when "
@@ -111,20 +113,21 @@ namespace Inventory
             else
             {
                 var stateName = element.State.name;
+                var dropdownButton = rect.PopLeftPartPixels(stateName.GetWidthCached() + 5);
+
                 GUIUtility.WithModifiers(
-                    () =>
-                    {
-                        Widgets.Dropdown(rect.PopLeftPartPixels(stateName.GetWidthCached() + 5), element,
-                            (e) => e.state, GetElems, stateName);
-                    }, color: Color.white);
+                    () => Widgets.Dropdown(dropdownButton, element, (e) => e.state, GetElems, stateName),
+                    color: Color.white);
 
                 // 'is'
                 Widgets.Label(rect.PopLeftPartPixels(Strings.Is.GetWidthCached() + 5), Strings.Is);
 
+                var conditionStr = ActiveConditionString(element.ActiveCondition);
+                var dropdownRect = rect.PopLeftPartPixels(conditionStr.GetWidthCached());
+
                 GUIUtility.WithModifiers(() =>
                 {
-                    var conditionStr = ActiveConditionString(element.ActiveCondition);
-                    if (Widgets.ButtonText(rect.PopLeftPartPixels(conditionStr.GetWidthCached()), conditionStr))
+                    if (Widgets.ButtonText(dropdownRect, conditionStr))
                     {
                         var oppositeCondition = element.ActiveCondition == ActiveCondition.StateActive
                             ? ActiveCondition.StateInactive
@@ -133,15 +136,13 @@ namespace Inventory
                     }
                 }, color: Color.white);
             }
-
-            Text.Anchor = TextAnchor.UpperLeft;
         }
 
         public override void DoWindowContents(Rect inRect)
         {
             GUI.color = baseColor;
 
-            var width = GetWidth;
+            var width = GetWidth(element);
             if (Math.Abs(width - windowRect.width) > 0.025)
             {
                 windowRect.width = width;
@@ -152,11 +153,13 @@ namespace Inventory
             {
                 return;
             }
-            
+
             var rect = inRect.PopTopPartPixels(UIC.SPACED_HEIGHT);
             rect.AdjHorzBy(10f);
 
+            Text.Anchor = TextAnchor.MiddleCenter;
             Draw(rect, element);
+            Text.Anchor = TextAnchor.UpperLeft;
 
             GUI.color = Color.white;
         }
