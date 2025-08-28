@@ -41,7 +41,6 @@ namespace Inventory
             defs ??= new List<PawnColumnDef> { DefDatabase<PawnColumnDef>.GetNamed("CL_ViewLoadoutState") };
 
             var list = floatMenuOptionsFor.Invoke(__instance, new object[] { defs }) as List<FloatMenuOption>;
-            Log.Message($"Invoking {floatMenuOptionsFor.Name} with {defs.Count} defs - {list.Count} options returned: {list[0].Label} as label");
             __result.AddRange(list);
         }
     }
