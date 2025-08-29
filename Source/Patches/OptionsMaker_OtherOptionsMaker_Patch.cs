@@ -14,7 +14,7 @@ namespace Inventory
         private static MethodInfo floatMenuOptionsFor = null;
         
         public static bool Prepare() {
-            if (LoadedModManager.RunningModsListForReading.Any(m => m.PackageId == "Mehni.Numbers".ToLowerInvariant()))
+            if (!LoadedModManager.RunningModsListForReading.Any(m => m.PackageId == "Mehni.Numbers".ToLowerInvariant()))
             {
                 return false;
             }
