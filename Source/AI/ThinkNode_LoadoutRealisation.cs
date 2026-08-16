@@ -88,7 +88,7 @@ namespace Inventory {
 
         // pre-condition that in `nextUpdateTick` there should be an entry for `pawn`
         private void SetPawnLastUpdated(Pawn pawn) {
-            nextUpdateTick[pawn] = GenTicks.TicksAbs + Rand.Range(10_000, 15_000);
+            nextUpdateTick[pawn] = GenTicks.TicksAbs + Rand.RangeSeeded(10_000, 15_000, GenTicks.TicksAbs);
         }
 
         private Job RemoveThingsJob(Pawn pawn, Loadout loadout) {
