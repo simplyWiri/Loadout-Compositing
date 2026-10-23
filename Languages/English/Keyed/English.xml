@@ -64,6 +64,10 @@
 	<CompositableLoadouts.InstalledLabel>{0} (installed)</CompositableLoadouts.InstalledLabel>
 	<CompositableLoadouts.InstalledOn>Installed on: {0}</CompositableLoadouts.InstalledOn>
 	<CompositableLoadouts.ProstheticConflict>Can't be installed: {0} wants prosthetics on the same body parts, and comes first.</CompositableLoadouts.ProstheticConflict>
+	<CompositableLoadouts.ObjectsToProsthetics>{0} objects to prosthetics ({1}), but {2} asks for them.</CompositableLoadouts.ObjectsToProsthetics>
+	<CompositableLoadouts.CantEverInstall>{0} can never have a {1} installed, which {2} asks for.</CompositableLoadouts.CantEverInstall>
+	<CompositableLoadouts.NoRoomForProsthetic>{0} hasn't enough body parts for all the {1}s which {2} asks for.</CompositableLoadouts.NoRoomForProsthetic>
+	<CompositableLoadouts.ProstheticConflictsWith>{0} can't have the {1} which {2} asks for, as {3} wants prosthetics on the same body parts and comes first.</CompositableLoadouts.ProstheticConflictsWith>
 	<CompositableLoadouts.ProstheticNoRoom>Can't be installed: there aren't enough free body parts for this many.</CompositableLoadouts.ProstheticNoRoom>
 	<CompositableLoadouts.ReorderAlternativeDesc>Drag to change which alternatives pawns prefer, higher is preferred.</CompositableLoadouts.ReorderAlternativeDesc>
 	<CompositableLoadouts.EditingAlternative>Alternative: {0}</CompositableLoadouts.EditingAlternative>

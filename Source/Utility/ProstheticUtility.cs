@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
@@ -29,6 +29,31 @@ namespace Inventory {
         public static int InstalledCount(Pawn pawn, ThingDef def) {
             var hediffs = InstallRecipesFor(def).Select(recipe => recipe.addsHediff).ToHashSet();
             return pawn.health.hediffSet.hediffs.Count(hediff => hediffs.Contains(hediff.def));
+        }
+
+        // whether `pawn` could ever have `def`, ignoring research and what's already installed (e.g. not for their race,
+        // or not at their age)
+        public static bool CanEverInstall(Pawn pawn, ThingDef def) {
+            var recipe = InstallRecipeFor(pawn, def);
+            if (recipe == null || !recipe.Worker.AvailableOnNow(pawn)) return false;
+
+            return !recipe.targetsBodyPart || TargetParts(pawn.RaceProps.body, recipe).Any();
+        }
+
+        // why `pawn` objects to having prosthetics installed, or null if they don't
+        public static string Objection(Pawn pawn) {
+            var trait = pawn.story?.traits?.GetTrait(TraitDefOf.BodyPurist);
+            if (trait != null) return trait.LabelCap;
+
+            var ideo = pawn.Ideo;
+            if (ideo == null) return null;
+
+            foreach (var defName in new[] { "BodyMod_Disapproved", "BodyMod_Abhorrent" }) {
+                var precept = DefDatabase<PreceptDef>.GetNamedSilentFail(defName);
+                if (precept != null && ideo.HasPrecept(precept)) return precept.LabelCap;
+            }
+
+            return null;
         }
 
         // the parts of `body` which `recipe` installs onto
