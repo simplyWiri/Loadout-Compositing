@@ -77,6 +77,15 @@ namespace Inventory {
         public static string ProstheticNoRoom => $"{P}ProstheticNoRoom".TranslateSimple();
         public static string SurgeryAwaitingApproval => $"{P}SurgeryAwaitingApproval".TranslateSimple();
         public static string SurgeryAwaitingApprovalDesc => $"{P}SurgeryAwaitingApprovalDesc".TranslateSimple();
+        public static string StatusInstalled => $"{P}ProstheticStatus.Installed".TranslateSimple();
+        public static string StatusHasBetter => $"{P}ProstheticStatus.HasBetter".TranslateSimple();
+        public static string StatusSurgeryQueued => $"{P}ProstheticStatus.SurgeryQueued".TranslateSimple();
+        public static string StatusNoRoom => $"{P}ProstheticStatus.NoRoom".TranslateSimple();
+        public static string StatusConflicts(string tag) => $"{P}ProstheticStatus.Conflicts".Translate(tag);
+        public static string StatusCantEverInstall => $"{P}ProstheticStatus.CantEverInstall".TranslateSimple();
+        public static string StatusDeclined => $"{P}ProstheticStatus.Declined".TranslateSimple();
+        public static string StatusAutoSurgeryOff => $"{P}ProstheticStatus.AutoSurgeryOff".TranslateSimple();
+        public static string StatusWaitingForPart => $"{P}ProstheticStatus.WaitingForPart".TranslateSimple();
         public static string AutoSurgery => $"{P}Settings.AutoSurgery".TranslateSimple();
         public static string AutoSurgeryDesc => $"{P}Settings.AutoSurgeryDesc".TranslateSimple();
         public static string AutoSurgeryMode(Inventory.AutoSurgery mode) => $"{P}Settings.AutoSurgery{mode}".TranslateSimple();
