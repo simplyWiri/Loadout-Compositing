@@ -73,6 +73,8 @@ namespace Inventory {
         public static string Prosthetics => $"{P}Prosthetics".TranslateSimple();
         public static string InstalledLabel(string item) => $"{P}InstalledLabel".Translate(item);
         public static string InstalledOn(string parts) => $"{P}InstalledOn".Translate(parts);
+        public static string ProstheticConflict(string tag) => $"{P}ProstheticConflict".Translate(tag);
+        public static string ProstheticNoRoom => $"{P}ProstheticNoRoom".TranslateSimple();
         public static string ReorderAlternativeDesc => $"{P}ReorderAlternativeDesc".TranslateSimple();
         public static string EditingAlternative(string def) => $"{P}EditingAlternative".Translate(def);
         public static string EditingAlternativeDesc => $"{P}EditingAlternativeDesc".TranslateSimple();

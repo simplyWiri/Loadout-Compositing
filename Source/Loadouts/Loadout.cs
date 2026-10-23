@@ -139,6 +139,12 @@ namespace Inventory {
             return wornApparel;
         }
 
+        // where the prosthetics of the tags active in `state` would go, higher priority tags first
+        public ProstheticSlots HypotheticalProsthetics(LoadoutState state, BodyDef body) {
+            var items = TagsWith(state).SelectMany(t => t.ItemsWithTagMatching(item => item.IsProsthetic));
+            return new ProstheticSlots(body, items);
+        }
+
         public IEnumerable<Item> DesiredItems(List<Thing> heldThings) {
             var desiredThings = CarriedItems.Where(t => !t.IsApparel);
             foreach (var thing in desiredThings) {

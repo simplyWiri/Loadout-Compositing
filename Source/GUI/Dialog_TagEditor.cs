@@ -288,6 +288,8 @@ namespace Inventory {
             visibilityRect.y += curItemScroll.y;
             var baseRect = viewRect;
 
+            var prostheticSlots = new ProstheticSlots(BodyDefOf.Human, curTag.ItemsWithTagMatching(item => item.IsProsthetic));
+
             var i = 0;
             // List each item in the currently required items
             // [ Info ] [ Icon ] [ Name ] [ Edit Filter ] [ Edit Quantity ] [ Remove ]  
@@ -374,6 +376,9 @@ namespace Inventory {
                 } else {
                     Text.Anchor = TextAnchor.MiddleCenter;
                     Widgets.Label(itemRect, item.IsProsthetic ? Strings.InstalledLabel(item.Label) : item.Label);
+                    if (prostheticSlots.Conflicting(item)) {
+                        GUIUtility.ProstheticConflictOverlay(itemRect, prostheticSlots.Conflicts[item]);
+                    }
                 }
                 Text.Anchor = TextAnchor.UpperLeft;
             }
@@ -651,6 +656,10 @@ namespace Inventory {
             }
             
             defs = defs.Where(t => !itms.Contains(t)).ToList();
+
+            // as with apparel, a prosthetic is hidden if it can't be installed alongside the tag's other prosthetics
+            var prostheticSlots = new ProstheticSlots(BodyDefOf.Human, curTag.ItemsWithTagMatching(item => item.IsProsthetic));
+            defs = defs.Where(t => !ProstheticUtility.IsProsthetic(t) || prostheticSlots.Fits(t)).ToList();
 
             if (addingAlternativesTo != null) {
                 // alternatives must be the same kind of thing, and prosthetics can't be alternatives
