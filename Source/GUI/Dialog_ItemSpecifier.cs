@@ -17,6 +17,7 @@ namespace Inventory {
         private static List<StatDef> generalItemStats;
 
         private ThingDef stuffPreview;
+        private Item item;
         private Filter filter;
         private ItemMember member;
 
@@ -73,6 +74,7 @@ namespace Inventory {
 
         // `filter` (quality/hp) is shared by the item, stuff is set per `member`
         public Dialog_ItemSpecifier(Item item, ItemMember member) {
+            this.item = item;
             this.filter = item.Filter;
             this.member = member;
             closeOnClickedOutside = true;
@@ -97,6 +99,7 @@ namespace Inventory {
 
             // Draw Title
             Rect titleRec = DrawTitle(canvas.position, "Customize " + member.Def.LabelCap, ref rollingY);
+            DrawMemberSelector(titleRec);
 
             GUI.color = Color.grey;
             Text.Anchor = TextAnchor.LowerLeft;
@@ -122,6 +125,7 @@ namespace Inventory {
 
             // Draw Title
             Rect titleRec = DrawTitle(canvas.position, Strings.Customize + " " + member.Def.LabelCap, ref rollingY);
+            DrawMemberSelector(titleRec);
 
             GUI.color = Color.grey;
             Text.Anchor = TextAnchor.LowerLeft;
@@ -160,6 +164,23 @@ namespace Inventory {
             Text.Font = GameFont.Small;
             rollingY = rectToDraw.yMax;
             return rectToDraw;
+        }
+
+        // when the item has alternatives, pick which one's stuff is being edited (quality and hit points are shared)
+        private void DrawMemberSelector(Rect titleRect) {
+            if (item.Members.Count <= 1) return;
+
+            var label = Strings.EditingAlternative(member.Def.LabelCap);
+            var rect = new Rect(titleRect.xMax + GenUI.GapSmall, titleRect.y, label.GetWidthCached() + UIC.SPACED_HEIGHT, titleRect.height);
+            if (Widgets.ButtonText(rect.ContractedBy(2f), label)) {
+                var options = item.Members.Select(m => new FloatMenuOption(m.Def.LabelCap, () => {
+                    member = m;
+                    stuffPreview = null;
+                })).ToList();
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+
+            TooltipHandler.TipRegion(rect, Strings.EditingAlternativeDesc);
         }
 
         protected virtual void DrawSliders(Rect rect) {
