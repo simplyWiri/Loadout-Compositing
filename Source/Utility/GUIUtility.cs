@@ -35,19 +35,21 @@ namespace Inventory {
             WithModifiers(rect, quantity.ToString(), font: GameFont.Tiny, anchor: TextAnchor.LowerCenter);
         }
 
-        // `tooltip` defaults to the item's label, pass an empty string for no tooltip
-        public static void DrawItemIcon(Rect rect, Item item, bool showCount = true, string tooltip = null) {
-            var def = item.RepresentativeDef;
+        // `tooltip` defaults to the item's label, pass an empty string for no tooltip. `member` defaults to the item's
+        // representative member
+        public static void DrawItemIcon(Rect rect, Item item, bool showCount = true, string tooltip = null, ItemMember member = null) {
+            member ??= item.RepresentativeMember;
+            var def = member.Def;
             if (def == null) {
                 Widgets.DrawTextureFitted(rect, Textures.PlaceholderDef, 1.0f);
-                TooltipHandler.TipRegion(rect, item.RepresentativeMember.WrappedDef.defName);
+                TooltipHandler.TipRegion(rect, member.WrappedDef.defName);
                 return;
             }
 
             if (showCount && item.Quantity > 1) {
-                FittedDefIconCount(rect, def, item.RepresentativeStuff, item.Quantity);
+                FittedDefIconCount(rect, def, member.RepresentativeStuff, item.Quantity);
             } else {
-                Widgets.DefIcon(rect, def, item.RepresentativeStuff);
+                Widgets.DefIcon(rect, def, member.RepresentativeStuff);
             }
 
             tooltip ??= def.LabelCap;
