@@ -49,6 +49,19 @@ namespace Inventory {
         // members grouped by rank, best first
         public IEnumerable<IGrouping<int, ItemMember>> RankedMembers => members.GroupBy(RankOf).OrderBy(g => g.Key);
         public bool SubsetOf(Bill_Production bill) => (MemberFor(bill.recipe.ProducedThingDef)?.StuffSubsetOf(bill) ?? false) && Filter.SubsetOf(bill);
+
+        // copies the shared quality/hp, and the stuff of the member the bill produces
+        public void CopyTo(Bill_Production bill) {
+            var member = MemberFor(bill.recipe.ProducedThingDef);
+            member.CopyTo(bill.ingredientFilter);
+            bill.limitToAllowedStuff = !member.GenericStuff;
+
+            if (Filter.SpecificQualityRange)
+                bill.qualityRange = Filter.QualityRange;
+
+            if (Filter.SpecificHitpointRange)
+                bill.hpRange = Filter.HpRange;
+        }
         public int CountIn(List<Thing> things) => things.Where(Allows).Sum(s => s.stackCount);
 
         // Stuff? Def.LabelCap Quality-Range?
