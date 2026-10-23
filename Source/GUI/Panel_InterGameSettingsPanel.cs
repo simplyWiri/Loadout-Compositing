@@ -136,8 +136,7 @@ namespace Inventory
 
         private List<Warning> MakeSaveWarnings(Tag tag) {
             var warnings = new List<Warning>();
-            // generic items are built into the mod, and never depend on another
-            foreach(var member in tag.requiredItems.Where(item => !item.IsGeneric).SelectMany(item => item.Members)) {
+            foreach(var member in tag.requiredItems.SelectMany(item => item.Members)) {
                 var def = member.Def;
                 if (!(def.modContentPack?.IsCoreMod ?? true)) {
                     warnings.Add(new Warning() {
@@ -162,7 +161,7 @@ namespace Inventory
         private List<Warning> MakeLoadWarnings(Tag tag) {
             var warnings = new List<Warning>();
 
-            foreach (var member in tag.requiredItems.Where(item => !item.IsGeneric).SelectMany(item => item.Members))
+            foreach (var member in tag.requiredItems.SelectMany(item => item.Members))
             {
                 var wrappedDef = member.WrappedDef;
                 wrappedDef.Load();

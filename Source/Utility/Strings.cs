@@ -62,7 +62,7 @@ namespace Inventory {
         public static string HitPointsAmount => $"{P}HitPointsAmount";
         public static string ToCopy => $"{P}ToCopy".TranslateSimple();
         public static string Customize => $"{P}Customize".TranslateSimple();
-        public static string GenericCategoryDesc => $"{P}GenericCategoryDesc".TranslateSimple();
+        public static string ItemPresetDesc => $"{P}ItemPresetDesc".TranslateSimple();
         public static string Done => $"{P}Done".TranslateSimple();
         public static string AddAlternativeDesc => $"{P}AddAlternativeDesc".TranslateSimple();
         public static string AddingAlternativesTo(string item) => $"{P}AddingAlternativesTo".Translate(item);
