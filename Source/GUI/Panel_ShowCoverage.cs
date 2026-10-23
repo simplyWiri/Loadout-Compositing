@@ -203,8 +203,7 @@ namespace Inventory {
                         GUI.DrawTexture(columnRect.LeftPartPixels(columnRect.height).ContractedBy(1f), Textures.CornerTex);
                         GUI.color = Color.white;
                         
-                        Widgets.DefIcon(columnRect.ContractedBy(3f), overlappingApparel.Def,
-                            overlappingApparel.RepresentativeStuff);
+                        GUIUtility.DrawItemIcon(columnRect.ContractedBy(3f), overlappingApparel, false, string.Empty);
 
                         if (possibleDefs.Any()) {
                             var str = "";
@@ -220,7 +219,7 @@ namespace Inventory {
                         var nextHighestPrio = possibleDefs.OrderBy(tup => component.Loadout.ElementsWith(parent.shownState).FirstIndexOf(e => e.Tag == overlappingTag)).First().Item2;
                         
                         Widgets.DrawBoxSolidWithOutline(columnRect, Widgets.WindowBGFillColor, Color.red);
-                        Widgets.DefIcon(columnRect.ContractedBy(3f), nextHighestPrio.Def, color: new Color(0.5f, 0.5f, 0.5f, 0.3f));
+                        Widgets.DefIcon(columnRect.ContractedBy(3f), nextHighestPrio.RepresentativeDef, color: new Color(0.5f, 0.5f, 0.5f, 0.3f));
 
                         var str = "Blocked Tags:";
                         foreach (var (pTag, pApparel) in possibleDefs) {

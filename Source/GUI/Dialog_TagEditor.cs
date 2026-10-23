@@ -306,14 +306,7 @@ namespace Inventory {
 
                 // Icon
                 var iconRect = itemRect.PopLeftPartPixels(UIC.SPACED_HEIGHT * 2);
-                if (item.Quantity > 1) {
-                    GUIUtility.FittedDefIconCount(iconRect, def, item.RepresentativeStuff, item.Quantity);
-                }
-                else {
-                    Widgets.DefIcon(iconRect, def, item.RepresentativeStuff);
-                }
-
-                TooltipHandler.TipRegion(iconRect, item.Def.DescriptionDetailed);
+                GUIUtility.DrawItemIcon(iconRect, item, tooltip: def.DescriptionDetailed);
 
                 // Remove
                 var removeButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
