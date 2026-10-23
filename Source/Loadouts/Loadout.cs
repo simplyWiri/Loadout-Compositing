@@ -59,7 +59,7 @@ namespace Inventory {
         }
 
         public void UpdateState(LoadoutElement element, bool active) {  
-            foreach (var item in element.Tag.requiredItems.Where(item => !item.Def.IsApparel)) {
+            foreach (var item in element.Tag.requiredItems.Where(item => !item.IsApparel)) {
                 if (!active) {
                     AddItemToRemove(item);
                 }
@@ -88,7 +88,7 @@ namespace Inventory {
         public float WeightAtWhichLoadoutDesires(Thing thing) {
             const float priorityMultiplier = 5;
 
-            var tag = Tags.FirstOrDefault(t => t.ItemsMatching(thing).Any());
+            var tag = Tags.FirstOrDefault(t => t.requiredItems.Any(item => item.Allows(thing)));
             if (tag == null) return 0;
 
             var tagIndex = IndexOf(tag);
@@ -123,7 +123,7 @@ namespace Inventory {
 
         public IEnumerable<Item> HypotheticalWornApparel(LoadoutState state, BodyDef def) {
             var itemsWithPrios = TagsWith(state).SelectMany(t => t
-                    .ItemsWithTagMatching(item => item.Def.IsApparel)
+                    .ItemsWithTagMatching(item => item.IsApparel)
                     .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, elements.FindIndex(e => e.Tag == tuple.Item1))))
                 .ToList();
 
@@ -133,7 +133,7 @@ namespace Inventory {
 
         public IEnumerable<Tuple<Item, Tag>> HypotheticalWornApparelWithTag(LoadoutState state, BodyDef def) {
             var itemsWithPrios = TagsWith(state).SelectMany(t => t
-                    .ItemsWithTagMatching(item => item.Def.IsApparel)
+                    .ItemsWithTagMatching(item => item.IsApparel)
                     .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, elements.FindIndex(e => e.Tag == tuple.Item1))))
                 .ToList();
 
@@ -142,7 +142,7 @@ namespace Inventory {
         }
 
         public IEnumerable<Item> DesiredItems(List<Thing> heldThings) {
-            var desiredThings = Items.Where(t => !t.Def.IsApparel);
+            var desiredThings = Items.Where(t => !t.IsApparel);
             foreach (var thing in desiredThings) {
                 var count = heldThings.Where(heldThing => thing.Allows(heldThing))
                     .Sum(heldThing => heldThing.stackCount);

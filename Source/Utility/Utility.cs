@@ -78,7 +78,7 @@ namespace Inventory {
         public static float HypotheticalGearAndInventoryMass(Pawn p, List<Item> items) {
             var mass = 0f;
             foreach (var item in items) {
-                var sr = StatRequest.For(item.Def, item.RandomStuff, item.RandomQuality);
+                var sr = StatRequest.For(item.RepresentativeDef, item.RepresentativeStuff, item.RandomQuality);
                 mass += (StatDefOf.Mass.Worker.GetValue(sr) * item.Quantity);
             }
 
@@ -96,8 +96,8 @@ namespace Inventory {
                 return massCapacity;
             }
             
-            foreach (var item in items.Where(item => massBoostingClothes.ContainsKey(item.Def))) {
-                massCapacity += massBoostingClothes[item.Def](item.RandomQuality);
+            foreach (var item in items.Where(item => massBoostingClothes.ContainsKey(item.RepresentativeDef))) {
+                massCapacity += massBoostingClothes[item.RepresentativeDef](item.RandomQuality);
             }
 
             return massCapacity;
