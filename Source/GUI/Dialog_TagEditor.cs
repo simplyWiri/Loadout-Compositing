@@ -53,6 +53,12 @@ namespace Inventory {
         private ThingDef hoveredDef = null;
         // when set, clicking a def in the def list adds it as an alternative of this item instead of a new item
         private Item addingAlternativesTo = null;
+        // the group whose alternative at `draggingMemberIdx` is being dragged to change its preference
+        private Item draggingMembersOf = null;
+        private int draggingMemberIdx = -1;
+
+        private static readonly Color BestAlternativeColour = new Color(0.85f, 0.65f, 0.15f);
+        private static readonly Color WorstAlternativeColour = new Color(0.35f, 0.35f, 0.35f);
 
         private LoadoutElement massAssignElement = null;
         private LoadoutElement dummySavedElement = null;
@@ -356,9 +362,14 @@ namespace Inventory {
 
                 TooltipHandler.TipRegion(quantityFieldRect, Strings.EditQuantity);
 
-                // Name, a group's alternatives are listed underneath it
-                Text.Anchor = TextAnchor.MiddleCenter;
-                Widgets.Label(itemRect, ShowsMemberRows(item) ? Strings.OneOfHeading : item.Label);
+                // Name, a group's alternatives are listed underneath its heading
+                if (ShowsMemberRows(item)) {
+                    Text.Anchor = TextAnchor.MiddleLeft;
+                    Widgets.Label(itemRect.RightPartPixels(itemRect.width - GenUI.GapSmall), Strings.OneOfHeading);
+                } else {
+                    Text.Anchor = TextAnchor.MiddleCenter;
+                    Widgets.Label(itemRect, item.Label);
+                }
                 Text.Anchor = TextAnchor.UpperLeft;
             }
             
@@ -382,14 +393,27 @@ namespace Inventory {
             return UIC.SPACED_HEIGHT * 2 + (ShowsMemberRows(item) ? item.Members.Count * UIC.SPACED_HEIGHT : 0);
         }
 
-        // one row per alternative, in order of preference
-        // [ Icon ] [ Name ] [ Up ] [ Down ] [ Remove ]
+        // one row per alternative, in order of preference, dragged to reorder
+        // [ Priority ] [ Icon ] [ Name ] [ Remove ]
         private void DrawMemberRows(Rect rect, Item item) {
             var members = item.members;
+            var rowRects = new List<Rect>();
             for (var idx = 0; idx < members.Count; idx++) {
                 var member = members[idx];
                 var rowRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
                 rowRect.xMin += UIC.SMALL_ICON + UIC.SPACED_HEIGHT;
+                rowRects.Add(rowRect);
+
+                // priority, from the best alternative to the worst
+                var priorityRect = rowRect.PopLeftPartPixels(UIC.SMALL_GAP).ContractedBy(0, 1f);
+                Widgets.DrawBoxSolid(priorityRect, Color.Lerp(BestAlternativeColour, WorstAlternativeColour, idx / (float)(members.Count - 1)));
+                if (Mouse.IsOver(rowRect)) {
+                    var alpha = Mathf.Sin((Time.time % 2) / 2.0f * Mathf.PI) * 0.3f;
+                    GUI.color = new Color(0, 0, 0, 0.7f + alpha);
+                    Widgets.DrawTexturePart(priorityRect, new Rect(1 / 4f, 0, 1 / 2f, 1), Textures.DraggableTex);
+                    GUI.color = Color.white;
+                }
+                rowRect.PopLeftPartPixels(GenUI.GapTiny);
 
                 var iconRect = rowRect.PopLeftPartPixels(UIC.SPACED_HEIGHT);
                 GUIUtility.DrawItemIcon(iconRect.ContractedBy(2f), item, false, member.Def.DescriptionDetailed, member, badge: false);
@@ -402,22 +426,63 @@ namespace Inventory {
                     return;
                 }
 
-                var downRect = rowRect.PopRightPartPixels(UIC.SPACED_HEIGHT);
-                var upRect = rowRect.PopRightPartPixels(UIC.SPACED_HEIGHT);
-                TooltipHandler.TipRegion(downRect, Strings.LowerAlternative);
-                TooltipHandler.TipRegion(upRect, Strings.RaiseAlternative);
-                if (idx < members.Count - 1 && Widgets.ButtonImageFitted(downRect.ContractedBy(5f), TexButton.ReorderDown)) {
-                    (members[idx], members[idx + 1]) = (members[idx + 1], members[idx]);
-                    return;
-                }
-                if (idx > 0 && Widgets.ButtonImageFitted(upRect.ContractedBy(5f), TexButton.ReorderUp)) {
-                    (members[idx], members[idx - 1]) = (members[idx - 1], members[idx]);
-                    return;
-                }
-
                 Text.Anchor = TextAnchor.MiddleLeft;
                 Widgets.Label(rowRect, $"{idx + 1}. {member.ListLabel}");
                 Text.Anchor = TextAnchor.UpperLeft;
+                TooltipHandler.TipRegion(rowRect, Strings.ReorderAlternativeDesc);
+            }
+
+            DraggableMembers(item, rowRects);
+        }
+
+        // as `DraggableItems`, swapping a dragged alternative with its neighbour as the mouse passes them
+        private void DraggableMembers(Item item, List<Rect> rowRects) {
+            var members = item.members;
+            var cEvent = Event.current;
+
+            // also stop if the group shrank under the drag
+            if (cEvent.rawType == EventType.MouseUp || (draggingMembersOf == item && draggingMemberIdx >= rowRects.Count)) {
+                draggingMembersOf = null;
+                draggingMemberIdx = -1;
+            }
+
+            if (draggingMembersOf == item) {
+                var area = new Rect(rowRects[0].x, rowRects[0].y, rowRects[0].width, rowRects[rowRects.Count - 1].yMax - rowRects[0].y);
+                if (Mouse.IsOver(area.ExpandedBy(25f))) {
+                    var tRect = rowRects[draggingMemberIdx];
+                    var mPos = cEvent.mousePosition;
+
+                    if (!tRect.ExpandedBy(5f).Contains(mPos)) {
+                        if (draggingMemberIdx > 0 && mPos.y < tRect.y) {
+                            (members[draggingMemberIdx], members[draggingMemberIdx - 1]) = (members[draggingMemberIdx - 1], members[draggingMemberIdx]);
+                            draggingMemberIdx -= 1;
+                        } else if (draggingMemberIdx < members.Count - 1 && mPos.y > tRect.y) {
+                            (members[draggingMemberIdx], members[draggingMemberIdx + 1]) = (members[draggingMemberIdx + 1], members[draggingMemberIdx]);
+                            draggingMemberIdx += 1;
+                        }
+
+                        SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
+                    }
+
+                    Widgets.DrawLine(new Vector2(tRect.x, tRect.yMax), new Vector2(tRect.xMax, tRect.yMax), ReorderableWidget.LineColor, 2f);
+                    Widgets.DrawHighlight(tRect);
+                } else {
+                    draggingMembersOf = null;
+                    draggingMemberIdx = -1;
+                }
+            }
+
+            if (cEvent.rawType != EventType.MouseDown) return;
+
+            for (var idx = 0; idx < rowRects.Count; idx++) {
+                // the remove button stays clickable
+                var grabRect = rowRects[idx];
+                grabRect.xMax -= UIC.SPACED_HEIGHT * 1.5f;
+                if (!grabRect.Contains(cEvent.mousePosition)) continue;
+
+                draggingMembersOf = item;
+                draggingMemberIdx = idx;
+                break;
             }
         }
 
