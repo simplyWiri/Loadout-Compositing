@@ -13,6 +13,9 @@ namespace Inventory {
         private LoadoutState currentState;
         private bool needsUpdate = false;
 
+        // prosthetics whose surgery the player deleted, which aren't queued again until the tags change
+        private HashSet<ThingDef> declinedProsthetics = new HashSet<ThingDef>();
+
         private bool panicMode = false;
         private LoadoutState priorState = null;
 
@@ -72,6 +75,19 @@ namespace Inventory {
             if (ModBase.settings.immediatelyResolveLoadout) {
                 needsUpdate = true;
             }
+        }
+
+        public bool Declined(ThingDef prosthetic) => declinedProsthetics.Contains(prosthetic);
+
+        // only prosthetics an active tag asks for can be declined
+        public void Decline(ThingDef prosthetic) {
+            if (Items.Any(item => item.IsProsthetic && item.RepresentativeDef == prosthetic)) {
+                declinedProsthetics.Add(prosthetic);
+            }
+        }
+
+        public void TagsChanged() {
+            declinedProsthetics.Clear();
         }
 
         public void RequiresUpdate() {
@@ -180,9 +196,13 @@ namespace Inventory {
 
             Scribe_Values.Look(ref panicMode, nameof(panicMode));
             Scribe_References.Look(ref priorState, nameof(priorState));
+            Scribe_Collections.Look(ref declinedProsthetics, nameof(declinedProsthetics), LookMode.Def);
 
             itemsToRemove = new List<Item>();
             elements ??= new List<LoadoutElement>();
+            declinedProsthetics ??= new HashSet<ThingDef>();
+            // a prosthetic from a removed mod loads as null
+            declinedProsthetics.Remove(null);
         }
     }
 
