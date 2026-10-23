@@ -74,7 +74,7 @@ namespace Inventory {
             float curY = rect.y + UIC.DEFAULT_HEIGHT;
             float beginY = curY;
 
-            var wornApparel = component.Loadout.HypotheticalWornApparelWithTag(parent.shownState, def).ToList();
+            var wornApparel = component.Loadout.HypotheticalWornApparel(parent.shownState, def).ToList();
 
             foreach (var category in ApparelUtility.GetBodyPartGroupFor(def).categories
                          .OrderByDescending(t => t.First().def.listOrder)) {
@@ -160,7 +160,7 @@ namespace Inventory {
         }
 
         public void DrawBodyPartGroup(BodyDef bodyDef, BodyPartGroup group, List<ApparelLayerDef> layers,
-            ref float curY, List<Rect> columns, List<Tuple<Item, Tag>> wornApparel) {
+            ref float curY, List<Rect> columns, List<Tuple<Item, Tag, ThingDef>> wornApparel) {
             var groupRect = new Rect(columns[0].x, curY, columns[0].width, UIC.SPACED_HEIGHT);
 
             var def = group.def;
@@ -176,11 +176,11 @@ namespace Inventory {
                 var columnRect = new Rect(columns[idx].x, curY, columns[idx].width, UIC.SPACED_HEIGHT);
                 var loadoutTags = component.Loadout.ElementsWith(parent.shownState).ToList();
 
-                var (overlappingApparel, overlappingTag) = wornApparel
+                var (overlappingApparel, overlappingTag, overlappingDef) = wornApparel
                                                                .FirstOrDefault(item =>
-                                                                   ApparelSlotMaker.Create(bodyDef, item.Item1.Def)
+                                                                   ApparelSlotMaker.Create(bodyDef, item.Item3)
                                                                        .Intersects(def, column)) ??
-                                                           new Tuple<Item, Tag>(null, null);
+                                                           new Tuple<Item, Tag, ThingDef>(null, null, null);
 
                 var possibleDefs = loadoutTags
                     .SelectMany(t =>
@@ -208,11 +208,11 @@ namespace Inventory {
                         if (possibleDefs.Any()) {
                             var str = "";
                             foreach (var (pTag, pApparel) in possibleDefs) {
-                                str += $"\n - {pApparel.Def.LabelCap} from {pTag.name}";
+                                str += $"\n - {pApparel.RepresentativeDef.LabelCap} from {pTag.name}";
                             }
 
                             TooltipHandler.TipRegion(columnRect,
-                                $"{overlappingApparel.Def.LabelCap} from {overlappingTag.name} blocks:{str}");
+                                $"{overlappingDef.LabelCap} from {overlappingTag.name} blocks:{str}");
                         }
                     }
                     else {
@@ -223,7 +223,7 @@ namespace Inventory {
 
                         var str = "Blocked Tags:";
                         foreach (var (pTag, pApparel) in possibleDefs) {
-                            str += $"\n - {pApparel.Def.LabelCap} from {pTag.name}";
+                            str += $"\n - {pApparel.RepresentativeDef.LabelCap} from {pTag.name}";
                         }
 
                         TooltipHandler.TipRegion(columnRect, str);
