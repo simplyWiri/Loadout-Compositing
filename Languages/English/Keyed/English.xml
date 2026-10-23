@@ -63,6 +63,8 @@
 	<CompositableLoadouts.Prosthetics>Prosthetics, installed by surgery rather than carried</CompositableLoadouts.Prosthetics>
 	<CompositableLoadouts.InstalledLabel>{0} (installed)</CompositableLoadouts.InstalledLabel>
 	<CompositableLoadouts.InstalledOn>Installed on: {0}</CompositableLoadouts.InstalledOn>
+	<CompositableLoadouts.ProstheticConflict>Can't be installed: {0} wants prosthetics on the same body parts, and comes first.</CompositableLoadouts.ProstheticConflict>
+	<CompositableLoadouts.ProstheticNoRoom>Can't be installed: there aren't enough free body parts for this many.</CompositableLoadouts.ProstheticNoRoom>
 	<CompositableLoadouts.ReorderAlternativeDesc>Drag to change which alternatives pawns prefer, higher is preferred.</CompositableLoadouts.ReorderAlternativeDesc>
 	<CompositableLoadouts.EditingAlternative>Alternative: {0}</CompositableLoadouts.EditingAlternative>
 	<CompositableLoadouts.EditingAlternativeDesc>Pick which alternative to edit. Stuff is set for each alternative, quality and hit points are shared by every alternative of this item.</CompositableLoadouts.EditingAlternativeDesc>

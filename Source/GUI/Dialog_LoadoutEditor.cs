@@ -137,6 +137,7 @@ namespace Inventory {
             frustum.y += Mathf.FloorToInt(tagScroll.y);
             
             var longestName = elements.Max(elem => elem.Tag.name.GetWidthCached());
+            var prostheticSlots = component.Loadout.HypotheticalProsthetics(shownState, pawn.RaceProps.body);
 
             foreach (var element in elements.ToList()) {
                 var tag = element.Tag;
@@ -211,7 +212,11 @@ namespace Inventory {
                         
                         var idx = i + j;
                         if (idx >= tag.requiredItems.Count) break;
-                        GUIUtility.DrawItemIcon(drawRect, tag.requiredItems[idx]);
+                        var item = tag.requiredItems[idx];
+                        GUIUtility.DrawItemIcon(drawRect, item);
+                        if (prostheticSlots.Conflicting(item) && element.Active(shownState)) {
+                            GUIUtility.ProstheticConflictOverlay(drawRect, prostheticSlots.Conflicts[item]);
+                        }
                     }
                 }
             }

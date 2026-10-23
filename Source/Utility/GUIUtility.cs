@@ -63,6 +63,13 @@ namespace Inventory {
             }
         }
 
+        // marks a prosthetic which can't be installed, as `blocker`'s prosthetics are in the way (or the body has too
+        // few parts, if null)
+        public static void ProstheticConflictOverlay(Rect rect, Tag blocker) {
+            Widgets.DrawBoxSolid(rect, new Color(.75f, 0.2f, 0.0f, .35f));
+            TooltipHandler.TipRegion(rect, blocker == null ? Strings.ProstheticNoRoom : Strings.ProstheticConflict(blocker.name));
+        }
+
         // returns whether the input field is in focus or not.
         public static bool InputField(Rect rect, string name, ref string buff, bool ShowName = false) {
             var inputFieldRect = rect;
