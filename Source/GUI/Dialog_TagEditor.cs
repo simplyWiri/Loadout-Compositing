@@ -57,9 +57,6 @@ namespace Inventory {
         private Item draggingMembersOf = null;
         private int draggingMemberIdx = -1;
 
-        private static readonly Color BestAlternativeColour = new Color(0.85f, 0.65f, 0.15f);
-        private static readonly Color WorstAlternativeColour = new Color(0.35f, 0.35f, 0.35f);
-
         private LoadoutElement massAssignElement = null;
         private LoadoutElement dummySavedElement = null;
         
@@ -401,12 +398,12 @@ namespace Inventory {
             for (var idx = 0; idx < members.Count; idx++) {
                 var member = members[idx];
                 var rowRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
-                rowRect.xMin += UIC.SMALL_ICON + UIC.SPACED_HEIGHT;
+                rowRect.xMin += UIC.SMALL_ICON;
                 rowRects.Add(rowRect);
 
-                // priority, from the best alternative to the worst
+                // priority, coloured as the loadout editor colours tags by priority
                 var priorityRect = rowRect.PopLeftPartPixels(UIC.SMALL_GAP).ContractedBy(0, 1f);
-                Widgets.DrawBoxSolid(priorityRect, Color.Lerp(BestAlternativeColour, WorstAlternativeColour, idx / (float)(members.Count - 1)));
+                Widgets.DrawBoxSolid(priorityRect, Panel_ShowCoverage.GetColorForTagAtIndex(idx));
                 if (Mouse.IsOver(rowRect)) {
                     var alpha = Mathf.Sin((Time.time % 2) / 2.0f * Mathf.PI) * 0.3f;
                     GUI.color = new Color(0, 0, 0, 0.7f + alpha);
@@ -427,7 +424,7 @@ namespace Inventory {
                 }
 
                 Text.Anchor = TextAnchor.MiddleLeft;
-                Widgets.Label(rowRect, $"{idx + 1}. {member.ListLabel}");
+                Widgets.Label(rowRect, member.ListLabel);
                 Text.Anchor = TextAnchor.UpperLeft;
                 TooltipHandler.TipRegion(rowRect, Strings.ReorderAlternativeDesc);
             }
