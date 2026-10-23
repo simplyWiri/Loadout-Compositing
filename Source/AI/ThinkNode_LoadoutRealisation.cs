@@ -118,10 +118,10 @@ namespace Inventory {
         // a heavily modified version of JobGiver_OptimizeApparel:TryGiveJob
         private Job SatisfyLoadoutClothingJob(Pawn pawn, Loadout loadout) {
             var wornApparel = pawn.apparel.WornApparel;
-            var list = pawn.Map.listerThings.ThingsInGroup(ThingRequestGroup.Apparel)
-                .OfType<Apparel>()
-                .Where(app => loadout.Items.Any(item => item.Allows(app)))
-                .ToList();
+            // `lookInHaulSources` includes apparel held by things such as outfit stands
+            var candidates = new List<Thing>();
+            pawn.Map.listerThings.GetAllThings(candidates, ThingRequestGroup.Apparel, thing => thing is Apparel app && loadout.Items.Any(item => item.Allows(app)), true);
+            var list = candidates.Cast<Apparel>().ToList();
 
             if (list.Count == 0) {
                 return null;
@@ -144,7 +144,15 @@ namespace Inventory {
                 var apparelScore = OptimizeApparel.ApparelScoreGain(pawn, apparel, OptimizeApparel.wornApparelScores);
 
                 if (apparelScore < 0.05f || apparelScore < bestApparelScore) continue;
-                if (!pawn.CanReserveAndReach(apparel, PathEndMode.OnCell, pawn.NormalMaxDanger())) continue;
+
+                // apparel held in a source (e.g. an outfit stand) is reserved and reached via the source, the
+                // `Wear` job handles walking to the source and removing the apparel from it.
+                LocalTargetInfo target = apparel;
+                if (apparel.ParentHolder is IApparelSource source && source is Thing sourceThing) {
+                    if (!source.ApparelSourceEnabled) continue;
+                    target = sourceThing;
+                }
+                if (!pawn.CanReserveAndReach(target, PathEndMode.OnCell, pawn.NormalMaxDanger())) continue;
 
                 bestApparel = apparel;
                 bestApparelScore = apparelScore;
