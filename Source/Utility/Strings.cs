@@ -62,6 +62,8 @@ namespace Inventory {
         public static string HitPointsAmount => $"{P}HitPointsAmount";
         public static string ToCopy => $"{P}ToCopy".TranslateSimple();
         public static string Customize => $"{P}Customize".TranslateSimple();
+        public static string EditingAlternative(string def) => $"{P}EditingAlternative".Translate(def);
+        public static string EditingAlternativeDesc => $"{P}EditingAlternativeDesc".TranslateSimple();
         public static string MouseOverDetails => $"{P}MouseOverDetails".TranslateSimple();
         public static string Statistics => $"{P}Statistics".TranslateSimple();
         public static string StuffFilter => $"{P}StuffFilter".TranslateSimple();
