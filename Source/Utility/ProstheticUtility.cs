@@ -11,6 +11,7 @@ namespace Inventory {
     // special handling. A tag item of a prosthetic is installed on the pawn, rather than carried.
     public static class ProstheticUtility {
         private static Dictionary<ThingDef, List<RecipeDef>> installRecipes = null;
+        private static Dictionary<ThingDef, Dictionary<string, float>> effects = new Dictionary<ThingDef, Dictionary<string, float>>();
 
         private static Dictionary<ThingDef, List<RecipeDef>> InstallRecipes => installRecipes ??= BuildIndex();
 
@@ -110,6 +111,51 @@ namespace Inventory {
             if (recipe == null || !recipe.targetsBodyPart) return null;
 
             return string.Join(", ", TargetParts(body, recipe).Select(part => part.Label).Distinct());
+        }
+
+        // what installing `def` does, by the label the game shows it under in the hediff's stats, e.g. "Food poisoning
+        // chance factor" -> 0.5. An immunity has a value of 1, e.g. "Prevents infection: gut worms" -> 1
+        public static IReadOnlyDictionary<string, float> EffectsOf(ThingDef def) {
+            if (effects.TryGetValue(def, out var cached)) return cached;
+
+            var result = new Dictionary<string, float>();
+            effects.Add(def, result);
+
+            // the same label may come up twice (e.g. a stat offset and factor), the first is kept
+            void Add(string label, float value) {
+                if (!result.ContainsKey(label)) result.Add(label, value);
+            }
+
+            var hediff = InstallRecipesFor(def).FirstOrDefault()?.addsHediff;
+            if (hediff == null) return result;
+
+            if (hediff.addedPartProps != null) Add("PartEfficiency".Translate(), hediff.addedPartProps.partEfficiency);
+
+            var stage = hediff.stages?.FirstOrDefault();
+            if (stage == null) return result;
+
+            foreach (var capMod in stage.capMods ?? new List<PawnCapacityModifier>()) {
+                if (capMod.offset != 0f) Add(capMod.capacity.GetLabelFor().CapitalizeFirst(), capMod.offset);
+                if (capMod.postFactor != 1f) Add(capMod.capacity.GetLabelFor().CapitalizeFirst(), capMod.postFactor);
+            }
+
+            foreach (var modifier in (stage.statOffsets ?? new List<StatModifier>()).Concat(stage.statFactors ?? new List<StatModifier>())) {
+                Add(modifier.stat.LabelCap, modifier.value);
+            }
+
+            if (stage.painOffset != 0f) Add("Pain".Translate(), stage.painOffset);
+            if (stage.painFactor != 1f) Add("Pain".Translate(), stage.painFactor);
+            if (stage.hungerRateFactor != 1f) Add("HungerRate".Translate(), stage.hungerRateFactor);
+            if (stage.restFallFactor != 1f) Add("Tiredness".Translate(), stage.restFallFactor);
+            if (stage.totalBleedFactor != 1f) Add("Stat_Hediff_TotalBleedFactor_Name".Translate(), stage.totalBleedFactor);
+            if (stage.naturalHealingFactor != -1f) Add("Stat_Hediff_NaturalHealingFactor_Name".Translate(), stage.naturalHealingFactor);
+            if (stage.foodPoisoningChanceFactor != 1f) Add("Stat_Hediff_FoodPoisoningChanceFactor_Name".Translate(), stage.foodPoisoningChanceFactor);
+
+            foreach (var immunity in stage.makeImmuneTo ?? new List<HediffDef>()) {
+                Add("PreventsInfection".Translate() + ": " + immunity.label, 1f);
+            }
+
+            return result;
         }
 
         private static Dictionary<ThingDef, List<RecipeDef>> BuildIndex() {
