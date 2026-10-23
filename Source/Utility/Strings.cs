@@ -75,6 +75,8 @@ namespace Inventory {
         public static string InstalledOn(string parts) => $"{P}InstalledOn".Translate(parts);
         public static string ProstheticConflict(string tag) => $"{P}ProstheticConflict".Translate(tag);
         public static string ProstheticNoRoom => $"{P}ProstheticNoRoom".TranslateSimple();
+        public static string SurgeryAwaitingApproval => $"{P}SurgeryAwaitingApproval".TranslateSimple();
+        public static string SurgeryAwaitingApprovalDesc => $"{P}SurgeryAwaitingApprovalDesc".TranslateSimple();
         public static string AutoSurgery => $"{P}Settings.AutoSurgery".TranslateSimple();
         public static string AutoSurgeryDesc => $"{P}Settings.AutoSurgeryDesc".TranslateSimple();
         public static string AutoSurgeryMode(Inventory.AutoSurgery mode) => $"{P}Settings.AutoSurgery{mode}".TranslateSimple();
