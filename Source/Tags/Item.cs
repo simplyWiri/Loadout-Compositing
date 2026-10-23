@@ -152,7 +152,7 @@ namespace Inventory {
 
         // one line per rank, best first, members of the same rank share a line
         public string RankedMembersDescription() {
-            return string.Join("\n", RankedMembers.Select((rank, idx) => $"{idx + 1}. " + string.Join(", ", rank.Select(m => m.Label))));
+            return string.Join("\n", RankedMembers.Select((rank, idx) => $"{idx + 1}. " + string.Join(", ", rank.Select(m => m.ListLabel))));
         }
 
         // a copy holding only the members (and stuffs) whose defs exist in this game, or null if none do

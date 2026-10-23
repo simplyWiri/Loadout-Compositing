@@ -66,6 +66,7 @@ namespace Inventory {
         public static string Done => $"{P}Done".TranslateSimple();
         public static string AddAlternativeDesc => $"{P}AddAlternativeDesc".TranslateSimple();
         public static string AddingAlternativesTo(string item) => $"{P}AddingAlternativesTo".Translate(item);
+        public static string OneOfHeading => $"{P}OneOfHeading".TranslateSimple();
         public static string OneOf(string defs) => $"{P}OneOf".Translate(defs);
         public static string RemoveAlternative => $"{P}RemoveAlternative".TranslateSimple();
         public static string RaiseAlternative => $"{P}RaiseAlternative".TranslateSimple();

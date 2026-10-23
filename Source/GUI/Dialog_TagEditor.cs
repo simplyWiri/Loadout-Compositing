@@ -315,7 +315,9 @@ namespace Inventory {
 
                 // Icon
                 var iconRect = itemRect.PopLeftPartPixels(UIC.SPACED_HEIGHT * 2);
-                var iconTooltip = item.IsGeneric ? Strings.GenericCategoryDesc + "\n\n" + item.RankedMembersDescription() : def.DescriptionDetailed;
+                var iconTooltip = item.IsGeneric ? Strings.GenericCategoryDesc + "\n\n" + item.RankedMembersDescription()
+                    : item.HasAlternatives ? null // defaults to listing the alternatives
+                    : def.DescriptionDetailed;
                 GUIUtility.DrawItemIcon(iconRect, item, tooltip: iconTooltip);
 
                 // Remove
@@ -343,10 +345,13 @@ namespace Inventory {
                     }
                     TooltipHandler.TipRegion(alternativeButton, Strings.AddAlternativeDesc);
 
-                    // Edit 
-                    if (Widgets.ButtonImageFitted(constrainButton.ContractedBy(1f), Textures.EditTex))
-                        Find.WindowStack.Add(new Dialog_ItemSpecifier(item, item.Members[0]));
-                    TooltipHandler.TipRegion(constrainButton, Strings.SpecifyElementsToolTip);
+                    // Edit, for a group only if one of its alternatives has a quality or stuff to pick
+                    var editMember = SpecifiableMember(item);
+                    if (editMember != null) {
+                        if (Widgets.ButtonImageFitted(constrainButton.ContractedBy(1f), Textures.EditTex))
+                            Find.WindowStack.Add(new Dialog_ItemSpecifier(item, editMember));
+                        TooltipHandler.TipRegion(constrainButton, Strings.SpecifyElementsToolTip);
+                    }
                 }
 
                 var quantityFieldRect = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 2f);
@@ -355,9 +360,9 @@ namespace Inventory {
 
                 TooltipHandler.TipRegion(quantityFieldRect, Strings.EditQuantity);
 
-                // Name
+                // Name, a group's alternatives are listed underneath it
                 Text.Anchor = TextAnchor.MiddleCenter;
-                Widgets.Label(itemRect, item.Label);
+                Widgets.Label(itemRect, ShowsMemberRows(item) ? Strings.OneOfHeading : item.Label);
                 Text.Anchor = TextAnchor.UpperLeft;
             }
             
@@ -368,12 +373,21 @@ namespace Inventory {
 
         private static bool ShowsMemberRows(Item item) => !item.IsGeneric && item.Members.Count > 1;
 
+        // the member the item's edit dialog opens on, preferring one made from stuff (stuff is set per member, the
+        // dialog can switch between them); null if a group has nothing but hit points to pick
+        private static ItemMember SpecifiableMember(Item item) {
+            if (item.Members.Count == 1) return item.Members[0];
+
+            return item.Members.FirstOrDefault(m => m.Def.MadeFromStuff)
+                   ?? item.Members.FirstOrDefault(m => m.Def.HasComp(typeof(CompQuality)));
+        }
+
         private static float ItemRowHeight(Item item) {
             return UIC.SPACED_HEIGHT * 2 + (ShowsMemberRows(item) ? item.Members.Count * UIC.SPACED_HEIGHT : 0);
         }
 
         // one row per alternative, in order of preference
-        // [ Icon ] [ Name ] [ Edit Stuff ] [ Up ] [ Down ] [ Remove ]
+        // [ Icon ] [ Name ] [ Up ] [ Down ] [ Remove ]
         private void DrawMemberRows(Rect rect, Item item) {
             var members = item.members;
             for (var idx = 0; idx < members.Count; idx++) {
@@ -405,16 +419,8 @@ namespace Inventory {
                     return;
                 }
 
-                var editRect = rowRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
-                if (member.Def.MadeFromStuff) {
-                    TooltipHandler.TipRegion(editRect, Strings.SpecifyElementsToolTip);
-                    if (Widgets.ButtonImageFitted(editRect.ContractedBy(3f), Textures.EditTex)) {
-                        Find.WindowStack.Add(new Dialog_ItemSpecifier(item, member));
-                    }
-                }
-
                 Text.Anchor = TextAnchor.MiddleLeft;
-                Widgets.Label(rowRect, $"{idx + 1}. {member.Label}");
+                Widgets.Label(rowRect, $"{idx + 1}. {member.ListLabel}");
                 Text.Anchor = TextAnchor.UpperLeft;
             }
         }
