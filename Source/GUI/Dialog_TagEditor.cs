@@ -380,7 +380,7 @@ namespace Inventory {
                 rowRect.xMin += UIC.SMALL_ICON + UIC.SPACED_HEIGHT;
 
                 var iconRect = rowRect.PopLeftPartPixels(UIC.SPACED_HEIGHT);
-                GUIUtility.DrawItemIcon(iconRect.ContractedBy(2f), item, false, member.Def.DescriptionDetailed, member);
+                GUIUtility.DrawItemIcon(iconRect.ContractedBy(2f), item, false, member.Def.DescriptionDetailed, member, badge: false);
 
                 // removing the last-but-one alternative leaves a plain item
                 var removeRect = rowRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);

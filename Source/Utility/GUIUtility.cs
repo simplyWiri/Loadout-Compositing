@@ -35,9 +35,9 @@ namespace Inventory {
             WithModifiers(rect, quantity.ToString(), font: GameFont.Tiny, anchor: TextAnchor.LowerCenter);
         }
 
-        // `tooltip` defaults to the item's label, pass an empty string for no tooltip. `member` defaults to the item's
-        // representative member
-        public static void DrawItemIcon(Rect rect, Item item, bool showCount = true, string tooltip = null, ItemMember member = null) {
+        // `tooltip` defaults to the item's label (and its alternatives), pass an empty string for no tooltip. `member`
+        // defaults to the item's representative member. Items with alternatives get a badge, unless `badge` is false
+        public static void DrawItemIcon(Rect rect, Item item, bool showCount = true, string tooltip = null, ItemMember member = null, bool badge = true) {
             member ??= item.RepresentativeMember;
             var def = member.Def;
             if (def == null) {
@@ -52,7 +52,12 @@ namespace Inventory {
                 Widgets.DefIcon(rect, def, member.RepresentativeStuff);
             }
 
-            tooltip ??= def.LabelCap;
+            if (badge && item.HasAlternatives) {
+                var badgeText = item.IsGeneric ? "*" : $"+{item.Members.Count - 1}";
+                WithModifiers(rect, badgeText, font: GameFont.Tiny, color: Color.yellow, anchor: TextAnchor.UpperRight);
+            }
+
+            tooltip ??= item.HasAlternatives ? item.ShortLabel + "\n\n" + item.RankedMembersDescription() : def.LabelCap.ToString();
             if (tooltip != string.Empty) {
                 TooltipHandler.TipRegion(rect, tooltip);
             }

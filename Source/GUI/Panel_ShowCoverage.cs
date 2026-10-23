@@ -208,7 +208,7 @@ namespace Inventory {
                         if (possibleDefs.Any()) {
                             var str = "";
                             foreach (var (pTag, pApparel) in possibleDefs) {
-                                str += $"\n - {pApparel.RepresentativeDef.LabelCap} from {pTag.name}";
+                                str += $"\n - {pApparel.ShortLabel} from {pTag.name}";
                             }
 
                             TooltipHandler.TipRegion(columnRect,
@@ -223,7 +223,7 @@ namespace Inventory {
 
                         var str = "Blocked Tags:";
                         foreach (var (pTag, pApparel) in possibleDefs) {
-                            str += $"\n - {pApparel.RepresentativeDef.LabelCap} from {pTag.name}";
+                            str += $"\n - {pApparel.ShortLabel} from {pTag.name}";
                         }
 
                         TooltipHandler.TipRegion(columnRect, str);

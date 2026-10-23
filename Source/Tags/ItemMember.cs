@@ -46,10 +46,6 @@ namespace Inventory {
             return true;
         }
 
-        public void ClearInvalidStuffs() {
-            stuffs = stuffs.Where(def => def.Valid).ToHashSet();
-        }
-
         public void CopyTo(ThingFilter thingFilter) {
             thingFilter.allowedDefs = stuffs.Count == 0 ? GenStuff.AllowedStuffsFor(Def).ToHashSet() : AllowedStuffs.Select(d => d.Def).ToHashSet();
         }
