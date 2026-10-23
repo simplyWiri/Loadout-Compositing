@@ -130,7 +130,7 @@ namespace Inventory {
                 return true;
             }
 
-            var assignment = comp.Loadout.AssignGear(inventory.pawn.InventoryAndEquipment().ToList());
+            var assignment = comp.Loadout.AssignGear(inventory.pawn, inventory.pawn.InventoryAndEquipment().ToList());
             var surplus = assignment.Surplus(thing);
             if (surplus <= 0) return false;
 

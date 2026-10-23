@@ -111,8 +111,8 @@ namespace Inventory {
         }
 
         // which of `pawnGear` counts towards each of the active items, and which is surplus
-        public GearAssignment AssignGear(List<Thing> pawnGear) {
-            return new GearAssignment(Items, pawnGear);
+        public GearAssignment AssignGear(Pawn pawn, List<Thing> pawnGear) {
+            return new GearAssignment(pawn, Items, pawnGear);
         }
 
         public bool Desires(Thing thing, bool allTags = false) {
