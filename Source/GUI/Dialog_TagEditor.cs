@@ -49,6 +49,8 @@ namespace Inventory {
         private SortBy sortedByKind = SortBy.Name;
         private bool ascending = false;
         private StatDef selectedStat = null;
+        // a prosthetic's effect being sorted by instead of a stat, see `ProstheticUtility.EffectsOf`
+        private string selectedEffect = null;
         private float statLength = UIC.DEFAULT_HEIGHT;
         private Color conflictingApparelColour = new Color(.75f, 0.2f, 0.0f, .8f);
         private ThingDef hoveredDef = null;
@@ -83,6 +85,7 @@ namespace Inventory {
         void ResetTabState() {
             sortedByKind = SortBy.Name;
             selectedStat = null;
+            selectedEffect = null;
             statLength = UIC.DEFAULT_HEIGHT;
 
             statCache = new Dictionary<ThingDef, float>();
@@ -584,12 +587,13 @@ namespace Inventory {
             DrawOptionButton(Textures.MiscItemsTex, "Items", State.Items);
             DrawOptionButton(Textures.ProstheticsTex, Strings.Prosthetics, State.Prosthetics);
 
-            if (selectedStat != null) {
+            var sortLabel = selectedStat?.LabelCap.ToString() ?? selectedEffect;
+            if (sortLabel != null) {
                 Text.Font = GameFont.Tiny;
                 Text.WordWrap = false;
-                var strLen = selectedStat.LabelCap.GetWidthCached();
+                var strLen = sortLabel.GetWidthCached();
                 topRect.width = Mathf.Max(topRect.width, strLen);
-                GUIUtility.WithModifiers(topRect, selectedStat.LabelCap, color: Color.gray, anchor: TextAnchor.MiddleRight);
+                GUIUtility.WithModifiers(topRect, sortLabel, color: Color.gray, anchor: TextAnchor.MiddleRight);
                 Text.Font = GameFont.Small;
                 Text.WordWrap = true;
             }
@@ -644,7 +648,9 @@ namespace Inventory {
                                || (td.modContentPack?.Name.ToLowerInvariant().Contains(filter) ?? false)
                                || ((td.IsApparel || td.IsWeapon) && (td.statBases?.Any(s => stats.Contains(s.stat)) ?? false))
                                || ((td.IsApparel || td.IsWeapon) && (td.equippedStatOffsets?.Any(s => stats.Contains(s.stat)) ?? false))
-                               || (td.IsApparel && td.apparel.layers.Intersect(acceptedLayers).Any());
+                               || (td.IsApparel && td.apparel.layers.Intersect(acceptedLayers).Any())
+                               // e.g. "food poisoning", or "infection" for any prosthetic which prevents one
+                               || ProstheticUtility.EffectsOf(td).Keys.Any(effect => effect.ToLowerInvariant().Contains(filter));
                     }).ToList();
 
                     lastDefFilter = defFilter;
@@ -735,14 +741,18 @@ namespace Inventory {
                         new FloatMenuOption("Name", () => {
                             sortedByKind = SortBy.Name;
                             selectedStat = null;
+                            selectedEffect = null;
                             statLength = UIC.DEFAULT_HEIGHT;
                         })
                     };
-                    
-                    foreach (var stat in stats.OrderBy(st => st.LabelCap.RawText)) {
-                        opts.Add(new FloatMenuOption(stat.LabelCap, () => {
+
+                    // stats and prosthetics' effects, sorted together by label
+                    var statOpts = new List<FloatMenuOption>();
+                    foreach (var stat in stats) {
+                        statOpts.Add(new FloatMenuOption(stat.LabelCap, () => {
                             sortedByKind = SortBy.Stat;
                             selectedStat = stat;
+                            selectedEffect = null;
                             statLength = UIC.DEFAULT_HEIGHT;
                             
                             foreach(var def in defList) {
@@ -755,6 +765,22 @@ namespace Inventory {
                             }
                         }));
                     }
+
+                    var effects = defs.SelectMany(td => ProstheticUtility.EffectsOf(td).Keys).ToHashSet();
+                    foreach (var effect in effects) {
+                        statOpts.Add(new FloatMenuOption(effect, () => {
+                            sortedByKind = SortBy.Stat;
+                            selectedStat = null;
+                            selectedEffect = effect;
+                            statLength = UIC.DEFAULT_HEIGHT;
+
+                            foreach (var def in defList) {
+                                statCache[def] = ProstheticUtility.EffectsOf(def).TryGetValue(effect, out var value) ? value : INVALID_STAT_VALUE;
+                            }
+                        }));
+                    }
+
+                    opts.AddRange(statOpts.OrderBy(opt => opt.Label));
                     Find.WindowStack.Add(new FloatMenu(opts));
                 } else {
                     ascending = !ascending;
