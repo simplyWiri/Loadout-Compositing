@@ -51,6 +51,8 @@ namespace Inventory {
         private float statLength = UIC.DEFAULT_HEIGHT;
         private Color conflictingApparelColour = new Color(.75f, 0.2f, 0.0f, .8f);
         private ThingDef hoveredDef = null;
+        // when set, clicking a def in the def list adds it as an alternative of this item instead of a new item
+        private Item addingAlternativesTo = null;
 
         private LoadoutElement massAssignElement = null;
         private LoadoutElement dummySavedElement = null;
@@ -327,6 +329,15 @@ namespace Inventory {
                 GUIUtility.DraggableCopyPaste(copyPasteButton, ref pasteTarget, Item.PasteFilter);
                 TooltipHandler.TipRegion(copyPasteButton, Strings.CopyPasteExplain);
 
+                // Add alternative
+                if (!item.IsGeneric) {
+                    var alternativeButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
+                    if (Widgets.ButtonImageFitted(alternativeButton.ContractedBy(4f), TexButton.Plus)) {
+                        addingAlternativesTo = item;
+                    }
+                    TooltipHandler.TipRegion(alternativeButton, Strings.AddAlternativeDesc);
+                }
+
                 // Edit 
                 var constrainButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
                 if (Widgets.ButtonImageFitted(constrainButton.ContractedBy(1f), Textures.EditTex))
@@ -408,7 +419,7 @@ namespace Inventory {
             
             // only the item's own row (not its alternatives) starts a drag, the full block is highlighted
             Rect RectForTag(int tIdx, bool full = false) 
-                => new Rect(rect.x, rect.y + items.Take(tIdx).Sum(ItemRowHeight), rect.width - (full ? 0 : 6 * UIC.SPACED_HEIGHT),
+                => new Rect(rect.x, rect.y + items.Take(tIdx).Sum(ItemRowHeight), rect.width - (full ? 0 : 9.5f * UIC.SPACED_HEIGHT),
                     full ? ItemRowHeight(items[tIdx]) : UIC.SPACED_HEIGHT * 2);
 
             var cEvent = Event.current;
@@ -518,11 +529,17 @@ namespace Inventory {
         }
 
         private void DrawDefList(Rect r, IReadOnlyList<ThingDef> defList, List<StatDef> extraStats = null) {
+            if (addingAlternativesTo != null && !curTag.requiredItems.Contains(addingAlternativesTo)) {
+                addingAlternativesTo = null;
+            }
+
             var itms = curTag.requiredItems.SelectMany(it => it.Defs).ToHashSet();
             List<ThingDef> defs = null;
 
-            // todo: cleanup
-            var slotsUsed = ApparelSlotMaker.Create(BodyDefOf.Human, curTag.requiredItems.Where(s => s.IsApparel).SelectMany(s => s.Defs).ToList());
+            // a def is hidden if it conflicts with any member of another item in the tag, alternatives may overlap the
+            // item they are an alternative of, as only one of them is worn
+            var otherItems = curTag.requiredItems.Where(s => s != addingAlternativesTo);
+            var slotsUsed = ApparelSlotMaker.Create(BodyDefOf.Human, otherItems.Where(s => s.IsApparel).SelectMany(s => s.Defs).ToList());
 
             if (defFilter != string.Empty) {
                 if (defFilter == lastDefFilter) {
@@ -550,6 +567,21 @@ namespace Inventory {
             }
             
             defs = defs.Where(t => !itms.Contains(t)).ToList();
+
+            if (addingAlternativesTo != null) {
+                // alternatives must be the same kind of thing
+                defs = defs.Where(t => t.IsApparel == addingAlternativesTo.IsApparel).ToList();
+
+                var bannerRect = r.PopTopPartPixels(UIC.SPACED_HEIGHT);
+                var doneRect = bannerRect.PopRightPartPixels(Strings.Done.GetWidthCached() + UIC.SMALL_GAP * 2);
+                if (Widgets.ButtonText(doneRect.ContractedBy(2f), Strings.Done)) {
+                    addingAlternativesTo = null;
+                }
+
+                Text.Anchor = TextAnchor.MiddleLeft;
+                Widgets.Label(bannerRect, Strings.AddingAlternativesTo(addingAlternativesTo?.Label ?? string.Empty));
+                Text.Anchor = TextAnchor.UpperLeft;
+            }
             
             if (onlyResearchedItems) {
                 var recipes = DefDatabase<RecipeDef>.AllDefs.Where(recipe => recipe.AvailableNow).ToList();
@@ -764,6 +796,11 @@ namespace Inventory {
         }
 
         private void AddDefToTag(ThingDef def) {
+            if (addingAlternativesTo != null) {
+                addingAlternativesTo.AddAlternative(def);
+                return;
+            }
+
             curTag.Add(def);
         }
 
