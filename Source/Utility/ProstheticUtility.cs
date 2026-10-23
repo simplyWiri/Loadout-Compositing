@@ -37,7 +37,8 @@ namespace Inventory {
             var defs = recipe.ingredients
                 .Where(ingredient => ingredient.IsFixedIngredient)
                 .Select(ingredient => ingredient.FixedIngredient)
-                .Where(def => def != null && def.isTechHediff)
+                // raw materials (e.g. wood, for peg legs) are installed directly too, but they aren't prosthetics
+                .Where(def => def != null && def.isTechHediff && !def.IsStuff)
                 .ToList();
 
             return defs.Count == 1 ? defs[0] : null;
@@ -127,6 +128,11 @@ namespace Inventory {
                 }
 
                 recipes.Add(recipe);
+            }
+
+            // a thing which installs as different parts (e.g. one install recipe per part) can't say which it means
+            foreach (var def in index.Keys.ToList().Where(def => index[def].Select(recipe => recipe.addsHediff).Distinct().Count() > 1)) {
+                index.Remove(def);
             }
 
             if (Prefs.DevMode) {
