@@ -186,6 +186,9 @@ namespace Inventory {
             panicMode = false;
             SetState(priorState);
             priorState = null;
+
+            // as on activating, put the panic gear away now rather than at the next routine check
+            RequiresUpdate();
         }
 
         public void ExposeData() {
@@ -198,7 +201,10 @@ namespace Inventory {
             Scribe_References.Look(ref priorState, nameof(priorState));
             Scribe_Collections.Look(ref declinedProsthetics, nameof(declinedProsthetics), LookMode.Def);
 
-            itemsToRemove = new List<Item>();
+            // pending removals are dropped on load, but saving (e.g. an autosave) mustn't forget them
+            if (Scribe.mode == LoadSaveMode.LoadingVars || itemsToRemove == null) {
+                itemsToRemove = new List<Item>();
+            }
             elements ??= new List<LoadoutElement>();
             declinedProsthetics ??= new HashSet<ThingDef>();
             // a prosthetic from a removed mod loads as null
