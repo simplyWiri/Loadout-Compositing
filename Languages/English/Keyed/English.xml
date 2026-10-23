@@ -214,6 +214,15 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.Settings.NoPanicAlert>Disable panic alert</CompositableLoadouts.Settings.NoPanicAlert>
 	<CompositableLoadouts.SurgeryAwaitingApproval>Surgery awaiting approval</CompositableLoadouts.SurgeryAwaitingApproval>
 	<CompositableLoadouts.SurgeryAwaitingApprovalDesc>These pawns have suspended surgeries to install the prosthetics their tags ask for. Unsuspend a surgery in the pawn's Operations tab to approve it, or delete it to decline it.\n\nNew surgeries are queued suspended. This can be changed in the mod settings.</CompositableLoadouts.SurgeryAwaitingApprovalDesc>
+	<CompositableLoadouts.ProstheticStatus.Installed>Installed</CompositableLoadouts.ProstheticStatus.Installed>
+	<CompositableLoadouts.ProstheticStatus.HasBetter>Has a better prosthetic</CompositableLoadouts.ProstheticStatus.HasBetter>
+	<CompositableLoadouts.ProstheticStatus.SurgeryQueued>Surgery queued</CompositableLoadouts.ProstheticStatus.SurgeryQueued>
+	<CompositableLoadouts.ProstheticStatus.NoRoom>Not enough body parts</CompositableLoadouts.ProstheticStatus.NoRoom>
+	<CompositableLoadouts.ProstheticStatus.Conflicts>Conflicts with {0}</CompositableLoadouts.ProstheticStatus.Conflicts>
+	<CompositableLoadouts.ProstheticStatus.CantEverInstall>Can't be installed on this pawn</CompositableLoadouts.ProstheticStatus.CantEverInstall>
+	<CompositableLoadouts.ProstheticStatus.Declined>Surgery declined, re-add the tag to queue it again</CompositableLoadouts.ProstheticStatus.Declined>
+	<CompositableLoadouts.ProstheticStatus.AutoSurgeryOff>Surgeries are off in the mod settings</CompositableLoadouts.ProstheticStatus.AutoSurgeryOff>
+	<CompositableLoadouts.ProstheticStatus.WaitingForPart>Waiting for a spare one</CompositableLoadouts.ProstheticStatus.WaitingForPart>
 	<CompositableLoadouts.Settings.AutoSurgery>Prosthetic surgeries</CompositableLoadouts.Settings.AutoSurgery>
 	<CompositableLoadouts.Settings.AutoSurgeryDesc>Once a spare prosthetic which a pawn's tags ask for is on the map, queue the surgery to install it.\n\nSuspended: queue it suspended, for you to approve by unsuspending it in the pawn's Operations tab.\nActive: queue it ready for a doctor.\nOff: never queue surgeries.</CompositableLoadouts.Settings.AutoSurgeryDesc>
 	<CompositableLoadouts.Settings.AutoSurgeryOff>Off</CompositableLoadouts.Settings.AutoSurgeryOff>
