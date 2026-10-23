@@ -128,6 +128,11 @@ namespace Inventory {
                 return null;
             }
 
+            var upgradeJob = RankUpgradeJob(pawn, loadout, list);
+            if (upgradeJob != null) {
+                return upgradeJob;
+            }
+
             OptimizeApparel.neededWarmth = PawnApparelGenerator.CalculateNeededWarmth(pawn, pawn.Map.Tile, GenLocalDate.Twelfth(pawn));
             OptimizeApparel.wornApparelScores.Clear();
             foreach (var apparel in wornApparel) {
@@ -146,20 +151,58 @@ namespace Inventory {
 
                 if (apparelScore < 0.05f || apparelScore < bestApparelScore) continue;
 
-                // apparel held in a source (e.g. an outfit stand) is reserved and reached via the source, the
-                // `Wear` job handles walking to the source and removing the apparel from it.
-                LocalTargetInfo target = apparel;
-                if (apparel.ParentHolder is IApparelSource source && source is Thing sourceThing) {
-                    if (!source.ApparelSourceEnabled) continue;
-                    target = sourceThing;
-                }
-                if (!pawn.CanReserveAndReach(target, PathEndMode.OnCell, pawn.NormalMaxDanger())) continue;
+                if (!CanReachToWear(pawn, apparel)) continue;
 
                 bestApparel = apparel;
                 bestApparelScore = apparelScore;
             }
 
             return bestApparel == null ? null : JobMaker.MakeJob(EquipApparel, bestApparel);
+        }
+
+        // strict preference: swap worn apparel for a better ranked member of the same item, regardless of score
+        private Job RankUpgradeJob(Pawn pawn, Loadout loadout, List<Apparel> candidates) {
+            foreach (var worn in pawn.apparel.WornApparel) {
+                var item = loadout.ItemsAccepting(worn).FirstOrDefault(i => i.IsApparel);
+                if (item == null || item.Members.Count == 1) continue;
+
+                var wornRank = item.RankOf(worn);
+                var betterApparel = candidates
+                    .Where(apparel => item.Allows(apparel) && item.RankOf(apparel) < wornRank)
+                    .OrderBy(item.RankOf);
+
+                foreach (var apparel in betterApparel) {
+                    if (!ValidApparelFor(apparel, pawn) || !OnlyDisplacesItem(pawn, loadout, item, apparel)) continue;
+                    if (!CanReachToWear(pawn, apparel)) continue;
+
+                    return JobMaker.MakeJob(EquipApparel, apparel);
+                }
+            }
+
+            return null;
+        }
+
+        // would wearing `apparel` only take off apparel which `item` accepts, or which the loadout doesn't want
+        private bool OnlyDisplacesItem(Pawn pawn, Loadout loadout, Item item, Apparel apparel) {
+            foreach (var worn in pawn.apparel.WornApparel) {
+                if (RimWorld.ApparelUtility.CanWearTogether(apparel.def, worn.def, pawn.RaceProps.body)) continue;
+                if (pawn.apparel.IsLocked(worn)) return false;
+                if (!item.Allows(worn) && loadout.Desires(worn)) return false;
+            }
+
+            return true;
+        }
+
+        private bool CanReachToWear(Pawn pawn, Apparel apparel) {
+            // apparel held in a source (e.g. an outfit stand) is reserved and reached via the source, the
+            // `Wear` job handles walking to the source and removing the apparel from it.
+            LocalTargetInfo target = apparel;
+            if (apparel.ParentHolder is IApparelSource source && source is Thing sourceThing) {
+                if (!source.ApparelSourceEnabled) return false;
+                target = sourceThing;
+            }
+
+            return pawn.CanReserveAndReach(target, PathEndMode.OnCell, pawn.NormalMaxDanger());
         }
 
         private bool ValidApparelFor(Apparel apparel, Pawn pawn) {

@@ -96,6 +96,20 @@ namespace Inventory {
             return tagPriority;
         }
 
+        // strict preference between the members of an apparel item: 1 for the best rank, falling towards 1/2 for worse
+        // ranks (staying within the tag's priority band), or 0 if a better ranked member of the same item is worn
+        public float RankWeight(Pawn pawn, Apparel apparel) {
+            var item = ItemsAccepting(apparel).FirstOrDefault(i => i.IsApparel);
+            if (item == null || item.Members.Count == 1) return 1f;
+
+            var rank = item.RankOf(apparel);
+            foreach (var worn in pawn.apparel.WornApparel) {
+                if (worn != apparel && item.Allows(worn) && item.RankOf(worn) < rank) return 0f;
+            }
+
+            return 1f - 0.5f * rank / item.Members.Count;
+        }
+
         // which of `pawnGear` counts towards each of the active items, and which is surplus
         public GearAssignment AssignGear(List<Thing> pawnGear) {
             return new GearAssignment(Items, pawnGear);
