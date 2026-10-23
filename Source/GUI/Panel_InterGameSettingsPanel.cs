@@ -71,8 +71,8 @@ namespace Inventory
                     var newTag = tag.MakeCopy();
                     newTag.name = currentTagNextName;
                     newTag.requiredItems = tag.requiredItems.Where((item) => item.WrappedDef.Valid).ToList();
-                    foreach (var item in newTag.requiredItems) {
-                        item.Filter.ClearInvalidStuffs();
+                    foreach (var member in newTag.requiredItems.SelectMany(item => item.Members)) {
+                        member.ClearInvalidStuffs();
                     }
 
                     newTag.uniqueId = LoadoutManager.GetNextTagId();
@@ -146,7 +146,7 @@ namespace Inventory
                         severity = Warning.Severity.Note
                     });
                 }
-                foreach(var defFilter in item.filter.AllowedStuffs) {
+                foreach(var defFilter in item.Members.SelectMany(m => m.AllowedStuffs)) {
                     if (!(defFilter.Def.modContentPack?.IsCoreMod ?? true)) {
                         warnings.Add(new Warning() {
                             message = Strings.WarningItemFilterDependsOnModLoad(item.Def.LabelCap, defFilter.Def.LabelCap, defFilter.Def.modContentPack.Name),
@@ -173,7 +173,7 @@ namespace Inventory
                         severity = Warning.Severity.Warn
                     });
                 }
-                foreach (var defFilter in item.filter.AllowedStuffs)
+                foreach (var defFilter in item.Members.SelectMany(m => m.AllowedStuffs))
                 {
                     defFilter.Load();
                     if (!defFilter.Valid)
