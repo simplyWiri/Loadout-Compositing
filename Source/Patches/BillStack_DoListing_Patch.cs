@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -71,7 +71,8 @@ namespace Inventory
                 // Set up the bill in a reasonable manner.
                 LoadoutManager.SetTagForBill(bill, tag);
                 bill.repeatMode = InvBillRepeatModeDefOf.W_PerTag;
-                bill.targetCount = 1;
+                // for a prosthetic, as many as each pawn has installed
+                bill.targetCount = item.IsProsthetic ? item.Quantity : 1;
                 bill.repeatCount = 0;
                 bill.includeEquipped = true;
                 item.CopyTo(bill);

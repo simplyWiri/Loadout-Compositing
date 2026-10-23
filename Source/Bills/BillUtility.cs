@@ -1,4 +1,6 @@
-﻿using RimWorld;
+﻿using System.Linq;
+using RimWorld;
+using UnityEngine;
 
 namespace Inventory {
 
@@ -10,10 +12,19 @@ namespace Inventory {
             // This is valid in two situations, consider when the bill is first set,
             // the particular tag to target will not have been set yet, and ditto when
             // there are actually no pawns on the map using the tag.
-            var numPawnsWithTag = LoadoutManager.ColonistCountFor(productionBill);
             var numRepetitionsPerTag = productionBill.targetCount;
             var numOffset = productionBill.repeatCount;
 
+            // prosthetics are only needed by the pawns who are yet to have them installed
+            var tag = LoadoutManager.TagFor(productionBill);
+            var item = tag?.ItemFor(productionBill.recipe.ProducedThingDef);
+            if (item != null && item.IsProsthetic) {
+                var numMissing = LoadoutManager.PawnsFor(productionBill)
+                    .Sum(pawn => Mathf.Max(0, numRepetitionsPerTag - ProstheticUtility.InstalledCount(pawn, item.RepresentativeDef)));
+                return numMissing + numOffset * numRepetitionsPerTag;
+            }
+
+            var numPawnsWithTag = LoadoutManager.ColonistCountFor(productionBill);
             return (numPawnsWithTag + numOffset) * numRepetitionsPerTag;
         }
 

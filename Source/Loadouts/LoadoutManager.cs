@@ -46,12 +46,17 @@ namespace Inventory {
         }
 
         public static int ColonistCountFor(Bill_Production bill) {
+            return PawnsFor(bill).Count();
+        }
+
+        // the pawns on the bill's map with the tag it targets
+        public static IEnumerable<Pawn> PawnsFor(Bill_Production bill) {
             // if the extra data has not been set (just switched to the bill, this is a valid
             // state to be in).
             var tag = TagFor(bill);
-            if (tag == null) return 0;
-            
-            return instance.pawnTags[tag].Count(p => p != null && p.Map == bill.Map && p.IsValidLoadoutHolder());
+            if (tag == null) return Enumerable.Empty<Pawn>();
+
+            return instance.pawnTags[tag].Where(p => p != null && p.Map == bill.Map && p.IsValidLoadoutHolder());
         }
 
         public LoadoutManager(Game game) { }
