@@ -125,21 +125,16 @@ namespace Inventory {
         public static bool ShouldDropThing(Pawn_InventoryTracker inventory, Thing thing, ref ThingCount count) {
             var comp = inventory.pawn.GetComp<LoadoutComponent>();
 
-            var item = comp.Loadout.ItemsAccepting(thing).FirstOrDefault();
-
-            if (item is null) {
+            if (!comp.Loadout.ItemsAccepting(thing).Any()) {
                 count = new ThingCount(thing, thing.stackCount);
                 return true;
             }
-            
-            var allThings = inventory.pawn.InventoryAndEquipment().ToList();
-            var currentQuantity = item.CountIn(allThings);
-            var desiredQuantity = comp.Loadout.DesiredCount(allThings, item);
 
-            var difference = currentQuantity - desiredQuantity;
-            if (difference <= 0) return false;
-            
-            count = new ThingCount(thing, Mathf.Min(difference, thing.stackCount));
+            var assignment = comp.Loadout.AssignGear(inventory.pawn.InventoryAndEquipment().ToList());
+            var surplus = assignment.Surplus(thing);
+            if (surplus <= 0) return false;
+
+            count = new ThingCount(thing, surplus);
             return true;
         }
 
