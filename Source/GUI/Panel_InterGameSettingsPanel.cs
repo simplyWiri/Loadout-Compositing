@@ -70,10 +70,8 @@ namespace Inventory
                 Action loadTagToGame = () => {
                     var newTag = tag.MakeCopy();
                     newTag.name = currentTagNextName;
-                    newTag.requiredItems = tag.requiredItems.Where((item) => item.RepresentativeMember.WrappedDef.Valid).ToList();
-                    foreach (var member in newTag.requiredItems.SelectMany(item => item.Members)) {
-                        member.ClearInvalidStuffs();
-                    }
+                    // copies, so the in-game tag doesn't share (and edit) the saved tag's items
+                    newTag.requiredItems = tag.requiredItems.Select(item => item.CopyValid()).Where(item => item != null).ToList();
 
                     newTag.uniqueId = LoadoutManager.GetNextTagId();
                     LoadoutManager.AddTag(newTag);
@@ -138,8 +136,9 @@ namespace Inventory
 
         private List<Warning> MakeSaveWarnings(Tag tag) {
             var warnings = new List<Warning>();
-            foreach(var item in tag.requiredItems) {
-                var def = item.RepresentativeDef;
+            // generic items are built into the mod, and never depend on another
+            foreach(var member in tag.requiredItems.Where(item => !item.IsGeneric).SelectMany(item => item.Members)) {
+                var def = member.Def;
                 if (!(def.modContentPack?.IsCoreMod ?? true)) {
                     warnings.Add(new Warning() {
                         message = Strings.WarningItemDependsOnModLoad(def.LabelCap, def.modContentPack.Name),
@@ -147,7 +146,7 @@ namespace Inventory
                         severity = Warning.Severity.Note
                     });
                 }
-                foreach(var defFilter in item.Members.SelectMany(m => m.AllowedStuffs)) {
+                foreach(var defFilter in member.AllowedStuffs) {
                     if (!(defFilter.Def.modContentPack?.IsCoreMod ?? true)) {
                         warnings.Add(new Warning() {
                             message = Strings.WarningItemFilterDependsOnModLoad(def.LabelCap, defFilter.Def.LabelCap, defFilter.Def.modContentPack.Name),
@@ -163,9 +162,9 @@ namespace Inventory
         private List<Warning> MakeLoadWarnings(Tag tag) {
             var warnings = new List<Warning>();
 
-            foreach (var item in tag.requiredItems)
+            foreach (var member in tag.requiredItems.Where(item => !item.IsGeneric).SelectMany(item => item.Members))
             {
-                var wrappedDef = item.RepresentativeMember.WrappedDef;
+                var wrappedDef = member.WrappedDef;
                 wrappedDef.Load();
                 if (!wrappedDef.Valid)
                 {
@@ -175,7 +174,7 @@ namespace Inventory
                         severity = Warning.Severity.Warn
                     });
                 }
-                foreach (var defFilter in item.Members.SelectMany(m => m.AllowedStuffs))
+                foreach (var defFilter in member.AllowedStuffs)
                 {
                     defFilter.Load();
                     if (!defFilter.Valid)

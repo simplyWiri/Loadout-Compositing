@@ -86,19 +86,30 @@ namespace Inventory {
         }
 
         // Stuff? Def.LabelCap Quality-Range?
+        // "One of: A, B +n", the category's name, or the def's name
+        public string ShortLabel {
+            get {
+                if (IsGeneric) return Category?.Label ?? category;
+                if (members.Count == 1) return RepresentativeDef?.LabelCap ?? RepresentativeMember.WrappedDef.defName;
+
+                const int shownMembers = 2;
+                var labels = string.Join(", ", members.Take(shownMembers).Select(m => m.Def?.LabelCap.ToString() ?? m.WrappedDef.defName));
+                if (members.Count > shownMembers) labels += $" +{members.Count - shownMembers}";
+                return Strings.OneOf(labels);
+            }
+        }
+
+        public bool HasAlternatives => IsGeneric || members.Count > 1;
+
         public string Print() {
             if (IsGeneric) {
-                return Category?.Label ?? category;
+                return ShortLabel;
             }
 
             var stringBuilder = new StringBuilder();
 
-            // One of: A, B +n
             if (members.Count > 1) {
-                const int shownMembers = 2;
-                var labels = string.Join(", ", members.Take(shownMembers).Select(m => m.Def.LabelCap.ToString()));
-                if (members.Count > shownMembers) labels += $" +{members.Count - shownMembers}";
-                stringBuilder.Append(Strings.OneOf(labels));
+                stringBuilder.Append(ShortLabel);
             } else {
                 stringBuilder.Append(RepresentativeMember.Label);
             }
@@ -142,6 +153,23 @@ namespace Inventory {
         // one line per rank, best first, members of the same rank share a line
         public string RankedMembersDescription() {
             return string.Join("\n", RankedMembers.Select((rank, idx) => $"{idx + 1}. " + string.Join(", ", rank.Select(m => m.Label))));
+        }
+
+        // a copy holding only the members (and stuffs) whose defs exist in this game, or null if none do
+        public Item CopyValid() {
+            if (IsGeneric) {
+                return new Item(Category) { quantity = quantity };
+            }
+
+            var copy = new Item { quantity = quantity, filter = new Filter() };
+            copy.filter.SetQualityRange(filter.QualityRange);
+            copy.filter.SetHpRange(filter.HpRange);
+            copy.members = members
+                .Where(m => m.WrappedDef.Valid)
+                .Select(m => new ItemMember(m.WrappedDef, m.AllowedStuffs.Where(stuff => stuff.Valid).ToHashSet()))
+                .ToList();
+
+            return copy.members.Count == 0 ? null : copy;
         }
 
         // the new alternative is the least preferred
