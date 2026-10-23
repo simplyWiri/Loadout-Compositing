@@ -2,6 +2,8 @@
 <LanguageData>
 	<CompositableLoadouts.Modify>Modify</CompositableLoadouts.Modify>
 	<CompositableLoadouts.Generic>Generic</CompositableLoadouts.Generic>
+	<CompositableLoadouts.GenericCategory.Medicine>Any medicine (best first)</CompositableLoadouts.GenericCategory.Medicine>
+	<CompositableLoadouts.GenericCategory.Meals>Any meal (best first)</CompositableLoadouts.GenericCategory.Meals>
 	<CompositableLoadouts.Create>Create</CompositableLoadouts.Create>
 
 	<CompositableLoadouts.TagLoadoutComposition>Tags and Loadout Composition</CompositableLoadouts.TagLoadoutComposition>

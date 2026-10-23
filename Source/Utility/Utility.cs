@@ -36,6 +36,10 @@ namespace Inventory {
             rangedWeapons ??= items.Where(def => def.IsRangedWeapon && def.category != ThingCategory.Building).ToList();
             medicinalDefs ??= items.Where(def => def.IsMedicine || def.IsDrug).ToList();
 
+            foreach (var category in GenericCategory.All) {
+                category.CalculateMembers();
+            }
+
             if (ModLister.HasActiveModWithName("Vanilla Expanded Framework")) {
                 Log.Message("[Loadout Compositing] Enabled mod integrations with Vanilla Expanded Framework, biasing mass carrying clothes...");
 
