@@ -35,6 +35,27 @@ namespace Inventory {
             WithModifiers(rect, quantity.ToString(), font: GameFont.Tiny, anchor: TextAnchor.LowerCenter);
         }
 
+        // `tooltip` defaults to the item's label, pass an empty string for no tooltip
+        public static void DrawItemIcon(Rect rect, Item item, bool showCount = true, string tooltip = null) {
+            var def = item.RepresentativeDef;
+            if (def == null) {
+                Widgets.DrawTextureFitted(rect, Textures.PlaceholderDef, 1.0f);
+                TooltipHandler.TipRegion(rect, item.WrappedDef.defName);
+                return;
+            }
+
+            if (showCount && item.Quantity > 1) {
+                FittedDefIconCount(rect, def, item.RepresentativeStuff, item.Quantity);
+            } else {
+                Widgets.DefIcon(rect, def, item.RepresentativeStuff);
+            }
+
+            tooltip ??= def.LabelCap;
+            if (tooltip != string.Empty) {
+                TooltipHandler.TipRegion(rect, tooltip);
+            }
+        }
+
         // returns whether the input field is in focus or not.
         public static bool InputField(Rect rect, string name, ref string buff, bool ShowName = false) {
             var inputFieldRect = rect;

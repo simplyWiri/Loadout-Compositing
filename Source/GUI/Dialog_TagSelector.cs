@@ -143,7 +143,7 @@ namespace Inventory {
                 var numIcons = Mathf.Min(tag.requiredItems.Count, iconsCanDraw);
                 
                 for (var i = 0; i < numIcons; i++) {
-                    Widgets.DefIcon(tagRect.PopLeftPartPixels(UIC.SMALL_ICON), tag.requiredItems[i].Def, tag.requiredItems[i].RepresentativeStuff);
+                    GUIUtility.DrawItemIcon(tagRect.PopLeftPartPixels(UIC.SMALL_ICON), tag.requiredItems[i], false, string.Empty);
                 }
             }
 

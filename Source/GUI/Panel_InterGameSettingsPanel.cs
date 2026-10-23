@@ -252,19 +252,7 @@ namespace Inventory
                             break;
                         }
 
-                        var item = tag.requiredItems[idx];
-                        if (item.Def == null) {
-                            Widgets.DrawTextureFitted(drawRect, Textures.PlaceholderDef, 1.0f);
-                            TooltipHandler.TipRegion(drawRect, item.WrappedDef.defName);
-                        } else {
-                            if (item.Quantity > 1) {
-                                GUIUtility.FittedDefIconCount(drawRect, item.Def, item.RepresentativeStuff, item.Quantity);
-                            } else {
-                                Widgets.DefIcon(drawRect, item.Def, item.RepresentativeStuff);
-                            }
-
-                            TooltipHandler.TipRegion(drawRect, item.Def.LabelCap);
-                        }
+                        GUIUtility.DrawItemIcon(drawRect, tag.requiredItems[idx]);
                     }
                 }
             }
