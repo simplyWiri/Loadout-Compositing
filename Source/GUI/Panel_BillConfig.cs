@@ -95,16 +95,7 @@ namespace Inventory {
             if (item != null) {
                 var copyTagStr = Strings.CopyFromTag(producedThingDef.LabelCap);
                 if (standard.ButtonText(copyTagStr)) {
-                    var member = item.MemberFor(producedThingDef);
-                    member.CopyTo(bill.ingredientFilter);
-
-                    bill.limitToAllowedStuff = !member.GenericStuff;
-
-                    if (item.Filter.SpecificQualityRange)
-                        bill.qualityRange = item.Filter.QualityRange;
-
-                    if (item.Filter.SpecificHitpointRange)
-                        bill.hpRange = item.Filter.HpRange;
+                    item.CopyTo(bill);
                 }
             }
 
