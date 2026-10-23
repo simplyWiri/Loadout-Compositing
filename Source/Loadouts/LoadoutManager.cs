@@ -125,13 +125,15 @@ namespace Inventory {
             if (Scribe.mode == LoadSaveMode.Saving) {
                 billToTag?.RemoveAll(kv => kv.Key.InvalidBill() || kv.Key.repeatMode != InvBillRepeatModeDefOf.W_PerTag);
                 // Even if our pawn is no longer a loadout holder, we should keep saving tags. This is due to "borrowed"
-                // pawns being temporarily considered quest pawns, then being returned. 
-                pawnTags?.Do(kv => kv.Value?.RemoveAll(p => p is null));
+                // pawns being temporarily considered quest pawns, then being returned. Dead pawns are kept too so they
+                // retain their tags if resurrected, only pawns which have been discarded (gone forever) are removed.
+                pawnTags?.Do(kv => kv.Value?.RemoveAll(p => p is null || p.Discarded));
             }
 
             Scribe_Collections.Look(ref tags, nameof(tags), LookMode.Deep);
             Scribe_Collections.Look(ref states, nameof(states), LookMode.Deep);
-            Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Reference, ref pTagsLoading, ref pPawnLoading);
+            // `saveDestroyedValues` - dead pawns are destroyed, and would otherwise be saved as null references.
+            Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Reference, ref pTagsLoading, ref pPawnLoading, saveDestroyedValues: true);
             Scribe_Collections.Look(ref billToTag, nameof(billToTag), LookMode.Reference, LookMode.Reference);
             Scribe_References.Look(ref panicState, nameof(panicState));
             Scribe_Values.Look(ref inPanicState, nameof(inPanicState));
