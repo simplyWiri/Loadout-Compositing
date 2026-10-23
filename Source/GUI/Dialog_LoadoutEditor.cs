@@ -211,15 +211,7 @@ namespace Inventory {
                         
                         var idx = i + j;
                         if (idx >= tag.requiredItems.Count) break;
-                        var item = tag.requiredItems[idx];
-                        if (item.Quantity > 1) {
-                            GUIUtility.FittedDefIconCount(drawRect, item.Def, item.RepresentativeStuff, item.Quantity);
-                        }
-                        else {
-                            Widgets.DefIcon(drawRect, item.Def, item.RepresentativeStuff);
-                        }
-
-                        TooltipHandler.TipRegion(drawRect, item.Def.LabelCap);
+                        GUIUtility.DrawItemIcon(drawRect, tag.requiredItems[idx]);
                     }
                 }
             }
@@ -464,8 +456,7 @@ namespace Inventory {
                 
                 foreach (var item in items.OrderBy(it => it.GetStatOffset(stat))) {
                     var iconRect = statRect.PopRightPartPixels(Text.LineHeight);
-                    Widgets.DefIcon(iconRect, item.Def, item.RepresentativeStuff);
-                    TooltipHandler.TipRegion(iconRect, item.Label + " " + stat.Worker.ValueToString(item.GetStatOffset(stat), false));
+                    GUIUtility.DrawItemIcon(iconRect, item, false, item.Label + " " + stat.Worker.ValueToString(item.GetStatOffset(stat), false));
                 }
             }
 
