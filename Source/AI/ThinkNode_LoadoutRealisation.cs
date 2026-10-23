@@ -241,7 +241,7 @@ namespace Inventory {
         private Job SatisfyLoadoutItemsJob(Pawn pawn, Loadout loadout) {
             var pawnGear = pawn.InventoryAndEquipment().ToList();
             var assignment = loadout.AssignGear(pawn, pawnGear);
-            var items = loadout.Items.Where(item => !item.IsApparel).Distinct().ToList();
+            var items = loadout.CarriedItems.Where(item => !item.IsApparel).Distinct().ToList();
 
             foreach (var item in items) {
                 // fetch the best ranked members first, lower ranks only make up what the better ranks can't
