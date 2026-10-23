@@ -7,7 +7,7 @@ using Verse;
 namespace Inventory {
 
     // Prosthetics are the things installed by surgery, e.g. a field hand. Any surgery which adds a hediff and takes a
-    // single tech hediff thing as its ingredient counts, so mods which follow the vanilla pattern (e.g. EPOE) need no
+    // single tech hediff thing among its ingredients (alongside the medicine every surgery takes) counts, so mods which follow the vanilla pattern (e.g. EPOE) need no
     // special handling. A tag item of a prosthetic is installed on the pawn, rather than carried.
     public static class ProstheticUtility {
         private static Dictionary<ThingDef, List<RecipeDef>> installRecipes = null;
@@ -27,10 +27,20 @@ namespace Inventory {
 
         // the prosthetic `recipe` installs, or null if it doesn't install one
         public static ThingDef ProstheticInstalledBy(RecipeDef recipe) {
-            if (recipe.ingredients.Count != 1 || !recipe.ingredients[0].IsFixedIngredient) return null;
+            var def = PartIngredient(recipe);
+            return def != null && InstallRecipesFor(def).Contains(recipe) ? def : null;
+        }
 
-            var def = recipe.ingredients[0].FixedIngredient;
-            return InstallRecipesFor(def).Contains(recipe) ? def : null;
+        // the one tech hediff thing among `recipe`'s ingredients, or null if there isn't exactly one. The others are
+        // the medicine, which is a category of things rather than a single (fixed) one
+        private static ThingDef PartIngredient(RecipeDef recipe) {
+            var defs = recipe.ingredients
+                .Where(ingredient => ingredient.IsFixedIngredient)
+                .Select(ingredient => ingredient.FixedIngredient)
+                .Where(def => def != null && def.isTechHediff)
+                .ToList();
+
+            return defs.Count == 1 ? defs[0] : null;
         }
 
         // how many of `def` are installed on `pawn`
@@ -108,10 +118,8 @@ namespace Inventory {
                 if (!recipe.IsSurgery || recipe.addsHediff == null || !(recipe.Worker is Recipe_Surgery)) continue;
                 // levelled implants (e.g. psylinks) are raised one level at a time, rather than installed once
                 if (typeof(Hediff_Level).IsAssignableFrom(recipe.addsHediff.hediffClass)) continue;
-                if (recipe.ingredients.Count != 1 || !recipe.ingredients[0].IsFixedIngredient) continue;
-
-                var def = recipe.ingredients[0].FixedIngredient;
-                if (def == null || !def.isTechHediff) continue;
+                var def = PartIngredient(recipe);
+                if (def == null) continue;
 
                 if (!index.TryGetValue(def, out var recipes)) {
                     recipes = new List<RecipeDef>();
