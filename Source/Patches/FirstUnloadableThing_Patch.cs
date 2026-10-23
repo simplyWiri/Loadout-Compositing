@@ -31,7 +31,7 @@ namespace Inventory {
         *       if ( ThingInLoadout(this, thing) ) {
         *           ThingCount tempCount;
         *           if ( ShouldDropThing(this, thing, ref tempCount) ) {
-        *               return tempCount;
+        *               return tempCount; // emitted as `leave` to an appended `ldloc tempCount; ret`
         *           } else {
         *               continue;
         *           }
@@ -48,6 +48,7 @@ namespace Inventory {
             var localCount = iLGenerator.DeclareLocal(typeof(ThingCount));
             var continueExecutingLabel = iLGenerator.DefineLabel();
             var breakLoopLabel = iLGenerator.DefineLabel();
+            var returnCountLabel = iLGenerator.DefineLabel();
 
             for (int i = 0; i < insts.Count; i++) {
                 if (Matches(insts, i)) {
@@ -72,8 +73,9 @@ namespace Inventory {
                     yield return new CodeInstruction(OpCodes.Ldloca, localCount); // ref thingCount
                     yield return new CodeInstruction(OpCodes.Call, shouldDrop);
                     yield return new CodeInstruction(OpCodes.Brfalse_S, breakLoopLabel);
-                    yield return new CodeInstruction(OpCodes.Ldloc, localCount); // return ref thingCount
-                    yield return new CodeInstruction(OpCodes.Ret);
+                    // we are inside the foreach's try/finally, so we can't `ret` directly, instead `leave` the
+                    // protected region (running the enumerator's Dispose) and return from our own epilogue
+                    yield return new CodeInstruction(OpCodes.Leave, returnCountLabel);
 
                     yield return insts[i].WithLabels(continueExecutingLabel);
                     matches++;
@@ -81,6 +83,11 @@ namespace Inventory {
                 else {
                     yield return insts[i];
                 }
+            }
+
+            if (matches > 0) {
+                yield return new CodeInstruction(OpCodes.Ldloc, localCount).WithLabels(returnCountLabel); // return ref thingCount
+                yield return new CodeInstruction(OpCodes.Ret);
             }
 
             if (matches != 1 || branchMatches != 1) {
