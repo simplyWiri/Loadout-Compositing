@@ -60,8 +60,7 @@
 	<CompositableLoadouts.OneOfHeading>One of:</CompositableLoadouts.OneOfHeading>
 	<CompositableLoadouts.OneOf>One of: {0}</CompositableLoadouts.OneOf>
 	<CompositableLoadouts.RemoveAlternative>Remove this alternative</CompositableLoadouts.RemoveAlternative>
-	<CompositableLoadouts.RaiseAlternative>Prefer this alternative more</CompositableLoadouts.RaiseAlternative>
-	<CompositableLoadouts.LowerAlternative>Prefer this alternative less</CompositableLoadouts.LowerAlternative>
+	<CompositableLoadouts.ReorderAlternativeDesc>Drag to change which alternatives pawns prefer, higher is preferred.</CompositableLoadouts.ReorderAlternativeDesc>
 	<CompositableLoadouts.EditingAlternative>Alternative: {0}</CompositableLoadouts.EditingAlternative>
 	<CompositableLoadouts.EditingAlternativeDesc>Pick which alternative to edit. Stuff is set for each alternative, quality and hit points are shared by every alternative of this item.</CompositableLoadouts.EditingAlternativeDesc>
 	<CompositableLoadouts.MouseOverDetails>(Mouse Over Numbers for Details)</CompositableLoadouts.MouseOverDetails>
