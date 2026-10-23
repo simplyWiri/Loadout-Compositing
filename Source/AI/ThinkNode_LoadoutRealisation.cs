@@ -172,7 +172,7 @@ namespace Inventory {
         private Job SatisfyLoadoutItemsJob(Pawn pawn, Loadout loadout) {
             var pawnGear = pawn.InventoryAndEquipment().ToList();
 
-            foreach (var item in loadout.Items.Where(item => !item.Def.IsApparel)) {
+            foreach (var item in loadout.Items.Where(item => !item.IsApparel)) {
                 var itemCount = item.CountIn(pawnGear);
                 var loadoutDesiredCount = loadout.DesiredCount(pawnGear, item);
 

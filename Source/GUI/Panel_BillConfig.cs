@@ -91,8 +91,9 @@ namespace Inventory {
             var producedThingDef = bill.recipe.ProducedThingDef;
             if (producedThingDef == null) return;
 
-            if (tag.HasThingDef(producedThingDef, out var item)) {
-                var copyTagStr = Strings.CopyFromTag(item.Def.LabelCap);
+            var item = tag.ItemFor(producedThingDef);
+            if (item != null) {
+                var copyTagStr = Strings.CopyFromTag(producedThingDef.LabelCap);
                 if (standard.ButtonText(copyTagStr)) {
                     item.Filter.CopyTo(bill.ingredientFilter);
 

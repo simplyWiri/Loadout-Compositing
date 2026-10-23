@@ -185,7 +185,7 @@ namespace Inventory {
                 var possibleDefs = loadoutTags
                     .SelectMany(t =>
                         t.Tag.ItemsWithTagMatching(item =>
-                            item.Def.IsApparel && ApparelSlotMaker.Create(bodyDef, item.Def).Intersects(def, column)))
+                            item.IsApparel && item.Defs.Any(d => ApparelSlotMaker.Create(bodyDef, d).Intersects(def, column))))
                     .ToList();
 
                 if (overlappingApparel != null) {
@@ -204,7 +204,7 @@ namespace Inventory {
                         GUI.color = Color.white;
                         
                         Widgets.DefIcon(columnRect.ContractedBy(3f), overlappingApparel.Def,
-                            overlappingApparel.RandomStuff);
+                            overlappingApparel.RepresentativeStuff);
 
                         if (possibleDefs.Any()) {
                             var str = "";

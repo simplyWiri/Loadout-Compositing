@@ -301,16 +301,16 @@ namespace Inventory {
                 // Info
                 Rect infoRect = itemRect.PopLeftPartPixels(UIC.SMALL_ICON);
                 if (Widgets.ButtonImageFitted(infoRect.ContractedBy(1f), TexButton.Info)) {
-                    Find.WindowStack.Add(new Dialog_InfoCard(def, item.RandomStuff));
+                    Find.WindowStack.Add(new Dialog_InfoCard(def, item.RepresentativeStuff));
                 }
 
                 // Icon
                 var iconRect = itemRect.PopLeftPartPixels(UIC.SPACED_HEIGHT * 2);
                 if (item.Quantity > 1) {
-                    GUIUtility.FittedDefIconCount(iconRect, def, item.RandomStuff, item.Quantity);
+                    GUIUtility.FittedDefIconCount(iconRect, def, item.RepresentativeStuff, item.Quantity);
                 }
                 else {
-                    Widgets.DefIcon(iconRect, def, item.RandomStuff);
+                    Widgets.DefIcon(iconRect, def, item.RepresentativeStuff);
                 }
 
                 TooltipHandler.TipRegion(iconRect, item.Def.DescriptionDetailed);
@@ -464,11 +464,11 @@ namespace Inventory {
         }
 
         private void DrawDefList(Rect r, IReadOnlyList<ThingDef> defList, List<StatDef> extraStats = null) {
-            var itms = curTag.requiredItems.Select(it => it.Def).ToHashSet();
+            var itms = curTag.requiredItems.SelectMany(it => it.Defs).ToHashSet();
             List<ThingDef> defs = null;
 
             // todo: cleanup
-            var slotsUsed = ApparelSlotMaker.Create(BodyDefOf.Human, curTag.requiredItems.Select(s => s.Def).Where(def => def.IsApparel).ToList());
+            var slotsUsed = ApparelSlotMaker.Create(BodyDefOf.Human, curTag.requiredItems.Where(s => s.IsApparel).SelectMany(s => s.Defs).ToList());
 
             if (defFilter != string.Empty) {
                 if (defFilter == lastDefFilter) {

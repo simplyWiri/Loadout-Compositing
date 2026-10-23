@@ -27,7 +27,12 @@ namespace Inventory {
 
         public SafeDef WrappedDef => def;
 
-        public ThingDef RandomStuff => !Def.MadeFromStuff ? null : filter.AllowedStuffs.Any() ? filter.AllowedStuffs.First() : GenStuff.AllowedStuffsFor(Def).First();
+        public bool IsApparel => Def.IsApparel;
+        public IEnumerable<ThingDef> Defs { get { yield return Def; } }
+
+        // the def used when only one can be shown or used for an estimate (icons, mass, stats)
+        public ThingDef RepresentativeDef => Def;
+        public ThingDef RepresentativeStuff => !Def.MadeFromStuff ? null : filter.AllowedStuffs.Any() ? filter.AllowedStuffs.First() : GenStuff.AllowedStuffsFor(Def).First();
         public QualityCategory RandomQuality => (QualityCategory)Mathf.FloorToInt(((int)filter.QualityRange.max + (int)filter.QualityRange.min) / 2.0f);
         public string Label => Print();
         public float GetStatOffset(StatDef def) => Def.equippedStatOffsets.GetStatOffsetFromList(def);
