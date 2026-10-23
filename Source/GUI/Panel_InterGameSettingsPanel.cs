@@ -258,9 +258,9 @@ namespace Inventory
                             TooltipHandler.TipRegion(drawRect, item.WrappedDef.defName);
                         } else {
                             if (item.Quantity > 1) {
-                                GUIUtility.FittedDefIconCount(drawRect, item.Def, item.RandomStuff, item.Quantity);
+                                GUIUtility.FittedDefIconCount(drawRect, item.Def, item.RepresentativeStuff, item.Quantity);
                             } else {
-                                Widgets.DefIcon(drawRect, item.Def, item.RandomStuff);
+                                Widgets.DefIcon(drawRect, item.Def, item.RepresentativeStuff);
                             }
 
                             TooltipHandler.TipRegion(drawRect, item.Def.LabelCap);

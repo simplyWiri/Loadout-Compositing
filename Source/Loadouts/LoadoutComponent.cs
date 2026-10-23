@@ -51,9 +51,9 @@ namespace Inventory {
                 Loadout.elements.Add(new LoadoutElement(tag, state, activeCondition));
             }
 
-            foreach (var item in tag.requiredItems.Where(item => item.Def.IsApparel)) {
-                if (Pawn.outfits.CurrentApparelPolicy.filter.Allows(item.Def)) continue;
-                Messages.Message(Strings.OutfitDisallowsKit(Pawn, Pawn.outfits.CurrentApparelPolicy, item.Def, tag), Pawn, MessageTypeDefOf.CautionInput, false);
+            foreach (var def in tag.requiredItems.Where(item => item.IsApparel).SelectMany(item => item.Defs)) {
+                if (Pawn.outfits.CurrentApparelPolicy.filter.Allows(def)) continue;
+                Messages.Message(Strings.OutfitDisallowsKit(Pawn, Pawn.outfits.CurrentApparelPolicy, def, tag), Pawn, MessageTypeDefOf.CautionInput, false);
                 return;
             }
         }
@@ -67,9 +67,9 @@ namespace Inventory {
             pList.Add(Pawn);
             Loadout.elements.Add(elem);
 
-            foreach (var item in elem.Tag.requiredItems.Where(item => item.Def.IsApparel)) {
-                if (Pawn.outfits.CurrentApparelPolicy.filter.Allows(item.Def)) continue;
-                Messages.Message(Strings.OutfitDisallowsKit(Pawn, Pawn.outfits.CurrentApparelPolicy, item.Def, elem.Tag), Pawn, MessageTypeDefOf.CautionInput, false);
+            foreach (var def in elem.Tag.requiredItems.Where(item => item.IsApparel).SelectMany(item => item.Defs)) {
+                if (Pawn.outfits.CurrentApparelPolicy.filter.Allows(def)) continue;
+                Messages.Message(Strings.OutfitDisallowsKit(Pawn, Pawn.outfits.CurrentApparelPolicy, def, elem.Tag), Pawn, MessageTypeDefOf.CautionInput, false);
                 return;
             }
         }

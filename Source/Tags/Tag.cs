@@ -49,10 +49,6 @@ namespace Inventory {
             return tag;
         }
 
-        public IEnumerable<Item> ItemsMatching(Thing thing) {
-            return requiredItems.Where(item => thing.def == item.Def && item.Filter.Allows(thing));
-        }
-
         public IEnumerable<Item> ItemsMatching(Predicate<Item> pred) {
             return requiredItems.Where(item => pred(item));
         }
@@ -74,16 +70,8 @@ namespace Inventory {
             }
         }
 
-        public bool HasThingDef(ThingDef def, out Item item) {
-            item = null;
-            foreach (var i in requiredItems) {
-                if (i.Def == def) {
-                    item = i;
-                    return true;
-                }
-            }
-
-            return false;
+        public Item ItemFor(ThingDef def) {
+            return requiredItems.FirstOrDefault(item => item.Defs.Contains(def));
         }
 
         public int CompareTo(Tag other) {

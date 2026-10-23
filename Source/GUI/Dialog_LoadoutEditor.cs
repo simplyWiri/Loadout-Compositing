@@ -213,10 +213,10 @@ namespace Inventory {
                         if (idx >= tag.requiredItems.Count) break;
                         var item = tag.requiredItems[idx];
                         if (item.Quantity > 1) {
-                            GUIUtility.FittedDefIconCount(drawRect, item.Def, item.RandomStuff, item.Quantity);
+                            GUIUtility.FittedDefIconCount(drawRect, item.Def, item.RepresentativeStuff, item.Quantity);
                         }
                         else {
-                            Widgets.DefIcon(drawRect, item.Def, item.RandomStuff);
+                            Widgets.DefIcon(drawRect, item.Def, item.RepresentativeStuff);
                         }
 
                         TooltipHandler.TipRegion(drawRect, item.Def.LabelCap);
@@ -415,7 +415,7 @@ namespace Inventory {
             // foreach (var apparelStat in apparelBonuses) {
             //     var totalScore = 0.0f;
             //     foreach (var apparel in hypotheticalApparel) {
-            //         totalScore += apparel.Def.GetStatValueAbstract(apparelStat, apparel.RandomStuff);
+            //         totalScore += apparel.Def.GetStatValueAbstract(apparelStat, apparel.RepresentativeStuff);
             //     }
             //     
             //     var statRect = viewRect.PopTopPartPixels(Text.LineHeight);
@@ -428,7 +428,7 @@ namespace Inventory {
             // }
 
             var hypotheticalApparel = component.Loadout.HypotheticalWornApparel(shownState, pawn.def.race.body).ToList();
-            var relevantItems = hypotheticalApparel.Union(loadoutItems.Where(item => !item.Def.IsApparel)).ToList();
+            var relevantItems = hypotheticalApparel.Union(loadoutItems.Where(item => !item.IsApparel)).ToList();
 
             if ((hypotheticalApparel.Count + relevantItems.Count) < 0) {
                 statsHeight = GenUI.GapTiny + UIC.SPACED_HEIGHT;
@@ -464,7 +464,7 @@ namespace Inventory {
                 
                 foreach (var item in items.OrderBy(it => it.GetStatOffset(stat))) {
                     var iconRect = statRect.PopRightPartPixels(Text.LineHeight);
-                    Widgets.DefIcon(iconRect, item.Def, item.RandomStuff);
+                    Widgets.DefIcon(iconRect, item.Def, item.RepresentativeStuff);
                     TooltipHandler.TipRegion(iconRect, item.Label + " " + stat.Worker.ValueToString(item.GetStatOffset(stat), false));
                 }
             }
