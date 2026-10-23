@@ -18,6 +18,7 @@ namespace Inventory {
         public static List<ThingDef> meleeWeapons = null;
         public static List<ThingDef> rangedWeapons = null;
         public static List<ThingDef> medicinalDefs = null;
+        public static List<ThingDef> prostheticDefs = null;
         public static List<ThingDef> items = null;
 
         public static void CalculateDefLists() {
@@ -29,6 +30,10 @@ namespace Inventory {
                 || typeof(UnfinishedThing).IsAssignableFrom(td.thingClass)
                 || typeof(MinifiedThing).IsAssignableFrom(td.thingClass)
                 || td.IsCorpse)).ToList();
+
+            // prosthetics are installed rather than carried, so they are listed apart from the other items
+            prostheticDefs ??= items.Where(ProstheticUtility.IsProsthetic).ToList();
+            items.RemoveAll(ProstheticUtility.IsProsthetic);
 
             apparelDefs ??= items.Where(def => def.IsApparel).ToList();
             massBoostingClothes = new Dictionary<ThingDef, Func<QualityCategory, float>>();

@@ -19,6 +19,7 @@ namespace Inventory {
         public static readonly Texture2D MedicalTex = ContentFinder<Texture2D>.Get("Medical");
         public static readonly Texture2D MeleeTex = ContentFinder<Texture2D>.Get("Melee");
         public static readonly Texture2D MiscItemsTex = ContentFinder<Texture2D>.Get("MiscItems");
+        public static readonly Texture2D ProstheticsTex = ContentFinder<Texture2D>.Get("Things/Item/Health/HealthItem");
         public static readonly Texture2D NextTex = ContentFinder<Texture2D>.Get("Next");
         public static readonly Texture2D PreviousTex = ContentFinder<Texture2D>.Get("Previous");
         public static readonly Texture2D RangedTex = ContentFinder<Texture2D>.Get("Ranged");

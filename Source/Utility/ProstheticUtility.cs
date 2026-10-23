@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
+using UnityEngine;
 using Verse;
 
 namespace Inventory {
@@ -28,6 +29,26 @@ namespace Inventory {
         public static int InstalledCount(Pawn pawn, ThingDef def) {
             var hediffs = InstallRecipesFor(def).Select(recipe => recipe.addsHediff).ToHashSet();
             return pawn.health.hediffSet.hediffs.Count(hediff => hediffs.Contains(hediff.def));
+        }
+
+        // the parts of `body` which `recipe` installs onto
+        public static IEnumerable<BodyPartRecord> TargetParts(BodyDef body, RecipeDef recipe) {
+            return body.AllParts.Where(part => (recipe.appliedOnFixedBodyParts?.Contains(part.def) ?? false)
+                                               || (recipe.appliedOnFixedBodyPartGroups?.Any(group => part.groups.Contains(group)) ?? false));
+        }
+
+        // the most of `def` which could be installed on a pawn with `body` at once
+        public static int MaxInstallable(BodyDef body, ThingDef def) {
+            var max = InstallRecipesFor(def).Select(recipe => recipe.targetsBodyPart ? TargetParts(body, recipe).Count() : 1).DefaultIfEmpty(1).Max();
+            return Mathf.Max(1, max);
+        }
+
+        // e.g. "left hand, right hand"
+        public static string TargetPartsLabel(BodyDef body, ThingDef def) {
+            var recipe = InstallRecipesFor(def).FirstOrDefault();
+            if (recipe == null || !recipe.targetsBodyPart) return null;
+
+            return string.Join(", ", TargetParts(body, recipe).Select(part => part.Label).Distinct());
         }
 
         private static Dictionary<ThingDef, List<RecipeDef>> BuildIndex() {
