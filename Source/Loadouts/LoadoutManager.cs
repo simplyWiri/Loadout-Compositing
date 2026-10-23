@@ -246,7 +246,8 @@ namespace Inventory {
                         pawn.jobs.ClearQueuedJobs();
                         pawn.jobs.CleanupCurrentJob(Verse.AI.JobCondition.InterruptForced, true);
                     }
-                } else {
+                } else if (comp.Loadout.InPanicMode) {
+                    // pawns which panicking didn't change were never put into panic mode, so have no state to go back to
                     comp.Loadout.DeactivatePanicMode();
                 }
             }
