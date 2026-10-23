@@ -60,6 +60,9 @@ namespace Inventory {
         public void Add(ThingDef thing) {
             requiredItems.Add(new Item(thing));
 
+            // apparel policies only cover apparel, anything else would always be reported as disallowed
+            if (!thing.IsApparel) return;
+
             var pawns = LoadoutManager.PawnsWithTags[this];
             foreach (var pawn in pawns) {
                 // dead pawns remain tagged in case they are resurrected, but there's no need to warn about them
