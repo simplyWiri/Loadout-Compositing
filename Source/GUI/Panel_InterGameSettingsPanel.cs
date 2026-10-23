@@ -70,7 +70,7 @@ namespace Inventory
                 Action loadTagToGame = () => {
                     var newTag = tag.MakeCopy();
                     newTag.name = currentTagNextName;
-                    newTag.requiredItems = tag.requiredItems.Where((item) => item.WrappedDef.Valid).ToList();
+                    newTag.requiredItems = tag.requiredItems.Where((item) => item.RepresentativeMember.WrappedDef.Valid).ToList();
                     foreach (var member in newTag.requiredItems.SelectMany(item => item.Members)) {
                         member.ClearInvalidStuffs();
                     }
@@ -139,9 +139,10 @@ namespace Inventory
         private List<Warning> MakeSaveWarnings(Tag tag) {
             var warnings = new List<Warning>();
             foreach(var item in tag.requiredItems) {
-                if (!(item.Def.modContentPack?.IsCoreMod ?? true)) {
+                var def = item.RepresentativeDef;
+                if (!(def.modContentPack?.IsCoreMod ?? true)) {
                     warnings.Add(new Warning() {
-                        message = Strings.WarningItemDependsOnModLoad(item.Def.LabelCap, item.Def.modContentPack.Name),
+                        message = Strings.WarningItemDependsOnModLoad(def.LabelCap, def.modContentPack.Name),
                         tooltip = Strings.WarningItemDependsOnModLoadDesc,
                         severity = Warning.Severity.Note
                     });
@@ -149,7 +150,7 @@ namespace Inventory
                 foreach(var defFilter in item.Members.SelectMany(m => m.AllowedStuffs)) {
                     if (!(defFilter.Def.modContentPack?.IsCoreMod ?? true)) {
                         warnings.Add(new Warning() {
-                            message = Strings.WarningItemFilterDependsOnModLoad(item.Def.LabelCap, defFilter.Def.LabelCap, defFilter.Def.modContentPack.Name),
+                            message = Strings.WarningItemFilterDependsOnModLoad(def.LabelCap, defFilter.Def.LabelCap, defFilter.Def.modContentPack.Name),
                             tooltip = Strings.WarningItemFilterDependsOnModLoadDesc,
                             severity = Warning.Severity.Note
                         });
@@ -164,11 +165,12 @@ namespace Inventory
 
             foreach (var item in tag.requiredItems)
             {
-                item.WrappedDef.Load();
-                if (!item.WrappedDef.Valid)
+                var wrappedDef = item.RepresentativeMember.WrappedDef;
+                wrappedDef.Load();
+                if (!wrappedDef.Valid)
                 {
                     warnings.Add(new Warning() {
-                        message = Strings.WarningItemDependsOnModSave(item.WrappedDef.defName),
+                        message = Strings.WarningItemDependsOnModSave(wrappedDef.defName),
                         tooltip = Strings.WarningItemDependsOnModSaveDesc,
                         severity = Warning.Severity.Warn
                     });

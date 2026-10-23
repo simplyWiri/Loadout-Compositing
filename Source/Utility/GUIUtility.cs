@@ -40,7 +40,7 @@ namespace Inventory {
             var def = item.RepresentativeDef;
             if (def == null) {
                 Widgets.DrawTextureFitted(rect, Textures.PlaceholderDef, 1.0f);
-                TooltipHandler.TipRegion(rect, item.WrappedDef.defName);
+                TooltipHandler.TipRegion(rect, item.RepresentativeMember.WrappedDef.defName);
                 return;
             }
 
