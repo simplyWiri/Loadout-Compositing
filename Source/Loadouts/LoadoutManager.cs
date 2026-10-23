@@ -51,7 +51,7 @@ namespace Inventory {
             var tag = TagFor(bill);
             if (tag == null) return 0;
             
-            return instance.pawnTags[tag].Count(p => p.Map == bill.Map && p.IsValidLoadoutHolder());
+            return instance.pawnTags[tag].Count(p => p != null && p.Map == bill.Map && p.IsValidLoadoutHolder());
         }
 
         public LoadoutManager(Game game) { }
@@ -125,13 +125,15 @@ namespace Inventory {
             if (Scribe.mode == LoadSaveMode.Saving) {
                 billToTag?.RemoveAll(kv => kv.Key.InvalidBill() || kv.Key.repeatMode != InvBillRepeatModeDefOf.W_PerTag);
                 // Even if our pawn is no longer a loadout holder, we should keep saving tags. This is due to "borrowed"
-                // pawns being temporarily considered quest pawns, then being returned. 
-                pawnTags?.Do(kv => kv.Value?.RemoveAll(p => p is null));
+                // pawns being temporarily considered quest pawns, then being returned. Dead pawns are kept too so they
+                // retain their tags if resurrected, only pawns which have been discarded (gone forever) are removed.
+                pawnTags?.Do(kv => kv.Value?.RemoveAll(p => p is null || p.Discarded));
             }
 
             Scribe_Collections.Look(ref tags, nameof(tags), LookMode.Deep);
             Scribe_Collections.Look(ref states, nameof(states), LookMode.Deep);
-            Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Reference, ref pTagsLoading, ref pPawnLoading);
+            // `saveDestroyedValues` - dead pawns are destroyed, and would otherwise be saved as null references.
+            Scribe_Collections.Look(ref pawnTags, nameof(pawnTags), LookMode.Reference, LookMode.Reference, ref pTagsLoading, ref pPawnLoading, saveDestroyedValues: true);
             Scribe_Collections.Look(ref billToTag, nameof(billToTag), LookMode.Reference, LookMode.Reference);
             Scribe_References.Look(ref panicState, nameof(panicState));
             Scribe_Values.Look(ref inPanicState, nameof(inPanicState));
@@ -143,6 +145,18 @@ namespace Inventory {
             pawnTags ??= new Dictionary<Tag, List<Pawn>>();
             billToTag ??= new Dictionary<Bill_Production, Tag>();
             states ??= new List<LoadoutState>();
+
+            if (Scribe.mode == LoadSaveMode.PostLoadInit) {
+                // Pawn references which failed to resolve (or were saved as null) load as null entries, remove them
+                // now rather than waiting for the next save, and make sure every tag has a membership list.
+                pawnTags.RemoveAll(kv => kv.Key is null);
+                foreach (var tag in tags) {
+                    if (!pawnTags.TryGetValue(tag, out var pawns) || pawns is null) {
+                        pawnTags[tag] = new List<Pawn>();
+                    }
+                }
+                pawnTags.Do(kv => kv.Value?.RemoveAll(p => p is null));
+            }
         }
 
         public override void GameComponentOnGUI() {
