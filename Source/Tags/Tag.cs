@@ -60,6 +60,13 @@ namespace Inventory {
         public void Add(ThingDef thing) {
             requiredItems.Add(new Item(thing));
 
+            if (ProstheticUtility.IsProsthetic(thing)) {
+                foreach (var pawn in LoadoutManager.PawnsWithTags[this]) {
+                    pawn.TryGetComp<LoadoutComponent>()?.WarnAboutProsthetics(this, thing);
+                }
+                return;
+            }
+
             // apparel policies only cover apparel, anything else would always be reported as disallowed
             if (!thing.IsApparel) return;
 
