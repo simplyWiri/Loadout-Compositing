@@ -173,23 +173,26 @@ namespace Inventory {
             return bodyPartGroup;
         }
         
-        public static List<Tuple<Item, Tag>> WornApparelFor(BodyDef def, List<Tuple<Item, Tag, int>> apparels) {
-            var wornApparels = new List<Tuple<Item, Tag>>();
+        // returns the worn items, the tag they came from, and the def chosen to be worn for that item
+        public static List<Tuple<Item, Tag, ThingDef>> WornApparelFor(BodyDef def, List<Tuple<Item, Tag, int>> apparels) {
+            var wornApparels = new List<Tuple<Item, Tag, ThingDef>>();
             ApparelSlot wornApparelSlots = null;
             foreach (var (apparel, tag, _) in apparels.OrderBy(app => app.Item3)) {
+                var apparelDef = apparel.RepresentativeDef;
+
                 // can obviously wear it if we aren't wearing anything
                 if (wornApparelSlots == null) {
-                    wornApparelSlots = ApparelSlotMaker.Create(def, apparel.Def);
-                    wornApparels.Add(new Tuple<Item, Tag>(apparel, tag));
+                    wornApparelSlots = ApparelSlotMaker.Create(def, apparelDef);
+                    wornApparels.Add(new Tuple<Item, Tag, ThingDef>(apparel, tag, apparelDef));
                     continue;
                 }
 
-                var apparelSlots = ApparelSlotMaker.Create(def, apparel.Def);
+                var apparelSlots = ApparelSlotMaker.Create(def, apparelDef);
 
                 if (!wornApparelSlots.Intersects(apparelSlots)) {
-                    wornApparels.Add(new Tuple<Item, Tag>(apparel, tag));
+                    wornApparels.Add(new Tuple<Item, Tag, ThingDef>(apparel, tag, apparelDef));
 
-                    wornApparelSlots = ApparelSlotMaker.Create(def, wornApparels.Select(kv => kv.Item1.Def));
+                    wornApparelSlots = ApparelSlotMaker.Create(def, wornApparels.Select(kv => kv.Item3));
                 }
             }
 
