@@ -42,12 +42,11 @@ namespace Inventory {
             thingFilter.allowedDefs = stuffs.Count == 0 ? GenStuff.AllowedStuffsFor(Def).ToHashSet() : AllowedStuffs.Select(d => d.Def).ToHashSet();
         }
 
+        // does the bill allow every stuff this member does
         public bool StuffSubsetOf(Bill_Production other) {
-            var filterStuff = other.ingredientFilter.allowedDefs;
-
             return stuffs.Count == 0
                 ? GenStuff.AllowedStuffsFor(Def).All(t => other.ingredientFilter.Allows(t))
-                : filterStuff.All(t => other.ingredientFilter.Allows(t));
+                : stuffs.All(t => other.ingredientFilter.Allows(t.Def));
         }
 
         // keeps the pasted stuffs which are valid for this def, or our own if none of them are

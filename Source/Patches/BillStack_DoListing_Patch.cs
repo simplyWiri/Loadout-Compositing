@@ -39,7 +39,8 @@ namespace Inventory
             var items = new Dictionary<Item, Tag>();
             foreach (var tag in tags)
             {
-                foreach (var item in tag.requiredItems)
+                // a bill can only make one def, so items with alternatives are skipped
+                foreach (var item in tag.requiredItems.Where(item => item.Members.Count == 1))
                 {
                     if (producedDefs.Contains(item.RepresentativeDef))
                     {
@@ -73,19 +74,8 @@ namespace Inventory
                 bill.targetCount = 1;
                 bill.repeatCount = 0;
                 bill.includeEquipped = true;
-                bill.limitToAllowedStuff = true;
-                        
-                var member = item.MemberFor(recipe.ProducedThingDef);
-                member.CopyTo(bill.ingredientFilter);
-                bill.limitToAllowedStuff = !member.GenericStuff;
+                item.CopyTo(bill);
 
-                if (item.Filter.SpecificQualityRange)
-                    bill.qualityRange = item.Filter.QualityRange;
-
-                if (item.Filter.SpecificHitpointRange)
-                    bill.hpRange = item.Filter.HpRange;
-                        
-                        
                 workTable.BillStack.AddBill(bill);
                 
                 Messages.Message(Strings.BillAddedFlavour(item.Print(), tag.name), MessageTypeDefOf.SilentInput);
