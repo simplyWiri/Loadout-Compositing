@@ -22,6 +22,14 @@ namespace Inventory {
 
         }
 
+        // which things the def list is limited to
+        enum ShowOnly {
+            All,
+            Researched,
+            // in storage, or carried, worn or equipped by a colonist
+            InColony
+        }
+
         enum SortBy
         {
             Name,
@@ -44,7 +52,9 @@ namespace Inventory {
         private string lastDefFilter = string.Empty;
         private List<ThingDef> lastDefList = null;
 
-        private bool onlyResearchedItems = false;
+        private ShowOnly showOnly = ShowOnly.All;
+        private HashSet<ThingDef> colonyDefs = null;
+        private float colonyDefsTime = -1;
         private static Dictionary<ThingDef, float> statCache = new Dictionary<ThingDef, float>();
         private SortBy sortedByKind = SortBy.Name;
         private bool ascending = false;
@@ -691,11 +701,14 @@ namespace Inventory {
                 TooltipHandler.TipRegion(bannerRect, label);
             }
             
-            if (onlyResearchedItems) {
+            if (showOnly == ShowOnly.Researched) {
                 var recipes = DefDatabase<RecipeDef>.AllDefs.Where(recipe => recipe.AvailableNow).ToList();
                 
                 defs = defs.Where(def => def.IsBuildingArtificial || recipes.Any(recipe => recipe.products.Any(pc => pc.thingDef == def))).ToList();
                 defs = defs.Where(def => !def.IsBuildingArtificial || def.IsResearchFinished).ToList();
+            } else if (showOnly == ShowOnly.InColony) {
+                var inColony = ColonyDefs();
+                defs = defs.Where(inColony.Contains).ToList();
             }
 
             string NameSelector(ThingDef td) => td.LabelCap.RawText;
@@ -717,12 +730,25 @@ namespace Inventory {
 
             var topBarRect = r.PopTopPartPixels(UIC.SPACED_HEIGHT);
             
-            var onlyResearchedRect = topBarRect.PopRightPartPixels(UIC.DEFAULT_HEIGHT).MiddlePartPixels(Text.LineHeight);
-            onlyResearchedRect.CenterWithWidth(Text.LineHeight);
-            if (Widgets.ButtonImage(onlyResearchedRect, Textures.FilterByResearchedTex)) {
-                onlyResearchedItems = !onlyResearchedItems;
+            var showOnlyRect = topBarRect.PopRightPartPixels(UIC.DEFAULT_HEIGHT).MiddlePartPixels(Text.LineHeight);
+            showOnlyRect.CenterWithWidth(Text.LineHeight);
+            // highlighted while it hides anything
+            if (Widgets.ButtonImage(showOnlyRect, Textures.FilterByResearchedTex, showOnly == ShowOnly.All ? Color.white : GenUI.MouseoverColor)) {
+                FloatMenuOption ShowOnlyOption(ShowOnly mode, string label) {
+                    return new FloatMenuOption(label, () => showOnly = mode);
+                }
+
+                var opts = new List<FloatMenuOption> {
+                    ShowOnlyOption(ShowOnly.All, Strings.ShowAllThings),
+                    ShowOnlyOption(ShowOnly.Researched, Strings.ShowResearchedThings),
+                };
+                // the colony's things are only known in a game, e.g. not when editing tags from the main menu
+                if (Current.Game != null) {
+                    opts.Add(ShowOnlyOption(ShowOnly.InColony, Strings.ShowThingsInColony));
+                }
+                Find.WindowStack.Add(new FloatMenu(opts));
             }
-            TooltipHandler.TipRegion(onlyResearchedRect, Strings.ResearchedItemsDesc);
+            TooltipHandler.TipRegion(showOnlyRect, Strings.ShowOnlyDesc);
 
             topBarRect.PopRightPartPixels(3f);
             
@@ -938,6 +964,30 @@ namespace Inventory {
 
             GUI.EndGroup();
             Widgets.EndScrollView();
+        }
+
+        // the defs of things in storage, or carried, worn or equipped by colonists, on any map. Looked up at most once a
+        // second, as there may be thousands of things
+        private HashSet<ThingDef> ColonyDefs() {
+            if (colonyDefs != null && Time.realtimeSinceStartup - colonyDefsTime < 1f) return colonyDefs;
+
+            colonyDefs = new HashSet<ThingDef>();
+            colonyDefsTime = Time.realtimeSinceStartup;
+            if (Current.Game == null) return colonyDefs;
+
+            foreach (var map in Find.Maps) {
+                foreach (var thing in map.listerThings.ThingsInGroup(ThingRequestGroup.HaulableEver).Where(t => t.IsInAnyStorage())) {
+                    colonyDefs.Add(thing.def);
+                }
+
+                foreach (var pawn in map.mapPawns.FreeColonistsSpawned) {
+                    colonyDefs.AddRange(pawn.inventory?.innerContainer.Select(t => t.def) ?? Enumerable.Empty<ThingDef>());
+                    colonyDefs.AddRange(pawn.apparel?.WornApparel.Select(t => t.def) ?? Enumerable.Empty<ThingDef>());
+                    colonyDefs.AddRange(pawn.equipment?.AllEquipmentListForReading.Select(t => t.def) ?? Enumerable.Empty<ThingDef>());
+                }
+            }
+
+            return colonyDefs;
         }
 
         private void DrawPinnedPreset(Rect rowRect, ItemPreset preset) {
