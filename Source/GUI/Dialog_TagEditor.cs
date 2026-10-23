@@ -313,7 +313,8 @@ namespace Inventory {
 
                 // Icon
                 var iconRect = itemRect.PopLeftPartPixels(UIC.SPACED_HEIGHT * 2);
-                GUIUtility.DrawItemIcon(iconRect, item, tooltip: def.DescriptionDetailed);
+                var iconTooltip = item.IsGeneric ? Strings.GenericCategoryDesc + "\n\n" + item.RankedMembersDescription() : def.DescriptionDetailed;
+                GUIUtility.DrawItemIcon(iconRect, item, tooltip: iconTooltip);
 
                 // Remove
                 var removeButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
@@ -324,25 +325,27 @@ namespace Inventory {
                 TooltipHandler.TipRegion(removeButton, Strings.RemoveItemFromTag);
 
                 // Copy, Paste
+                // generic items have no filter or alternatives to edit, only their quantity, the space is kept so
+                // quantities line up
                 var copyPasteButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 3);
-                var pasteTarget = item;
-                GUIUtility.DraggableCopyPaste(copyPasteButton, ref pasteTarget, Item.PasteFilter);
-                TooltipHandler.TipRegion(copyPasteButton, Strings.CopyPasteExplain);
-
-                // Add alternative
+                var alternativeButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
+                var constrainButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
                 if (!item.IsGeneric) {
-                    var alternativeButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
+                    var pasteTarget = item;
+                    GUIUtility.DraggableCopyPaste(copyPasteButton, ref pasteTarget, Item.PasteFilter);
+                    TooltipHandler.TipRegion(copyPasteButton, Strings.CopyPasteExplain);
+
+                    // Add alternative
                     if (Widgets.ButtonImageFitted(alternativeButton.ContractedBy(4f), TexButton.Plus)) {
                         addingAlternativesTo = item;
                     }
                     TooltipHandler.TipRegion(alternativeButton, Strings.AddAlternativeDesc);
-                }
 
-                // Edit 
-                var constrainButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
-                if (Widgets.ButtonImageFitted(constrainButton.ContractedBy(1f), Textures.EditTex))
-                    Find.WindowStack.Add(new Dialog_ItemSpecifier(item, item.Members[0]));
-                TooltipHandler.TipRegion(constrainButton, Strings.SpecifyElementsToolTip);
+                    // Edit 
+                    if (Widgets.ButtonImageFitted(constrainButton.ContractedBy(1f), Textures.EditTex))
+                        Find.WindowStack.Add(new Dialog_ItemSpecifier(item, item.Members[0]));
+                    TooltipHandler.TipRegion(constrainButton, Strings.SpecifyElementsToolTip);
+                }
 
                 var quantityFieldRect = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 2f);
                 item.quantityStr ??= item.Quantity.ToString();
@@ -520,15 +523,16 @@ namespace Inventory {
                     DrawDefList(r, Utility.rangedWeapons, Dialog_ItemSpecifier.baseWeaponStats.Union(Dialog_ItemSpecifier.rangedWeaponStats).ToList());
                     break;
                 case State.Medicinal:
-                    DrawDefList(r, Utility.medicinalDefs);
+                    DrawDefList(r, Utility.medicinalDefs, pinned: GenericCategory.Medicine);
                     break;
                 case State.Items:
-                    DrawDefList(r, Utility.items);
+                    DrawDefList(r, Utility.items, pinned: GenericCategory.Meals);
                     break;
             }
         }
 
-        private void DrawDefList(Rect r, IReadOnlyList<ThingDef> defList, List<StatDef> extraStats = null) {
+        // `pinned` is a generic category shown above the def list
+        private void DrawDefList(Rect r, IReadOnlyList<ThingDef> defList, List<StatDef> extraStats = null, GenericCategory pinned = null) {
             if (addingAlternativesTo != null && !curTag.requiredItems.Contains(addingAlternativesTo)) {
                 addingAlternativesTo = null;
             }
@@ -665,6 +669,10 @@ namespace Inventory {
             GUIUtility.InputField(inputFieldRect, "Def List Filter", ref defFilter);
             TooltipHandler.TipRegion(inputFieldRect, Strings.SearchBarDesc);
 
+            if (pinned != null && addingAlternativesTo == null && !curTag.requiredItems.Any(item => item.Category == pinned)) {
+                DrawPinnedCategory(r.PopTopPartPixels(UIC.DEFAULT_HEIGHT), pinned);
+            }
+
             var height = defs.Count * UIC.DEFAULT_HEIGHT;
             var width = r.width - (r.height > height ? 0 : UIC.SCROLL_WIDTH);
             var viewRect = new Rect(r.x, r.y, width, height);
@@ -793,6 +801,23 @@ namespace Inventory {
 
             GUI.EndGroup();
             Widgets.EndScrollView();
+        }
+
+        private void DrawPinnedCategory(Rect rowRect, GenericCategory category) {
+            var descRect = rowRect.LeftPart(0.85f);
+            var icon = category.Members.FirstOrDefault()?.Def;
+            if (icon != null) {
+                Widgets.DefIcon(descRect.LeftPart(.15f), icon);
+            }
+            Widgets.Label(descRect.RightPart(.85f), category.Label);
+
+            Widgets.DrawLightHighlight(rowRect);
+            Widgets.DrawHighlightIfMouseover(rowRect);
+            TooltipHandler.TipRegion(rowRect, () => Strings.GenericCategoryDesc + "\n\n" + new Item(category).RankedMembersDescription(), category.GetHashCode());
+
+            if (Widgets.ButtonInvisible(rowRect)) {
+                curTag.requiredItems.Add(new Item(category));
+            }
         }
 
         private void AddDefToTag(ThingDef def) {
