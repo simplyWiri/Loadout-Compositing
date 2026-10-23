@@ -40,7 +40,7 @@ namespace Inventory
             foreach (var tag in tags)
             {
                 // a bill can only make one def, so items with alternatives are skipped
-                foreach (var item in tag.requiredItems.Where(item => !item.IsGeneric && item.Members.Count == 1))
+                foreach (var item in tag.requiredItems.Where(item => item.Members.Count == 1))
                 {
                     if (producedDefs.Contains(item.RepresentativeDef))
                     {

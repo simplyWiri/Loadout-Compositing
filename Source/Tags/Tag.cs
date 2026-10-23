@@ -92,13 +92,8 @@ namespace Inventory {
             Scribe_Values.Look(ref defaultState, nameof(defaultState), null);
             Scribe_Values.Look(ref defaultCondition, nameof(defaultCondition), ActiveCondition.StateActive);
 
-            var unknownCategories = requiredItems.RemoveAll(item => item.IsGeneric && item.Category == null);
-            if (unknownCategories != 0) {
-                Log.Error($"Attempting to load an unknown generic category - Removing item from {name} - ({GetUniqueLoadID()})");
-            }
-
             if (!GenericLoad && idType != "GenericTag_") {
-                foreach (var item in requiredItems.Where(item => !item.IsGeneric)) {
+                foreach (var item in requiredItems) {
                     var count = item.members.RemoveAll(member => member.Def == null);
                     if (count != 0) {
                         Log.Error($"Attempting to load a null def, have you removed a mod? - Removing item from {name} - ({GetUniqueLoadID()})");
@@ -112,7 +107,7 @@ namespace Inventory {
                     }
                 }
 
-                requiredItems.RemoveAll(item => !item.IsGeneric && item.members.Count == 0);
+                requiredItems.RemoveAll(item => item.members.Count == 0);
 
                 idType = "Tag_";
             } else {

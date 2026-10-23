@@ -2,8 +2,8 @@
 <LanguageData>
 	<CompositableLoadouts.Modify>Modify</CompositableLoadouts.Modify>
 	<CompositableLoadouts.Generic>Generic</CompositableLoadouts.Generic>
-	<CompositableLoadouts.GenericCategory.Medicine>Any medicine (best first)</CompositableLoadouts.GenericCategory.Medicine>
-	<CompositableLoadouts.GenericCategory.Meals>Any meal (best first)</CompositableLoadouts.GenericCategory.Meals>
+	<CompositableLoadouts.ItemPreset.Medicine>Any medicine (best first)</CompositableLoadouts.ItemPreset.Medicine>
+	<CompositableLoadouts.ItemPreset.Meals>Any meal (best first)</CompositableLoadouts.ItemPreset.Meals>
 	<CompositableLoadouts.Create>Create</CompositableLoadouts.Create>
 
 	<CompositableLoadouts.TagLoadoutComposition>Tags and Loadout Composition</CompositableLoadouts.TagLoadoutComposition>
@@ -53,7 +53,7 @@
 	<CompositableLoadouts.HitPointsAmount>Hit points {0}</CompositableLoadouts.HitPointsAmount>
 
 	<CompositableLoadouts.Customize>Customize</CompositableLoadouts.Customize>
-	<CompositableLoadouts.GenericCategoryDesc>Any of the following counts towards this item, pawns take the best available first. Rotten things never count, and meals only count if the pawn is willing to eat them.</CompositableLoadouts.GenericCategoryDesc>
+	<CompositableLoadouts.ItemPresetDesc>Adds a group of all of these, pawns take the best available first. Once added it is a normal group, reorder or remove its alternatives as you like.</CompositableLoadouts.ItemPresetDesc>
 	<CompositableLoadouts.Done>Done</CompositableLoadouts.Done>
 	<CompositableLoadouts.AddAlternativeDesc>Add alternatives to this item, any one of them satisfies it. Pawns prefer alternatives higher in the list.</CompositableLoadouts.AddAlternativeDesc>
 	<CompositableLoadouts.AddingAlternativesTo>Adding alternatives to {0}</CompositableLoadouts.AddingAlternativesTo>

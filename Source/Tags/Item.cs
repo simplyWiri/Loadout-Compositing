@@ -8,12 +8,9 @@ using Verse;
 
 namespace Inventory {
 
-    // the base type, contains the `ThingDef`s (members) which satisfy it, and the quality/hp they must meet. A generic
-    // item saves only its `category`, its members come from that category.
+    // the base type, contains the `ThingDef`s (members) which satisfy it, and the quality/hp they must meet
     public class Item : IExposable {
-        // only used when not generic
         internal List<ItemMember> members;
-        internal string category;
 
         // should only be directly accessed in `Dialog_TagEditor.cs`
         internal Filter filter;
@@ -25,46 +22,41 @@ namespace Inventory {
         public string quantityStr;
 
         public Filter Filter => filter;
-        public IReadOnlyList<ItemMember> Members => MemberList;
+        public IReadOnlyList<ItemMember> Members => members;
         public int Quantity => quantity;
-
-        public bool IsGeneric => category != null;
-        // null if not generic, or the category is unknown
-        public GenericCategory Category => IsGeneric ? GenericCategory.Named(category) : null;
-        private List<ItemMember> MemberList => IsGeneric ? Category?.Members ?? new List<ItemMember>() : members;
 
         // all members are either apparel, or not
         public bool IsApparel => RepresentativeDef.IsApparel;
-        public IEnumerable<ThingDef> Defs => MemberList.Select(m => m.Def);
+        public IEnumerable<ThingDef> Defs => members.Select(m => m.Def);
 
         // the best ranked member, used when only one can be shown or used for an estimate (icons, mass, stats)
-        public ItemMember RepresentativeMember => MemberList[0];
+        public ItemMember RepresentativeMember => members[0];
         public ThingDef RepresentativeDef => RepresentativeMember.Def;
         public ThingDef RepresentativeStuff => RepresentativeMember.RepresentativeStuff;
         public QualityCategory RandomQuality => (QualityCategory)Mathf.FloorToInt(((int)filter.QualityRange.max + (int)filter.QualityRange.min) / 2.0f);
         public string Label => Print();
 
-        // rotten things never count towards generic items
-        public bool Allows(Thing thing) => MemberAllowing(thing) != null && Filter.Allows(thing) && !(IsGeneric && IsRotten(thing));
+        // rotten meals never count
+        public bool Allows(Thing thing) => MemberAllowing(thing) != null && Filter.Allows(thing) && !(IsMeal(thing) && IsRotten(thing));
 
         // whether `thing` counts towards this item for `pawn` specifically, i.e. a meal they are willing to eat
         public bool AllowsFor(Pawn pawn, Thing thing) {
             if (!Allows(thing)) return false;
-            if (Category == GenericCategory.Meals && !pawn.WillEat(thing)) return false;
+            if (IsMeal(thing) && !pawn.WillEat(thing)) return false;
 
             return true;
         }
 
-        public ItemMember MemberFor(ThingDef def) => MemberList.FirstOrDefault(m => m.Def == def);
-        public ItemMember MemberAllowing(Thing thing) => MemberList.FirstOrDefault(m => m.Allows(thing));
+        public ItemMember MemberFor(ThingDef def) => members.FirstOrDefault(m => m.Def == def);
+        public ItemMember MemberAllowing(Thing thing) => members.FirstOrDefault(m => m.Allows(thing));
 
         // lower is better, members may share a rank
-        public int RankOf(ItemMember member) => IsGeneric ? Category.RankOf(member.Def) : members.IndexOf(member);
+        public int RankOf(ItemMember member) => members.IndexOf(member);
         // the rank of the member which accepts `thing`, or -1 if this item does not accept it
         public int RankOf(Thing thing) => Allows(thing) ? RankOf(MemberAllowing(thing)) : -1;
 
         // members grouped by rank, best first
-        public IEnumerable<IGrouping<int, ItemMember>> RankedMembers => MemberList.GroupBy(RankOf).OrderBy(g => g.Key);
+        public IEnumerable<IGrouping<int, ItemMember>> RankedMembers => members.GroupBy(RankOf).OrderBy(g => g.Key);
         public bool SubsetOf(Bill_Production bill) => (MemberFor(bill.recipe.ProducedThingDef)?.StuffSubsetOf(bill) ?? false) && Filter.SubsetOf(bill);
 
         // copies the shared quality/hp, and the stuff of the member the bill produces
@@ -80,16 +72,17 @@ namespace Inventory {
                 bill.hpRange = Filter.HpRange;
         }
 
+        private static bool IsMeal(Thing thing) => thing.def.ingestible?.IsMeal ?? false;
+
         private static bool IsRotten(Thing thing) {
             var rottable = thing.TryGetComp<CompRottable>();
             return rottable != null && rottable.Stage != RotStage.Fresh;
         }
 
         // Stuff? Def.LabelCap Quality-Range?
-        // "One of: A, B +n", the category's name, or the def's name
+        // "One of: A, B +n", or the def's name
         public string ShortLabel {
             get {
-                if (IsGeneric) return Category?.Label ?? category;
                 if (members.Count == 1) return RepresentativeDef?.LabelCap ?? RepresentativeMember.WrappedDef.defName;
 
                 const int shownMembers = 2;
@@ -99,13 +92,9 @@ namespace Inventory {
             }
         }
 
-        public bool HasAlternatives => IsGeneric || members.Count > 1;
+        public bool HasAlternatives => members.Count > 1;
 
         public string Print() {
-            if (IsGeneric) {
-                return ShortLabel;
-            }
-
             var stringBuilder = new StringBuilder();
 
             if (members.Count > 1) {
@@ -140,16 +129,6 @@ namespace Inventory {
             this.quantity = 1;
         }
 
-        public Item(GenericCategory category) {
-            this.members = new List<ItemMember>();
-            this.category = category.key;
-            // generics have no filter to edit, so accept any quality and hit points
-            this.filter = new Filter();
-            this.filter.SetQualityRange(QualityRange.All);
-            this.filter.SetHpRange(FloatRange.ZeroToOne);
-            this.quantity = 1;
-        }
-
         // one line per rank, best first, members of the same rank share a line
         public string RankedMembersDescription() {
             return string.Join("\n", RankedMembers.Select((rank, idx) => $"{idx + 1}. " + string.Join(", ", rank.Select(m => m.ListLabel))));
@@ -157,10 +136,6 @@ namespace Inventory {
 
         // a copy holding only the members (and stuffs) whose defs exist in this game, or null if none do
         public Item CopyValid() {
-            if (IsGeneric) {
-                return new Item(Category) { quantity = quantity };
-            }
-
             var copy = new Item { quantity = quantity, filter = new Filter() };
             copy.filter.SetQualityRange(filter.QualityRange);
             copy.filter.SetHpRange(filter.HpRange);
@@ -179,8 +154,6 @@ namespace Inventory {
 
         // pastes `from`'s quality/hp, and each of its stuffs which are valid for `to`'s members
         public static Item PasteFilter(Item from, Item to) {
-            if (to.IsGeneric || from.IsGeneric) return to;
-
             var newFilter = new Filter();
             if (to.RepresentativeDef.HasComp(typeof(CompQuality)) && from.RepresentativeDef.HasComp(typeof(CompQuality))) {
                 newFilter.SetQualityRange(from.Filter.QualityRange);
@@ -203,7 +176,7 @@ namespace Inventory {
 
         // exists to make generic `Items` easier
         public IEnumerable<Thing> ThingsOnMap(Map map) {
-            foreach (var member in MemberList) {
+            foreach (var member in members) {
                 var things = map.listerThings.ThingsOfDef(member.Def);
                 if (things.NullOrEmpty()) continue;
                 foreach (var thing in things.Where(Allows)) {
@@ -213,16 +186,9 @@ namespace Inventory {
         }
 
         public void ExposeData() {
-            Scribe_Values.Look(ref category, nameof(category));
-            if (!IsGeneric) {
-                Scribe_Collections.Look(ref members, nameof(members), LookMode.Deep);
-            }
+            Scribe_Collections.Look(ref members, nameof(members), LookMode.Deep);
             Scribe_Deep.Look(ref filter, nameof(filter));
             Scribe_Values.Look(ref quantity, nameof(quantity));
-
-            if (Scribe.mode == LoadSaveMode.LoadingVars && IsGeneric) {
-                members = new List<ItemMember>();
-            }
 
             // items saved before groups existed hold a single `def`, with its stuffs saved inside `filter`
             if (Scribe.mode == LoadSaveMode.LoadingVars && members == null) {

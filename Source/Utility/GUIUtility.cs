@@ -53,7 +53,7 @@ namespace Inventory {
             }
 
             if (badge && item.HasAlternatives) {
-                var badgeText = item.IsGeneric ? "*" : $"+{item.Members.Count - 1}";
+                var badgeText = $"+{item.Members.Count - 1}";
                 WithModifiers(rect, badgeText, font: GameFont.Tiny, color: Color.yellow, anchor: TextAnchor.UpperRight);
             }
 
