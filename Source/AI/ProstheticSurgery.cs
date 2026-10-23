@@ -33,7 +33,7 @@ namespace Inventory {
                 foreach (var item in loadout.Items.Where(item => item.IsProsthetic).Distinct()) {
                     var def = item.RepresentativeDef;
                     var recipe = ProstheticUtility.InstallRecipeFor(pawn, def);
-                    if (recipe == null || !recipe.AvailableNow) continue;
+                    if (recipe == null || !recipe.AvailableNow || loadout.Declined(def)) continue;
 
                     var queued = pawn.BillStack.Bills.Count(bill => bill.recipe == recipe);
                     if (ProstheticUtility.SatisfiedCount(pawn, def) + queued >= item.Quantity) continue;
