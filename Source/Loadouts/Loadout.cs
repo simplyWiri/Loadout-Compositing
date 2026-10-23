@@ -96,20 +96,9 @@ namespace Inventory {
             return tagPriority;
         }
 
-        public int DesiredCount(List<Thing> pawnGear, Item curItem) {
-            // list of things which our current item accepts
-            var acceptedThings = pawnGear.Where(curItem.Allows).ToList();
-            // all items besides our current item
-            var otherItems = Items.Except(curItem);
-
-            var desiredCount = curItem.Quantity;
-
-            foreach (var item in otherItems) {
-                var potentiallyOwnedStackCount = acceptedThings.Where(item.Allows).Sum(thing => thing.stackCount);
-                desiredCount += Mathf.Min(item.Quantity, potentiallyOwnedStackCount);
-            }
-
-            return desiredCount;
+        // which of `pawnGear` counts towards each of the active items, and which is surplus
+        public GearAssignment AssignGear(List<Thing> pawnGear) {
+            return new GearAssignment(Items, pawnGear);
         }
 
         public bool Desires(Thing thing, bool allTags = false) {

@@ -94,19 +94,20 @@ namespace Inventory {
         private Job RemoveThingsJob(Pawn pawn, Loadout loadout) {
 
             var pawnGear = pawn.InventoryAndEquipment().ToList();
+            var assignment = loadout.AssignGear(pawnGear);
 
             foreach (var item in loadout.ThingsToRemove.ToList()) {
-                var itemCount = item.CountIn(pawnGear);
-                var loadoutDesiredCount = loadout.DesiredCount(pawnGear, item) - item.Quantity;
+                // anything the removed item accepts which the active items have not claimed is no longer needed
+                var thing = pawnGear.Where(t => item.Allows(t) && assignment.Surplus(t) > 0)
+                    .OrderByDescending(t => assignment.Surplus(t))
+                    .FirstOrDefault();
 
-                if (itemCount > loadoutDesiredCount) {
-                    var job = RemoveItem(pawnGear, item, Mathf.Min(itemCount - loadoutDesiredCount, item.Quantity));
-                    if (job != null) {
-                        if (job.count >= item.Quantity) {
-                            loadout.ThingsToRemove.Remove(item);
-                        }
-                        return job;
+                if (thing != null) {
+                    var job = UnloadJob(thing, Mathf.Min(assignment.Surplus(thing), item.Quantity));
+                    if (job.count >= item.Quantity) {
+                        loadout.ThingsToRemove.Remove(item);
                     }
+                    return job;
                 }
 
                 loadout.ThingsToRemove.Remove(item);
@@ -171,46 +172,41 @@ namespace Inventory {
 
         private Job SatisfyLoadoutItemsJob(Pawn pawn, Loadout loadout) {
             var pawnGear = pawn.InventoryAndEquipment().ToList();
+            var assignment = loadout.AssignGear(pawnGear);
+            var items = loadout.Items.Where(item => !item.IsApparel).Distinct().ToList();
 
-            foreach (var item in loadout.Items.Where(item => !item.IsApparel)) {
-                var itemCount = item.CountIn(pawnGear);
-                var loadoutDesiredCount = loadout.DesiredCount(pawnGear, item);
+            foreach (var item in items) {
+                // fetch the best ranked members first, lower ranks only make up what the better ranks can't
+                var remaining = item.Quantity;
+                foreach (var rank in item.RankedMembers) {
+                    if (remaining == 0) break;
 
-                // if we have the ideal amount for our item, we can just continue and consider this item
-                // satisfied
-                if (itemCount == loadoutDesiredCount) {
-                    continue;
+                    var held = assignment.HeldOfRank(item, rank.Key);
+                    if (held < remaining) {
+                        var job = FindItem(pawn, item, rank.Key, remaining - held);
+                        if (job != null) {
+                            return job;
+                        }
+                    }
+
+                    remaining -= Mathf.Min(held, remaining);
                 }
+            }
 
-                // we need to pick up some more of this item to consider it satisfied
-                if (itemCount < loadoutDesiredCount) {
-                    var job = FindItem(pawn, item, loadoutDesiredCount - itemCount);
-                    if (job != null) {
-                        return job;
-                    }
-                }
-                else {
-                    // we have too many for this item, but what happens if there are other tags which
-                    // have this item in it too? we need to check for them too. I.e. if multiple tags
-                    // want a pawn to pick up medicine, we need to remove only if we are above the sum
-                    // of quantities of all those items in those tags.
-
-                    if (loadoutDesiredCount >= itemCount) {
-                        continue;
-                    }
-
-                    var job = RemoveItem(pawnGear, item, itemCount - loadoutDesiredCount);
-                    if (job != null) {
-                        return job;
-                    }
+            // things are only surplus once the items accepting them are full, so we never drop something before
+            // its replacement is held. Multiple tags wanting the same thing are accounted for by the assignment.
+            foreach (var thing in assignment.SurplusThings) {
+                if (items.Any(item => item.Allows(thing))) {
+                    return UnloadJob(thing, assignment.Surplus(thing));
                 }
             }
 
             return null;
         }
 
-        private Job FindItem(Pawn pawn, Item item, int count) {
-            var things = item.ThingsOnMap(pawn.Map).ToList();
+        private Job FindItem(Pawn pawn, Item item, int rank, int count) {
+            var things = item.ThingsOnMap(pawn.Map).Where(thing => item.RankOf(thing) == rank).ToList();
+            var primary = pawn.equipment.Primary;
 
             var orderedList = count == 1
                 ? DecideItemPriority(pawn, things)
@@ -221,7 +217,8 @@ namespace Inventory {
                     continue;
                 }
 
-                if (count == 1 && thing.def.IsWeapon && pawn.equipment.Primary is null )
+                // equipping swaps out a worse ranked primary of the same item
+                if (count == 1 && thing.def.IsWeapon && (primary is null || item.RankOf(primary) > rank))
                 {
                     return JobMaker.MakeJob(HoldItem, thing);
                 } else {
@@ -284,14 +281,7 @@ namespace Inventory {
             return things.OrderBy(t => t.InteractionCell.DistanceToSquared(pawn.InteractionCell));
         }
 
-        private Job RemoveItem(List<Thing> pawnGear, Item item, int count) {
-            if (count == 0) return null;
-            
-            var gear = pawnGear.Where(item.Allows).OrderByDescending(thing => thing.stackCount).ToList();
-
-            var thing = gear.FirstOrDefault();
-            if (thing == null) return null;
-
+        private Job UnloadJob(Thing thing, int count) {
             var job = JobMaker.MakeJob(UnloadItem);
             job.SetTarget(TargetIndex.A, thing);
             job.count = Mathf.Min(count, thing.stackCount);
