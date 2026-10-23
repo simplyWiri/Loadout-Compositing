@@ -201,9 +201,12 @@ namespace Inventory {
             Scribe_References.Look(ref priorState, nameof(priorState));
             Scribe_Collections.Look(ref declinedProsthetics, nameof(declinedProsthetics), LookMode.Def);
 
-            // pending removals are dropped on load, but saving (e.g. an autosave) mustn't forget them
-            if (Scribe.mode == LoadSaveMode.LoadingVars || itemsToRemove == null) {
-                itemsToRemove = new List<Item>();
+            // pending removals are kept, so gear a pawn was about to put away is still put away after loading. Any
+            // whose things no longer exist (a removed mod) are dropped, as tags drop such items
+            itemsToRemove ??= new List<Item>();
+            if (Scribe.mode == LoadSaveMode.PostLoadInit) {
+                itemsToRemove.RemoveAll(item => item?.members == null || item.members.All(member => member.Def == null));
+                itemsToRemove.ForEach(item => item.members.RemoveAll(member => member.Def == null));
             }
             elements ??= new List<LoadoutElement>();
             declinedProsthetics ??= new HashSet<ThingDef>();
