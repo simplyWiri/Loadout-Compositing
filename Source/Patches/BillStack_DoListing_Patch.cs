@@ -41,7 +41,7 @@ namespace Inventory
             {
                 foreach (var item in tag.requiredItems)
                 {
-                    if (producedDefs.Contains(item.Def))
+                    if (producedDefs.Contains(item.RepresentativeDef))
                     {
                         items[item] = tag;
                     }
@@ -54,16 +54,16 @@ namespace Inventory
                 if (existingBill is not Bill_Production bp) continue;
                 if (bp.repeatMode != InvBillRepeatModeDefOf.W_PerTag) continue;
                         
-                items.RemoveAll(kp => bp.recipe.ProducedThingDef == kp.Key.Def && kp.Key.SubsetOf(bp));
+                items.RemoveAll(kp => bp.recipe.ProducedThingDef == kp.Key.RepresentativeDef && kp.Key.SubsetOf(bp));
             }
 
             foreach (var (item, tag) in items)
             {
-                var recipe = availableRecipes.First(r => r.ProducedThingDef == item.Def);
+                var recipe = availableRecipes.First(r => r.ProducedThingDef == item.RepresentativeDef);
                 var bill = recipe.MakeNewBill() as Bill_Production;
                 if (bill == null)
                 {
-                    Log.Error($"Failed to make bill for {item.Def.defName}");
+                    Log.Error($"Failed to make bill for {item.RepresentativeDef.defName}");
                     continue;
                 }
                         

@@ -286,7 +286,7 @@ namespace Inventory {
             // List each item in the currently required items
             // [ Info ] [ Icon ] [ Name ] [ Edit Filter ] [ Edit Quantity ] [ Remove ]  
             foreach (var item in curTag.requiredItems.ToList()) {
-                var def = item.Def;
+                var def = item.RepresentativeDef;
                 var itemRect = baseRect.PopTopPartPixels(UIC.SPACED_HEIGHT * 2);
 
                 if (!itemRect.Overlaps(visibilityRect)) {
