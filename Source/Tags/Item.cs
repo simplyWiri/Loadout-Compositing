@@ -27,6 +27,8 @@ namespace Inventory {
 
         // all members are either apparel, or not
         public bool IsApparel => RepresentativeDef.IsApparel;
+        // installed on the pawn by surgery, rather than carried
+        public bool IsProsthetic => ProstheticUtility.IsProsthetic(RepresentativeDef);
         public IEnumerable<ThingDef> Defs => members.Select(m => m.Def);
 
         // the best ranked member, used when only one can be shown or used for an estimate (icons, mass, stats)

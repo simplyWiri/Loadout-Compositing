@@ -33,6 +33,10 @@ namespace Inventory {
         public IEnumerable<Item> Items => Tags.SelectMany(t => t.requiredItems);
         public IEnumerable<Item> ItemsWith(LoadoutState state) => TagsWith(state).SelectMany(t => t.requiredItems);
 
+        // the items which are worn or held, i.e. everything but prosthetics, which are installed instead
+        public IEnumerable<Item> CarriedItems => Items.Where(item => !item.IsProsthetic);
+        public IEnumerable<Item> CarriedItemsWith(LoadoutState state) => ItemsWith(state).Where(item => !item.IsProsthetic);
+
         public Loadout() {
             elements = new List<LoadoutElement>();
             itemsToRemove = new List<Item>();
@@ -59,7 +63,7 @@ namespace Inventory {
         }
 
         public void UpdateState(LoadoutElement element, bool active) {  
-            foreach (var item in element.Tag.requiredItems.Where(item => !item.IsApparel)) {
+            foreach (var item in element.Tag.requiredItems.Where(item => !item.IsApparel && !item.IsProsthetic)) {
                 if (!active) {
                     AddItemToRemove(item);
                 }
@@ -112,16 +116,16 @@ namespace Inventory {
 
         // which of `pawnGear` counts towards each of the active items, and which is surplus
         public GearAssignment AssignGear(Pawn pawn, List<Thing> pawnGear) {
-            return new GearAssignment(pawn, Items, pawnGear);
+            return new GearAssignment(pawn, CarriedItems, pawnGear);
         }
 
         public bool Desires(Thing thing, bool allTags = false) {
-            return (allTags ? AllTags : Tags).Any(t => t.ItemsMatching(item => item.Allows(thing)).Any());
+            return (allTags ? AllTags : Tags).Any(t => t.ItemsMatching(item => !item.IsProsthetic && item.Allows(thing)).Any());
         }
 
         public IEnumerable<Item> ItemsAccepting(Thing thing) {
             return Tags.SelectMany(t => t
-                .ItemsMatching(item => item.Allows(thing)));
+                .ItemsMatching(item => !item.IsProsthetic && item.Allows(thing)));
         }
 
         // (item, tag it came from, def chosen to be worn for the item)
@@ -136,7 +140,7 @@ namespace Inventory {
         }
 
         public IEnumerable<Item> DesiredItems(List<Thing> heldThings) {
-            var desiredThings = Items.Where(t => !t.IsApparel);
+            var desiredThings = CarriedItems.Where(t => !t.IsApparel);
             foreach (var thing in desiredThings) {
                 var count = heldThings.Where(heldThing => thing.Allows(heldThing))
                     .Sum(heldThing => heldThing.stackCount);
