@@ -17,6 +17,7 @@ namespace Inventory {
         public bool hideGizmo = false;
         public bool noPanicAlert = false;
         public bool disableCustomScroll = false;
+        public AutoSurgery autoSurgery = AutoSurgery.Suspended;
         public FloatRange defaultHitpoints = FloatRange.ZeroToOne;
         public QualityRange defaultQualityRange = QualityRange.All;
         
@@ -77,6 +78,20 @@ namespace Inventory {
             DrawOption(ref rect, Strings.HideGizmo, ref hideGizmo, Strings.HideGizmoDesc);
             DrawOption(ref rect, Strings.DisableCustomScroll, ref disableCustomScroll, Strings.DisableCustomScrollDesc);
             DrawOption(ref rect, Strings.NoPanicAlert, ref noPanicAlert, Strings.NoPanicAlertDesc);
+
+            // [ Auto surgery          ] [ Suspended ]
+            var autoSurgeryRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
+            TooltipHandler.TipRegion(autoSurgeryRect, Strings.AutoSurgeryDesc);
+            var modeRect = autoSurgeryRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 5);
+            Text.Anchor = TextAnchor.MiddleLeft;
+            Widgets.Label(autoSurgeryRect, Strings.AutoSurgery);
+            Text.Anchor = TextAnchor.UpperLeft;
+            if (Widgets.ButtonText(modeRect, Strings.AutoSurgeryMode(autoSurgery))) {
+                var options = new[] { AutoSurgery.Off, AutoSurgery.Suspended, AutoSurgery.Active }
+                    .Select(mode => new FloatMenuOption(Strings.AutoSurgeryMode(mode), () => autoSurgery = mode))
+                    .ToList();
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
         }
 
         private void DrawDefaults(ref Rect rect) {
@@ -139,6 +154,7 @@ namespace Inventory {
             Scribe_Values.Look(ref onlyItemsFromLoadout, nameof(onlyItemsFromLoadout), false);
             Scribe_Values.Look(ref disableCustomScroll, nameof(disableCustomScroll), Application.platform == RuntimePlatform.LinuxPlayer);
             Scribe_Values.Look(ref noPanicAlert, nameof(noPanicAlert), false);
+            Scribe_Values.Look(ref autoSurgery, nameof(autoSurgery), AutoSurgery.Suspended);
             Scribe_Values.Look(ref defaultHitpoints, nameof(defaultHitpoints), FloatRange.ZeroToOne);
             Scribe_Values.Look(ref defaultQualityRange, nameof(defaultQualityRange), QualityRange.All);
 

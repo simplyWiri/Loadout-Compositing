@@ -37,6 +37,14 @@ namespace Inventory {
             return recipe == null || !recipe.targetsBodyPart || ProstheticUtility.TargetParts(body, recipe).Any(part => BlockedBy(recipe, part) == null);
         }
 
+        // could `def` go on `part`, i.e. it was placed there, or nothing placed is in the way
+        public bool Free(ThingDef def, BodyPartRecord part) {
+            if (placedDefs.TryGetValue(def, out var placed) && placed.Contains(part)) return true;
+
+            var recipe = RecipeFor(def);
+            return recipe != null && BlockedBy(recipe, part) == null;
+        }
+
         private void Place(Item item, Tag tag) {
             var def = item.RepresentativeDef;
             var recipe = RecipeFor(def);
@@ -77,11 +85,11 @@ namespace Inventory {
         private Tuple<RecipeDef, Tag> BlockedBy(RecipeDef recipe, BodyPartRecord part) {
             // nothing can go on or below an added part
             for (var ancestor = part; ancestor != null; ancestor = ancestor.parent) {
-                var addedPart = Reservations(ancestor).FirstOrDefault(r => IsAddedPart(r.Item1));
+                var addedPart = Reservations(ancestor).FirstOrDefault(r => ProstheticUtility.IsAddedPart(r.Item1));
                 if (addedPart != null) return addedPart;
             }
 
-            if (IsAddedPart(recipe)) {
+            if (ProstheticUtility.IsAddedPart(recipe)) {
                 // an added part replaces everything below it
                 return SelfAndDescendants(part).SelectMany(Reservations).FirstOrDefault();
             }
@@ -99,8 +107,6 @@ namespace Inventory {
                 yield return descendant;
             }
         }
-
-        private static bool IsAddedPart(RecipeDef recipe) => typeof(Hediff_AddedPart).IsAssignableFrom(recipe.addsHediff.hediffClass);
 
         private RecipeDef RecipeFor(ThingDef def) {
             return ProstheticUtility.InstallRecipesFor(def).FirstOrDefault(recipe => !recipe.targetsBodyPart || ProstheticUtility.TargetParts(body, recipe).Any());
