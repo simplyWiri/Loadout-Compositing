@@ -104,7 +104,8 @@ namespace Inventory
         internal static Tag SaveToSettings(Tag tag, string name, List<Tag> savedTags) {
             var newTag = tag.MakeCopy();
             newTag.name = name;
-            newTag.requiredItems = tag.requiredItems.ToList();
+            // copies, so editing the in-game tag afterwards doesn't edit (and on the next settings write, save) this one
+            newTag.requiredItems = tag.requiredItems.Select(item => item.CopyValid()).Where(item => item != null).ToList();
             newTag.uniqueId = savedTags.Count == 0 ? 0 : savedTags.MaxBy(t => t.uniqueId).uniqueId + 1;
             savedTags.Add(newTag);
             ModBase.settings.Write();
