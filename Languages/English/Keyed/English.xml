@@ -184,6 +184,7 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.BillAddedFlavour>Bill added for {0} from {1}</CompositableLoadouts.BillAddedFlavour> 
 
 	<CompositableLoadouts.ApparelOverlapFlavour>If equipped, {0} would prevent the highlighted apparel being worn</CompositableLoadouts.ApparelOverlapFlavour>
+	<CompositableLoadouts.ProstheticOverlapFlavour>If installed, {0} would prevent the highlighted prosthetics being installed</CompositableLoadouts.ProstheticOverlapFlavour>
 	<CompositableLoadouts.RemovingDeletedTagPawn>Removing {0} from {1}</CompositableLoadouts.RemovingDeletedTagPawn>
 	<CompositableLoadouts.RemovingDeletedTagBill>Suspending bill {0} in {1} as it referenced {2}</CompositableLoadouts.RemovingDeletedTagBill>
 	<CompositableLoadouts.UnknownLocation>Unknown building</CompositableLoadouts.UnknownLocation>
