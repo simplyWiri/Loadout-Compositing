@@ -17,7 +17,8 @@ namespace Inventory {
             Melee,
             Ranged,
             Medicinal,
-            Items
+            Items,
+            Prosthetics
 
         }
 
@@ -320,6 +321,9 @@ namespace Inventory {
                 var iconRect = itemRect.PopLeftPartPixels(UIC.SPACED_HEIGHT * 2);
                 // a group's tooltip defaults to listing its alternatives
                 var iconTooltip = item.HasAlternatives ? null : def.DescriptionDetailed;
+                if (item.IsProsthetic) {
+                    iconTooltip += "\n\n" + Strings.InstalledOn(ProstheticUtility.TargetPartsLabel(BodyDefOf.Human, def));
+                }
                 GUIUtility.DrawItemIcon(iconRect, item, tooltip: iconTooltip);
 
                 // Remove
@@ -336,12 +340,14 @@ namespace Inventory {
                 GUIUtility.DraggableCopyPaste(copyPasteButton, ref pasteTarget, Item.PasteFilter);
                 TooltipHandler.TipRegion(copyPasteButton, Strings.CopyPasteExplain);
 
-                // Add alternative
+                // Add alternative, prosthetics can't have any. The space is kept so quantities line up
                 var alternativeButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
-                if (Widgets.ButtonImageFitted(alternativeButton.ContractedBy(4f), TexButton.Plus)) {
-                    addingAlternativesTo = item;
+                if (!item.IsProsthetic) {
+                    if (Widgets.ButtonImageFitted(alternativeButton.ContractedBy(4f), TexButton.Plus)) {
+                        addingAlternativesTo = item;
+                    }
+                    TooltipHandler.TipRegion(alternativeButton, Strings.AddAlternativeDesc);
                 }
-                TooltipHandler.TipRegion(alternativeButton, Strings.AddAlternativeDesc);
 
                 // Edit, for a group only if one of its alternatives has a quality or stuff to pick. The space is kept
                 // so quantities line up
@@ -355,7 +361,9 @@ namespace Inventory {
 
                 var quantityFieldRect = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 2f);
                 item.quantityStr ??= item.Quantity.ToString();
-                Widgets.TextFieldNumeric(quantityFieldRect.ContractedBy(0, quantityFieldRect.height / 4.0f), ref item.quantity, ref item.quantityStr, 1);
+                // no more prosthetics than a body has parts for
+                var maxQuantity = item.IsProsthetic ? ProstheticUtility.MaxInstallable(BodyDefOf.Human, def) : 1E+09f;
+                Widgets.TextFieldNumeric(quantityFieldRect.ContractedBy(0, quantityFieldRect.height / 4.0f), ref item.quantity, ref item.quantityStr, 1, maxQuantity);
 
                 TooltipHandler.TipRegion(quantityFieldRect, Strings.EditQuantity);
 
@@ -365,7 +373,7 @@ namespace Inventory {
                     Widgets.Label(itemRect.RightPartPixels(itemRect.width - GenUI.GapSmall), Strings.OneOfHeading);
                 } else {
                     Text.Anchor = TextAnchor.MiddleCenter;
-                    Widgets.Label(itemRect, item.Label);
+                    Widgets.Label(itemRect, item.IsProsthetic ? Strings.InstalledLabel(item.Label) : item.Label);
                 }
                 Text.Anchor = TextAnchor.UpperLeft;
             }
@@ -380,6 +388,8 @@ namespace Inventory {
         // the member the item's edit dialog opens on, preferring one made from stuff (stuff is set per member, the
         // dialog can switch between them); null if a group has nothing but hit points to pick
         private static ItemMember SpecifiableMember(Item item) {
+            // nothing about a prosthetic changes once it is installed
+            if (item.IsProsthetic) return null;
             if (item.Members.Count == 1) return item.Members[0];
 
             return item.Members.FirstOrDefault(m => m.Def.MadeFromStuff)
@@ -567,6 +577,7 @@ namespace Inventory {
             DrawOptionButton(Textures.RangedTex, "Ranged", State.Ranged);
             DrawOptionButton(Textures.MedicalTex, "Medicine", State.Medicinal);
             DrawOptionButton(Textures.MiscItemsTex, "Items", State.Items);
+            DrawOptionButton(Textures.ProstheticsTex, Strings.Prosthetics, State.Prosthetics);
 
             if (selectedStat != null) {
                 Text.Font = GameFont.Tiny;
@@ -593,6 +604,9 @@ namespace Inventory {
                     break;
                 case State.Items:
                     DrawDefList(r, Utility.items, pinned: ItemPreset.Meals);
+                    break;
+                case State.Prosthetics:
+                    DrawDefList(r, Utility.prostheticDefs);
                     break;
             }
         }
@@ -639,8 +653,8 @@ namespace Inventory {
             defs = defs.Where(t => !itms.Contains(t)).ToList();
 
             if (addingAlternativesTo != null) {
-                // alternatives must be the same kind of thing
-                defs = defs.Where(t => t.IsApparel == addingAlternativesTo.IsApparel).ToList();
+                // alternatives must be the same kind of thing, and prosthetics can't be alternatives
+                defs = defs.Where(t => t.IsApparel == addingAlternativesTo.IsApparel && !ProstheticUtility.IsProsthetic(t)).ToList();
 
                 // [ Adding alternatives to X ] [ Done ], on one line, named by the item's best alternative
                 var bannerRect = r.PopTopPartPixels(UIC.SPACED_HEIGHT);
