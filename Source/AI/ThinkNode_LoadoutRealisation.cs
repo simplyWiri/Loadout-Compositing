@@ -13,7 +13,11 @@ namespace Inventory {
 
     public class ThinkNode_LoadoutRealisation : ThinkNode_ConditionalColonist {
 
-        private Dictionary<Pawn, int> nextUpdateTick = new Dictionary<Pawn, int>();
+        // Think nodes outlive games, so this is cleared whenever a game is started or loaded: otherwise a loaded game's
+        // pawns would inherit the previous game's timers, and the previous game's pawns would never be released.
+        private static Dictionary<Pawn, int> nextUpdateTick = new Dictionary<Pawn, int>();
+
+        public static void ResetUpdateTicks() => nextUpdateTick.Clear();
 
         private static JobDef EquipApparel => JobDefOf.Wear;
         private static JobDef EquipItem => JobDefOf.TakeInventory;
