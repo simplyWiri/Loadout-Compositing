@@ -66,6 +66,8 @@ namespace Inventory {
 
             var pawns = LoadoutManager.PawnsWithTags[this];
             foreach (var pawn in pawns) {
+                // dead pawns remain tagged in case they are resurrected, but there's no need to warn about them
+                if (pawn.Dead || pawn.outfits?.CurrentApparelPolicy is null) continue;
                 if (pawn.outfits.CurrentApparelPolicy.filter.Allows(thing)) continue;
                 
                 Messages.Message(Strings.OutfitDisallowsKit(pawn, pawn.outfits.CurrentApparelPolicy, thing, this), pawn, MessageTypeDefOf.CautionInput, false);
