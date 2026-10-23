@@ -36,16 +36,14 @@ namespace Inventory {
         public QualityCategory RandomQuality => (QualityCategory)Mathf.FloorToInt(((int)filter.QualityRange.max + (int)filter.QualityRange.min) / 2.0f);
         public string Label => Print();
 
-        // rotten meals never count
-        public bool Allows(Thing thing) => MemberAllowing(thing) != null && Filter.Allows(thing) && !(IsMeal(thing) && IsRotten(thing));
+        public bool Allows(Thing thing) => MemberAllowing(thing) != null && SharedAllows(thing);
 
         // whether `thing` counts towards this item for `pawn` specifically, i.e. a meal they are willing to eat
-        public bool AllowsFor(Pawn pawn, Thing thing) {
-            if (!Allows(thing)) return false;
-            if (IsMeal(thing) && !pawn.WillEat(thing)) return false;
+        public bool AllowsFor(Pawn pawn, Thing thing) => Allows(thing) && PawnAllows(pawn, thing);
 
-            return true;
-        }
+        // the checks every member shares: the quality/hp filter, and rotten meals never counting
+        private bool SharedAllows(Thing thing) => Filter.Allows(thing) && !(IsMeal(thing) && IsRotten(thing));
+        private static bool PawnAllows(Pawn pawn, Thing thing) => !IsMeal(thing) || pawn.WillEat(thing);
 
         public ItemMember MemberFor(ThingDef def) => members.FirstOrDefault(m => m.Def == def);
         public ItemMember MemberAllowing(Thing thing) => members.FirstOrDefault(m => m.Allows(thing));
@@ -174,13 +172,16 @@ namespace Inventory {
             return to;
         }
 
-        // exists to make generic `Items` easier
-        public IEnumerable<Thing> ThingsOnMap(Map map) {
-            foreach (var member in members) {
-                var things = map.listerThings.ThingsOfDef(member.Def);
+        // things on `pawn`'s map which count towards this item for them, through `rankMembers` (the members of one rank).
+        // Each member's things are checked against that member alone, rather than searching every member for each.
+        public IEnumerable<Thing> ThingsOnMap(Pawn pawn, IEnumerable<ItemMember> rankMembers) {
+            foreach (var member in rankMembers) {
+                var things = pawn.Map.listerThings.ThingsOfDef(member.Def);
                 if (things.NullOrEmpty()) continue;
-                foreach (var thing in things.Where(Allows)) {
-                    yield return thing;
+                foreach (var thing in things) {
+                    if (member.Allows(thing) && SharedAllows(thing) && PawnAllows(pawn, thing)) {
+                        yield return thing;
+                    }
                 }
             }
         }
