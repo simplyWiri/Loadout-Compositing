@@ -181,7 +181,7 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 
     <CompositableLoadouts.HasRightClick>Right click for advanced copy options</CompositableLoadouts.HasRightClick>
 	    
-	<CompositableLoadouts.Settings.Options>∂Options</CompositableLoadouts.Settings.Options>
+	<CompositableLoadouts.Settings.Options>Options</CompositableLoadouts.Settings.Options>
 	<CompositableLoadouts.Settings.Keybinds>Keybinds</CompositableLoadouts.Settings.Keybinds>
 	<CompositableLoadouts.Settings.ItemFilterDefaults>Tag-item filter defaults</CompositableLoadouts.Settings.ItemFilterDefaults>
 	<CompositableLoadouts.Settings.InterGameTagSaving>Inter-Game Tag Use</CompositableLoadouts.Settings.InterGameTagSaving>
