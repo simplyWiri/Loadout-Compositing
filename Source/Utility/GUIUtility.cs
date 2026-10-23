@@ -57,7 +57,7 @@ namespace Inventory {
                 WithModifiers(rect, badgeText, font: GameFont.Tiny, color: Color.yellow, anchor: TextAnchor.UpperRight);
             }
 
-            tooltip ??= item.HasAlternatives ? item.ShortLabel + "\n\n" + item.RankedMembersDescription() : def.LabelCap.ToString();
+            tooltip ??= item.HasAlternatives ? Strings.OneOfHeading + "\n" + item.RankedMembersDescription() : def.LabelCap.ToString();
             if (tooltip != string.Empty) {
                 TooltipHandler.TipRegion(rect, tooltip);
             }

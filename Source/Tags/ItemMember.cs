@@ -27,6 +27,9 @@ namespace Inventory {
             }
         }
 
+        // as `Label`, but only mentions stuff once specific stuffs are picked
+        public string ListLabel => GenericStuff ? Def.LabelCap.ToString() : Label;
+
         public ThingDef RepresentativeStuff => !Def.MadeFromStuff ? null : stuffs.Any() ? stuffs.First() : GenStuff.AllowedStuffsFor(Def).First();
 
         public ItemMember() {
