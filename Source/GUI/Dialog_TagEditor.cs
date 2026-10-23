@@ -295,7 +295,9 @@ namespace Inventory {
                     continue;
                 }
 
-                if (i % 2 == 0) {
+                if (item == addingAlternativesTo) {
+                    Widgets.DrawHighlightSelected(blockRect);
+                } else if (i % 2 == 0) {
                     Widgets.DrawLightHighlight(blockRect);
                 }
                 i++;
@@ -576,15 +578,23 @@ namespace Inventory {
                 // alternatives must be the same kind of thing
                 defs = defs.Where(t => t.IsApparel == addingAlternativesTo.IsApparel).ToList();
 
+                // [ Adding alternatives to X ] [ Done ], on one line, named by the item's best alternative
                 var bannerRect = r.PopTopPartPixels(UIC.SPACED_HEIGHT);
+                Widgets.DrawHighlightSelected(bannerRect);
+                var label = Strings.AddingAlternativesTo(addingAlternativesTo.RepresentativeDef.LabelCap);
+
                 var doneRect = bannerRect.PopRightPartPixels(Strings.Done.GetWidthCached() + UIC.SMALL_GAP * 2);
                 if (Widgets.ButtonText(doneRect.ContractedBy(2f), Strings.Done)) {
                     addingAlternativesTo = null;
                 }
 
+                bannerRect.xMin += GenUI.GapTiny;
                 Text.Anchor = TextAnchor.MiddleLeft;
-                Widgets.Label(bannerRect, Strings.AddingAlternativesTo(addingAlternativesTo?.Label ?? string.Empty));
+                Text.WordWrap = false;
+                Widgets.Label(bannerRect, label.Truncate(bannerRect.width));
+                Text.WordWrap = true;
                 Text.Anchor = TextAnchor.UpperLeft;
+                TooltipHandler.TipRegion(bannerRect, label);
             }
             
             if (onlyResearchedItems) {
