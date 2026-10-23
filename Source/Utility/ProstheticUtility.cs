@@ -25,6 +25,14 @@ namespace Inventory {
             return InstallRecipesFor(def).FirstOrDefault(recipe => pawn.def.AllRecipes.Contains(recipe));
         }
 
+        // the prosthetic `recipe` installs, or null if it doesn't install one
+        public static ThingDef ProstheticInstalledBy(RecipeDef recipe) {
+            if (recipe.ingredients.Count != 1 || !recipe.ingredients[0].IsFixedIngredient) return null;
+
+            var def = recipe.ingredients[0].FixedIngredient;
+            return InstallRecipesFor(def).Contains(recipe) ? def : null;
+        }
+
         // how many of `def` are installed on `pawn`
         public static int InstalledCount(Pawn pawn, ThingDef def) {
             var hediffs = InstallRecipesFor(def).Select(recipe => recipe.addsHediff).ToHashSet();

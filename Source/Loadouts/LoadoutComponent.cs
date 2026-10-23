@@ -51,6 +51,7 @@ namespace Inventory {
                 Loadout.elements.Add(new LoadoutElement(tag, state, activeCondition));
             }
 
+            Loadout.TagsChanged();
             WarnAboutProsthetics(tag);
 
             foreach (var def in tag.requiredItems.Where(item => item.IsApparel).SelectMany(item => item.Defs)) {
@@ -69,6 +70,7 @@ namespace Inventory {
             pList.Add(Pawn);
             Loadout.elements.Add(elem);
 
+            Loadout.TagsChanged();
             WarnAboutProsthetics(elem.Tag);
 
             foreach (var def in elem.Tag.requiredItems.Where(item => item.IsApparel).SelectMany(item => item.Defs)) {
@@ -114,6 +116,7 @@ namespace Inventory {
 
         public void RemoveTag(LoadoutElement element) {
             Loadout.elements.Remove(element);
+            Loadout.TagsChanged();
 
             if (LoadoutManager.PawnsWithTags.TryGetValue(element.Tag, out var pList)) {
                 pList.Remove(Pawn);
