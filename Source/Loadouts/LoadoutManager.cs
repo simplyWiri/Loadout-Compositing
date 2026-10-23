@@ -120,6 +120,7 @@ namespace Inventory {
         
         public override void FinalizeInit() {
             instance = this;
+            ThinkNode_LoadoutRealisation.ResetUpdateTicks();
 
             // Ugly workaround detailed on the type itself.
             BetterPawnControl_EmergencyToggle_Patch.TryPatch(ModBase.harmony);
