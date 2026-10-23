@@ -139,6 +139,11 @@ namespace Inventory {
             this.quantity = 1;
         }
 
+        // the new alternative is the least preferred
+        public void AddAlternative(ThingDef def) {
+            members.Add(new ItemMember(new SafeDef(def), new HashSet<SafeDef>()));
+        }
+
         // pastes `from`'s quality/hp, and each of its stuffs which are valid for `to`'s members
         public static Item PasteFilter(Item from, Item to) {
             if (to.IsGeneric || from.IsGeneric) return to;

@@ -53,6 +53,9 @@
 	<CompositableLoadouts.HitPointsAmount>Hit points {0}</CompositableLoadouts.HitPointsAmount>
 
 	<CompositableLoadouts.Customize>Customize</CompositableLoadouts.Customize>
+	<CompositableLoadouts.Done>Done</CompositableLoadouts.Done>
+	<CompositableLoadouts.AddAlternativeDesc>Add alternatives to this item, any one of them satisfies it. Pawns prefer alternatives higher in the list.</CompositableLoadouts.AddAlternativeDesc>
+	<CompositableLoadouts.AddingAlternativesTo>Adding alternatives to {0}</CompositableLoadouts.AddingAlternativesTo>
 	<CompositableLoadouts.OneOf>One of: {0}</CompositableLoadouts.OneOf>
 	<CompositableLoadouts.RemoveAlternative>Remove this alternative</CompositableLoadouts.RemoveAlternative>
 	<CompositableLoadouts.RaiseAlternative>Prefer this alternative more</CompositableLoadouts.RaiseAlternative>
