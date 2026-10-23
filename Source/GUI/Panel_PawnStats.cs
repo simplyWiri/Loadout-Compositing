@@ -76,7 +76,7 @@ namespace Inventory {
 
             var wornApparel = parent.component.Loadout.HypotheticalWornApparel(parent.shownState, parent.pawn.RaceProps.body).ToList();
             var apparels = ApparelUtility
-                .ApparelCanFitOnBody(parent.pawn.RaceProps.body, wornApparel.Select(td => td.Def).ToList()).ToList();
+                .ApparelCanFitOnBody(parent.pawn.RaceProps.body, wornApparel.Select(tuple => tuple.Item3).ToList()).ToList();
             var allocatedHeight = apparels.Count * UIC.DEFAULT_HEIGHT;
 
             var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, allocatedHeight);

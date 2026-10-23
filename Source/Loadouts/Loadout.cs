@@ -121,23 +121,14 @@ namespace Inventory {
                 .ItemsMatching(item => item.Allows(thing)));
         }
 
-        public IEnumerable<Item> HypotheticalWornApparel(LoadoutState state, BodyDef def) {
+        // (item, tag it came from, def chosen to be worn for the item)
+        public IEnumerable<Tuple<Item, Tag, ThingDef>> HypotheticalWornApparel(LoadoutState state, BodyDef def) {
             var itemsWithPrios = TagsWith(state).SelectMany(t => t
                     .ItemsWithTagMatching(item => item.IsApparel)
                     .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, elements.FindIndex(e => e.Tag == tuple.Item1))))
                 .ToList();
 
-            var wornApparel = ApparelUtility.WornApparelFor(def, itemsWithPrios) ?? new List<Tuple<Item, Tag>>();
-            return wornApparel.Select(tuple => tuple.Item1);
-        }
-
-        public IEnumerable<Tuple<Item, Tag>> HypotheticalWornApparelWithTag(LoadoutState state, BodyDef def) {
-            var itemsWithPrios = TagsWith(state).SelectMany(t => t
-                    .ItemsWithTagMatching(item => item.IsApparel)
-                    .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, elements.FindIndex(e => e.Tag == tuple.Item1))))
-                .ToList();
-
-            var wornApparel = ApparelUtility.WornApparelFor(def, itemsWithPrios) ?? new List<Tuple<Item, Tag>>();
+            var wornApparel = ApparelUtility.WornApparelFor(def, itemsWithPrios) ?? new List<Tuple<Item, Tag, ThingDef>>();
             return wornApparel;
         }
 
