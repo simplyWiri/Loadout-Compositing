@@ -657,7 +657,8 @@ namespace Inventory {
             
             defs = defs.Where(t => !itms.Contains(t)).ToList();
 
-            // as with apparel, a prosthetic is hidden if it can't be installed alongside the tag's other prosthetics
+            // as with apparel, a prosthetic is hidden if it overlaps any of the tag's other prosthetics, e.g. any other leg
+            // once the tag has a bionic leg, or a field hand once it has a bionic arm
             var prostheticSlots = new ProstheticSlots(BodyDefOf.Human, curTag.ItemsWithTagMatching(item => item.IsProsthetic));
             defs = defs.Where(t => !ProstheticUtility.IsProsthetic(t) || prostheticSlots.Fits(t)).ToList();
 
@@ -836,7 +837,7 @@ namespace Inventory {
                 Widgets.DefIcon(descRect.LeftPart(.15f), def);
                 Widgets.Label(descRect.RightPart(.85f), def.LabelCap);
 
-                if (Mouse.IsOver(rowRect) && def.IsApparel)
+                if (Mouse.IsOver(rowRect) && (def.IsApparel || ProstheticUtility.IsProsthetic(def)))
                 {
                     hoveredDef = def;
                     conflictingApparelColour.a = (Mathf.Sin((float)(DateTime.Now.TimeOfDay.TotalMilliseconds % 3000) / 3000 * Mathf.PI * 2) * 0.25f) + 0.75f;
@@ -847,6 +848,12 @@ namespace Inventory {
                     if (def.IsApparel)
                     {
                         return $"{def.DescriptionDetailed}\n\n" + Strings.ApparelOverlapFlavour(def.LabelCap);
+                    }
+
+                    if (ProstheticUtility.IsProsthetic(def))
+                    {
+                        return $"{def.DescriptionDetailed}\n\n" + Strings.InstalledOn(ProstheticUtility.TargetPartsLabel(BodyDefOf.Human, def))
+                               + "\n\n" + Strings.ProstheticOverlapFlavour(def.LabelCap);
                     }
                     
                     return def.DescriptionDetailed;
@@ -869,11 +876,17 @@ namespace Inventory {
 
             if (hoveredDef != null)
             {
-                var coveringSlots = ApparelSlotMaker.Create(BodyDefOf.Human, hoveredDef);
+                var coveringSlots = hoveredDef.IsApparel ? ApparelSlotMaker.Create(BodyDefOf.Human, hoveredDef) : null;
                 
+                // apparel covering the same layers, or prosthetics replacing the same body parts
+                bool Conflicts(ThingDef otherDef) {
+                    if (coveringSlots != null) return otherDef.IsApparel && coveringSlots.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, otherDef));
+                    return ProstheticUtility.IsProsthetic(otherDef) && ProstheticSlots.Overlaps(BodyDefOf.Human, hoveredDef, otherDef);
+                }
+
                 void DrawHighlightIfConflicts(ThingDef otherDef, Rect rect)
                 {
-                    if (!otherDef.IsApparel || !coveringSlots.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, otherDef)))
+                    if (!Conflicts(otherDef))
                         return;
 
                     if (otherDef == hoveredDef)
