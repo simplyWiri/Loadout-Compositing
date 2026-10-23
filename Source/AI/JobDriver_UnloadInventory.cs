@@ -40,6 +40,7 @@ namespace Inventory {
         private const TargetIndex StoreCellInd = TargetIndex.B;
 
         public override void ExposeData() {
+            base.ExposeData();
             Scribe_Values.Look(ref countToDrop, nameof(countToDrop));
             Scribe_Values.Look(ref specificItem, nameof(specificItem));
         }
