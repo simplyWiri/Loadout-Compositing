@@ -76,7 +76,7 @@ namespace Inventory
                     }
 
                     newTag.uniqueId = LoadoutManager.GetNextTagId();
-                    loadedTags.Add(newTag);
+                    LoadoutManager.AddTag(newTag);
                 };
                 
                 var warnings = MakeLoadWarnings(tag);
