@@ -2,6 +2,8 @@
 <LanguageData>
 	<CompositableLoadouts.Modify>Modify</CompositableLoadouts.Modify>
 	<CompositableLoadouts.Generic>Generic</CompositableLoadouts.Generic>
+	<CompositableLoadouts.ItemPreset.Medicine>Any medicine (best first)</CompositableLoadouts.ItemPreset.Medicine>
+	<CompositableLoadouts.ItemPreset.Meals>Any meal (best first)</CompositableLoadouts.ItemPreset.Meals>
 	<CompositableLoadouts.Create>Create</CompositableLoadouts.Create>
 
 	<CompositableLoadouts.TagLoadoutComposition>Tags and Loadout Composition</CompositableLoadouts.TagLoadoutComposition>
@@ -51,6 +53,16 @@
 	<CompositableLoadouts.HitPointsAmount>Hit points {0}</CompositableLoadouts.HitPointsAmount>
 
 	<CompositableLoadouts.Customize>Customize</CompositableLoadouts.Customize>
+	<CompositableLoadouts.ItemPresetDesc>Adds a group of all of these, pawns take the best available first. Once added it is a normal group, reorder or remove its alternatives as you like.</CompositableLoadouts.ItemPresetDesc>
+	<CompositableLoadouts.Done>Done</CompositableLoadouts.Done>
+	<CompositableLoadouts.AddAlternativeDesc>Add alternatives to this item, any one of them satisfies it. Pawns prefer alternatives higher in the list.</CompositableLoadouts.AddAlternativeDesc>
+	<CompositableLoadouts.AddingAlternativesTo>Adding alternatives to {0}</CompositableLoadouts.AddingAlternativesTo>
+	<CompositableLoadouts.OneOfHeading>One of:</CompositableLoadouts.OneOfHeading>
+	<CompositableLoadouts.OneOf>One of: {0}</CompositableLoadouts.OneOf>
+	<CompositableLoadouts.RemoveAlternative>Remove this alternative</CompositableLoadouts.RemoveAlternative>
+	<CompositableLoadouts.ReorderAlternativeDesc>Drag to change which alternatives pawns prefer, higher is preferred.</CompositableLoadouts.ReorderAlternativeDesc>
+	<CompositableLoadouts.EditingAlternative>Alternative: {0}</CompositableLoadouts.EditingAlternative>
+	<CompositableLoadouts.EditingAlternativeDesc>Pick which alternative to edit. Stuff is set for each alternative, quality and hit points are shared by every alternative of this item.</CompositableLoadouts.EditingAlternativeDesc>
 	<CompositableLoadouts.MouseOverDetails>(Mouse Over Numbers for Details)</CompositableLoadouts.MouseOverDetails>
 	<CompositableLoadouts.Statistics>Statistics</CompositableLoadouts.Statistics>
 	<CompositableLoadouts.StuffFilter>Stuff Filter</CompositableLoadouts.StuffFilter>
@@ -169,7 +181,7 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 
     <CompositableLoadouts.HasRightClick>Right click for advanced copy options</CompositableLoadouts.HasRightClick>
 	    
-	<CompositableLoadouts.Settings.Options>∂Options</CompositableLoadouts.Settings.Options>
+	<CompositableLoadouts.Settings.Options>Options</CompositableLoadouts.Settings.Options>
 	<CompositableLoadouts.Settings.Keybinds>Keybinds</CompositableLoadouts.Settings.Keybinds>
 	<CompositableLoadouts.Settings.ItemFilterDefaults>Tag-item filter defaults</CompositableLoadouts.Settings.ItemFilterDefaults>
 	<CompositableLoadouts.Settings.InterGameTagSaving>Inter-Game Tag Use</CompositableLoadouts.Settings.InterGameTagSaving>

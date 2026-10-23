@@ -91,18 +91,11 @@ namespace Inventory {
             var producedThingDef = bill.recipe.ProducedThingDef;
             if (producedThingDef == null) return;
 
-            if (tag.HasThingDef(producedThingDef, out var item)) {
-                var copyTagStr = Strings.CopyFromTag(item.Def.LabelCap);
+            var item = tag.ItemFor(producedThingDef);
+            if (item != null) {
+                var copyTagStr = Strings.CopyFromTag(producedThingDef.LabelCap);
                 if (standard.ButtonText(copyTagStr)) {
-                    item.Filter.CopyTo(bill.ingredientFilter);
-
-                    bill.limitToAllowedStuff = !item.Filter.Generic;
-
-                    if (item.Filter.SpecificQualityRange)
-                        bill.qualityRange = item.Filter.QualityRange;
-
-                    if (item.Filter.SpecificHitpointRange)
-                        bill.hpRange = item.Filter.HpRange;
+                    item.CopyTo(bill);
                 }
             }
 

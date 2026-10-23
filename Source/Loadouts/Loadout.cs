@@ -59,7 +59,7 @@ namespace Inventory {
         }
 
         public void UpdateState(LoadoutElement element, bool active) {  
-            foreach (var item in element.Tag.requiredItems.Where(item => !item.Def.IsApparel)) {
+            foreach (var item in element.Tag.requiredItems.Where(item => !item.IsApparel)) {
                 if (!active) {
                     AddItemToRemove(item);
                 }
@@ -88,7 +88,7 @@ namespace Inventory {
         public float WeightAtWhichLoadoutDesires(Thing thing) {
             const float priorityMultiplier = 5;
 
-            var tag = Tags.FirstOrDefault(t => t.ItemsMatching(thing).Any());
+            var tag = Tags.FirstOrDefault(t => t.requiredItems.Any(item => item.Allows(thing)));
             if (tag == null) return 0;
 
             var tagIndex = IndexOf(tag);
@@ -96,20 +96,23 @@ namespace Inventory {
             return tagPriority;
         }
 
-        public int DesiredCount(List<Thing> pawnGear, Item curItem) {
-            // list of things which our current item accepts
-            var acceptedThings = pawnGear.Where(curItem.Allows).ToList();
-            // all items besides our current item
-            var otherItems = Items.Except(curItem);
+        // strict preference between the members of an apparel item: 1 for the best rank, falling towards 1/2 for worse
+        // ranks (staying within the tag's priority band), or 0 if a better ranked member of the same item is worn
+        public float RankWeight(Pawn pawn, Apparel apparel) {
+            var item = ItemsAccepting(apparel).FirstOrDefault(i => i.IsApparel);
+            if (item == null || item.Members.Count == 1) return 1f;
 
-            var desiredCount = curItem.Quantity;
-
-            foreach (var item in otherItems) {
-                var potentiallyOwnedStackCount = acceptedThings.Where(item.Allows).Sum(thing => thing.stackCount);
-                desiredCount += Mathf.Min(item.Quantity, potentiallyOwnedStackCount);
+            var rank = item.RankOf(apparel);
+            foreach (var worn in pawn.apparel.WornApparel) {
+                if (worn != apparel && item.Allows(worn) && item.RankOf(worn) < rank) return 0f;
             }
 
-            return desiredCount;
+            return 1f - 0.5f * rank / item.Members.Count;
+        }
+
+        // which of `pawnGear` counts towards each of the active items, and which is surplus
+        public GearAssignment AssignGear(Pawn pawn, List<Thing> pawnGear) {
+            return new GearAssignment(pawn, Items, pawnGear);
         }
 
         public bool Desires(Thing thing, bool allTags = false) {
@@ -121,28 +124,19 @@ namespace Inventory {
                 .ItemsMatching(item => item.Allows(thing)));
         }
 
-        public IEnumerable<Item> HypotheticalWornApparel(LoadoutState state, BodyDef def) {
+        // (item, tag it came from, def chosen to be worn for the item)
+        public IEnumerable<Tuple<Item, Tag, ThingDef>> HypotheticalWornApparel(LoadoutState state, BodyDef def) {
             var itemsWithPrios = TagsWith(state).SelectMany(t => t
-                    .ItemsWithTagMatching(item => item.Def.IsApparel)
+                    .ItemsWithTagMatching(item => item.IsApparel)
                     .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, elements.FindIndex(e => e.Tag == tuple.Item1))))
                 .ToList();
 
-            var wornApparel = ApparelUtility.WornApparelFor(def, itemsWithPrios) ?? new List<Tuple<Item, Tag>>();
-            return wornApparel.Select(tuple => tuple.Item1);
-        }
-
-        public IEnumerable<Tuple<Item, Tag>> HypotheticalWornApparelWithTag(LoadoutState state, BodyDef def) {
-            var itemsWithPrios = TagsWith(state).SelectMany(t => t
-                    .ItemsWithTagMatching(item => item.Def.IsApparel)
-                    .Select(tuple => new Tuple<Item, Tag, int>(tuple.Item2, tuple.Item1, elements.FindIndex(e => e.Tag == tuple.Item1))))
-                .ToList();
-
-            var wornApparel = ApparelUtility.WornApparelFor(def, itemsWithPrios) ?? new List<Tuple<Item, Tag>>();
+            var wornApparel = ApparelUtility.WornApparelFor(def, itemsWithPrios) ?? new List<Tuple<Item, Tag, ThingDef>>();
             return wornApparel;
         }
 
         public IEnumerable<Item> DesiredItems(List<Thing> heldThings) {
-            var desiredThings = Items.Where(t => !t.Def.IsApparel);
+            var desiredThings = Items.Where(t => !t.IsApparel);
             foreach (var thing in desiredThings) {
                 var count = heldThings.Where(heldThing => thing.Allows(heldThing))
                     .Sum(heldThing => heldThing.stackCount);

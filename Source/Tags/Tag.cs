@@ -49,10 +49,6 @@ namespace Inventory {
             return tag;
         }
 
-        public IEnumerable<Item> ItemsMatching(Thing thing) {
-            return requiredItems.Where(item => thing.def == item.Def && item.Filter.Allows(thing));
-        }
-
         public IEnumerable<Item> ItemsMatching(Predicate<Item> pred) {
             return requiredItems.Where(item => pred(item));
         }
@@ -64,6 +60,9 @@ namespace Inventory {
         public void Add(ThingDef thing) {
             requiredItems.Add(new Item(thing));
 
+            // apparel policies only cover apparel, anything else would always be reported as disallowed
+            if (!thing.IsApparel) return;
+
             var pawns = LoadoutManager.PawnsWithTags[this];
             foreach (var pawn in pawns) {
                 // dead pawns remain tagged in case they are resurrected, but there's no need to warn about them
@@ -74,16 +73,8 @@ namespace Inventory {
             }
         }
 
-        public bool HasThingDef(ThingDef def, out Item item) {
-            item = null;
-            foreach (var i in requiredItems) {
-                if (i.Def == def) {
-                    item = i;
-                    return true;
-                }
-            }
-
-            return false;
+        public Item ItemFor(ThingDef def) {
+            return requiredItems.FirstOrDefault(item => item.Defs.Contains(def));
         }
 
         public int CompareTo(Tag other) {
@@ -102,17 +93,21 @@ namespace Inventory {
             Scribe_Values.Look(ref defaultCondition, nameof(defaultCondition), ActiveCondition.StateActive);
 
             if (!GenericLoad && idType != "GenericTag_") {
-                var count = requiredItems.RemoveAll(item => item.Def == null);
-                if (count != 0) {
-                    Log.Error($"Attempting to load a null def, have you removed a mod? - Removing item from {name} - ({GetUniqueLoadID()})");
-                }
-
-                foreach(var item in requiredItems) {
-                    count = item.filter.stuffs.RemoveWhere(thing => thing.Def is null);
+                foreach (var item in requiredItems) {
+                    var count = item.members.RemoveAll(member => member.Def == null);
                     if (count != 0) {
-                        Log.Error($"Attempted to load a null stuff in a filter, have you removed a mod?");
+                        Log.Error($"Attempting to load a null def, have you removed a mod? - Removing item from {name} - ({GetUniqueLoadID()})");
+                    }
+
+                    foreach (var member in item.members) {
+                        count = member.stuffs.RemoveWhere(thing => thing.Def is null);
+                        if (count != 0) {
+                            Log.Error($"Attempted to load a null stuff in a filter, have you removed a mod?");
+                        }
                     }
                 }
+
+                requiredItems.RemoveAll(item => item.members.Count == 0);
 
                 idType = "Tag_";
             } else {

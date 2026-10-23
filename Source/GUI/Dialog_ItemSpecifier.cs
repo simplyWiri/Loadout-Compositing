@@ -17,7 +17,9 @@ namespace Inventory {
         private static List<StatDef> generalItemStats;
 
         private ThingDef stuffPreview;
+        private Item item;
         private Filter filter;
+        private ItemMember member;
 
         private QualityCategory qualityPreview = QualityCategory.Normal;
 
@@ -70,8 +72,11 @@ namespace Inventory {
             tipCache = new Dictionary<Tuple<ThingDef, ThingDef, QualityCategory>, Dictionary<StatDef, string>>();
         }
 
-        public Dialog_ItemSpecifier(Filter filter) {
-            this.filter = filter;
+        // `filter` (quality/hp) is shared by the item, stuff is set per `member`
+        public Dialog_ItemSpecifier(Item item, ItemMember member) {
+            this.item = item;
+            this.filter = item.Filter;
+            this.member = member;
             closeOnClickedOutside = true;
             doCloseX = true;
         }
@@ -81,7 +86,7 @@ namespace Inventory {
             if (Event.current.type == EventType.Layout)
                 return;
 
-            if (filter.Thing.MadeFromStuff) {
+            if (member.Def.MadeFromStuff) {
                 this.DoWindowContentsGeneral(canvas);
             }
             else {
@@ -93,7 +98,8 @@ namespace Inventory {
             float rollingY = 0;
 
             // Draw Title
-            Rect titleRec = DrawTitle(canvas.position, "Customize " + filter.Thing.LabelCap, ref rollingY);
+            Rect titleRec = DrawTitle(canvas.position, "Customize " + member.Def.LabelCap, ref rollingY);
+            DrawMemberSelector(titleRec);
 
             GUI.color = Color.grey;
             Text.Anchor = TextAnchor.LowerLeft;
@@ -118,7 +124,8 @@ namespace Inventory {
             float rollingY = 0;
 
             // Draw Title
-            Rect titleRec = DrawTitle(canvas.position, Strings.Customize + " " + filter.Thing.LabelCap, ref rollingY);
+            Rect titleRec = DrawTitle(canvas.position, Strings.Customize + " " + member.Def.LabelCap, ref rollingY);
+            DrawMemberSelector(titleRec);
 
             GUI.color = Color.grey;
             Text.Anchor = TextAnchor.LowerLeft;
@@ -159,22 +166,39 @@ namespace Inventory {
             return rectToDraw;
         }
 
+        // when the item has alternatives, pick which one's stuff is being edited (quality and hit points are shared)
+        private void DrawMemberSelector(Rect titleRect) {
+            if (item.Members.Count <= 1) return;
+
+            var label = Strings.EditingAlternative(member.Def.LabelCap);
+            var rect = new Rect(titleRect.xMax + GenUI.GapSmall, titleRect.y, label.GetWidthCached() + UIC.SPACED_HEIGHT, titleRect.height);
+            if (Widgets.ButtonText(rect.ContractedBy(2f), label)) {
+                var options = item.Members.Select(m => new FloatMenuOption(m.Def.LabelCap, () => {
+                    member = m;
+                    stuffPreview = null;
+                })).ToList();
+                Find.WindowStack.Add(new FloatMenu(options));
+            }
+
+            TooltipHandler.TipRegion(rect, Strings.EditingAlternativeDesc);
+        }
+
         protected virtual void DrawSliders(Rect rect) {
             // Draw hitpoint slider
             int dragID = Rand.Int;
             Rect drawRect = rect;
 
-            if (filter.Thing.useHitPoints) {
+            if (member.Def.useHitPoints) {
                 this.DrawHitPointsSlider(drawRect, dragID);
                 drawRect = new Rect(drawRect.x, drawRect.y + drawRect.height + GenUI.GapTiny, drawRect.width, drawRect.height);
             }
 
             // Draw quality slider
-            if (filter.Thing.HasComp(typeof(CompQuality))) {
+            if (member.Def.HasComp(typeof(CompQuality))) {
                 this.DrawQualitySlider(drawRect, ++dragID);
             }
 
-            if (filter.Thing.useHitPoints && filter.Thing.HasComp(typeof(CompQuality))) {
+            if (member.Def.useHitPoints && member.Def.HasComp(typeof(CompQuality))) {
                 if (Widgets.ButtonText(new Rect(drawRect.x, drawRect.y + drawRect.height + GenUI.GapTiny, drawRect.width, drawRect.height), Strings.SetDefault)) {
                     ModBase.settings.defaultHitpoints = filter.HpRange;
                     ModBase.settings.defaultQualityRange = filter.QualityRange;
@@ -219,11 +243,11 @@ namespace Inventory {
         }
 
         protected virtual void DrawStuffScrollableList(Rect canvas) {
-            if (filter.Thing.MadeFromStuff) {
+            if (member.Def.MadeFromStuff) {
                 canvas.width -= GenUI.GapSmall;
 
                 // Draw stuff source.
-                var stuffs = GenStuff.AllowedStuffsFor(filter.Thing).ToList();
+                var stuffs = GenStuff.AllowedStuffsFor(member.Def).ToList();
                 canvas.yMin += UIC.SPACED_HEIGHT;
                 DrawStuffSourceScrollableList(canvas, stuffs, ref stuffScrollPosition, ref stuffScrollViewHeight);
             }
@@ -268,12 +292,12 @@ namespace Inventory {
                 Widgets.DefIcon(iconRect, stuff);
                 Widgets.Label(labelRect, stuff.LabelCap);
 
-                var state = filter.AllowedStuffs.Contains(wrappedStuff);
+                var state = member.AllowedStuffs.Contains(wrappedStuff);
                 if (GUIUtility.DraggableCheckbox(row, checkBoxRect, ref state)) {
                     if (state) {
-                        filter.AllowedStuffs.Add(wrappedStuff);
+                        member.AllowedStuffs.Add(wrappedStuff);
                     } else {
-                        filter.AllowedStuffs.Remove(wrappedStuff);
+                        member.AllowedStuffs.Remove(wrappedStuff);
                     }
                 }
 
@@ -323,16 +347,13 @@ namespace Inventory {
                     statInfoList.Add(drawInfo);
                 }
 
-                if (filter.Thing.MadeFromStuff) {
-                    DrawColumnFor(filter.Thing,
-                        filter.AllowedStuffs.Count > 0
-                            ? filter.AllowedStuffs.First()
-                            : GenStuff.AllowedStuffsFor(filter.Thing).First(), qualityPreview);
+                if (member.Def.MadeFromStuff) {
+                    DrawColumnFor(member.Def, member.RepresentativeStuff, qualityPreview);
                     if (stuffPreview is not null)
-                        DrawColumnFor(filter.Thing, stuffPreview, qualityPreview);
+                        DrawColumnFor(member.Def, stuffPreview, qualityPreview);
                 }
                 else {
-                    DrawColumnFor(filter.Thing, null, qualityPreview);
+                    DrawColumnFor(member.Def, null, qualityPreview);
                 }
 
 
@@ -421,18 +442,16 @@ namespace Inventory {
                 Widgets.Label(rect, text);
             }
 
-            if (filter.Thing.MadeFromStuff) {
-                var stuff = filter.AllowedStuffs.Any()
-                    ? filter.AllowedStuffs.First()
-                    : GenStuff.AllowedStuffsFor(filter.Thing).First();
+            if (member.Def.MadeFromStuff) {
+                var stuff = member.RepresentativeStuff;
 
-                DrawHeaderFor(startRect.LeftHalf(), filter.Thing, stuff, qualityPreview);
+                DrawHeaderFor(startRect.LeftHalf(), member.Def, stuff, qualityPreview);
 
                 if (stuffPreview != null)
-                    DrawHeaderFor(startRect.RightHalf(), filter.Thing, stuffPreview, qualityPreview);
+                    DrawHeaderFor(startRect.RightHalf(), member.Def, stuffPreview, qualityPreview);
             }
             else {
-                DrawHeaderFor(startRect.LeftHalf(), filter.Thing, null, qualityPreview);
+                DrawHeaderFor(startRect.LeftHalf(), member.Def, null, qualityPreview);
             }
 
             Text.Anchor = TextAnchor.UpperLeft;
@@ -441,9 +460,9 @@ namespace Inventory {
 
         private void DrawStats(Rect rect) {
             List<StatDef> stats = new List<StatDef>();
-            if (filter.Thing.IsApparel) stats = armorStats;
-            else if (filter.Thing.IsMeleeWeapon) stats = baseWeaponStats.Union(meleeWeaponStats).ToList();
-            else if (filter.Thing.IsRangedWeapon) stats = baseWeaponStats.Union(rangedWeaponStats).ToList();
+            if (member.Def.IsApparel) stats = armorStats;
+            else if (member.Def.IsMeleeWeapon) stats = baseWeaponStats.Union(meleeWeaponStats).ToList();
+            else if (member.Def.IsRangedWeapon) stats = baseWeaponStats.Union(rangedWeaponStats).ToList();
             else stats = generalItemStats;
 
             statScrollViewHeight = UIC.SPACED_HEIGHT * stats.Count;

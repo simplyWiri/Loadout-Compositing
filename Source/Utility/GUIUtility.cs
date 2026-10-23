@@ -35,6 +35,34 @@ namespace Inventory {
             WithModifiers(rect, quantity.ToString(), font: GameFont.Tiny, anchor: TextAnchor.LowerCenter);
         }
 
+        // `tooltip` defaults to the item's label (and its alternatives), pass an empty string for no tooltip. `member`
+        // defaults to the item's representative member. Items with alternatives get a badge, unless `badge` is false
+        public static void DrawItemIcon(Rect rect, Item item, bool showCount = true, string tooltip = null, ItemMember member = null, bool badge = true) {
+            member ??= item.RepresentativeMember;
+            var def = member.Def;
+            if (def == null) {
+                Widgets.DrawTextureFitted(rect, Textures.PlaceholderDef, 1.0f);
+                TooltipHandler.TipRegion(rect, member.WrappedDef.defName);
+                return;
+            }
+
+            if (showCount && item.Quantity > 1) {
+                FittedDefIconCount(rect, def, member.RepresentativeStuff, item.Quantity);
+            } else {
+                Widgets.DefIcon(rect, def, member.RepresentativeStuff);
+            }
+
+            if (badge && item.HasAlternatives) {
+                var badgeText = $"+{item.Members.Count - 1}";
+                WithModifiers(rect, badgeText, font: GameFont.Tiny, color: Color.yellow, anchor: TextAnchor.UpperRight);
+            }
+
+            tooltip ??= item.HasAlternatives ? Strings.OneOfHeading + "\n" + item.RankedMembersDescription() : def.LabelCap.ToString();
+            if (tooltip != string.Empty) {
+                TooltipHandler.TipRegion(rect, tooltip);
+            }
+        }
+
         // returns whether the input field is in focus or not.
         public static bool InputField(Rect rect, string name, ref string buff, bool ShowName = false) {
             var inputFieldRect = rect;

@@ -51,6 +51,11 @@ namespace Inventory {
         private float statLength = UIC.DEFAULT_HEIGHT;
         private Color conflictingApparelColour = new Color(.75f, 0.2f, 0.0f, .8f);
         private ThingDef hoveredDef = null;
+        // when set, clicking a def in the def list adds it as an alternative of this item instead of a new item
+        private Item addingAlternativesTo = null;
+        // the group whose alternative at `draggingMemberIdx` is being dragged to change its preference
+        private Item draggingMembersOf = null;
+        private int draggingMemberIdx = -1;
 
         private LoadoutElement massAssignElement = null;
         private LoadoutElement dummySavedElement = null;
@@ -275,7 +280,7 @@ namespace Inventory {
             curTag.name ??= " ";
 
             var viewRect = new Rect(r.x, r.y, rect.width - UIC.SCROLL_WIDTH,
-                (curTag.requiredItems.Count * UIC.SPACED_HEIGHT * 2));
+                curTag.requiredItems.Sum(ItemRowHeight));
             Widgets.BeginScrollView(r, ref curItemScroll, viewRect);
 
             var visibilityRect = r;
@@ -286,34 +291,36 @@ namespace Inventory {
             // List each item in the currently required items
             // [ Info ] [ Icon ] [ Name ] [ Edit Filter ] [ Edit Quantity ] [ Remove ]  
             foreach (var item in curTag.requiredItems.ToList()) {
-                var def = item.Def;
-                var itemRect = baseRect.PopTopPartPixels(UIC.SPACED_HEIGHT * 2);
+                var def = item.RepresentativeDef;
+                var blockRect = baseRect.PopTopPartPixels(ItemRowHeight(item));
 
-                if (!itemRect.Overlaps(visibilityRect)) {
+                if (!blockRect.Overlaps(visibilityRect)) {
                     continue;
                 }
 
-                if (i % 2 == 0) {
-                    Widgets.DrawLightHighlight(itemRect);
+                if (item == addingAlternativesTo) {
+                    Widgets.DrawHighlightSelected(blockRect);
+                } else if (i % 2 == 0) {
+                    Widgets.DrawLightHighlight(blockRect);
                 }
                 i++;
+
+                var itemRect = blockRect.PopTopPartPixels(UIC.SPACED_HEIGHT * 2);
+                if (ShowsMemberRows(item)) {
+                    DrawMemberRows(blockRect, item);
+                }
 
                 // Info
                 Rect infoRect = itemRect.PopLeftPartPixels(UIC.SMALL_ICON);
                 if (Widgets.ButtonImageFitted(infoRect.ContractedBy(1f), TexButton.Info)) {
-                    Find.WindowStack.Add(new Dialog_InfoCard(def, item.RandomStuff));
+                    Find.WindowStack.Add(new Dialog_InfoCard(def, item.RepresentativeStuff));
                 }
 
                 // Icon
                 var iconRect = itemRect.PopLeftPartPixels(UIC.SPACED_HEIGHT * 2);
-                if (item.Quantity > 1) {
-                    GUIUtility.FittedDefIconCount(iconRect, def, item.RandomStuff, item.Quantity);
-                }
-                else {
-                    Widgets.DefIcon(iconRect, def, item.RandomStuff);
-                }
-
-                TooltipHandler.TipRegion(iconRect, item.Def.DescriptionDetailed);
+                // a group's tooltip defaults to listing its alternatives
+                var iconTooltip = item.HasAlternatives ? null : def.DescriptionDetailed;
+                GUIUtility.DrawItemIcon(iconRect, item, tooltip: iconTooltip);
 
                 // Remove
                 var removeButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
@@ -325,14 +332,26 @@ namespace Inventory {
 
                 // Copy, Paste
                 var copyPasteButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 3);
-                GUIUtility.DraggableCopyPaste(copyPasteButton, ref item.filter, Filter.CopyFrom);
+                var pasteTarget = item;
+                GUIUtility.DraggableCopyPaste(copyPasteButton, ref pasteTarget, Item.PasteFilter);
                 TooltipHandler.TipRegion(copyPasteButton, Strings.CopyPasteExplain);
 
-                // Edit 
+                // Add alternative
+                var alternativeButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
+                if (Widgets.ButtonImageFitted(alternativeButton.ContractedBy(4f), TexButton.Plus)) {
+                    addingAlternativesTo = item;
+                }
+                TooltipHandler.TipRegion(alternativeButton, Strings.AddAlternativeDesc);
+
+                // Edit, for a group only if one of its alternatives has a quality or stuff to pick. The space is kept
+                // so quantities line up
                 var constrainButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
-                if (Widgets.ButtonImageFitted(constrainButton.ContractedBy(1f), Textures.EditTex))
-                    Find.WindowStack.Add(new Dialog_ItemSpecifier(item.Filter));
-                TooltipHandler.TipRegion(constrainButton, Strings.SpecifyElementsToolTip);
+                var editMember = SpecifiableMember(item);
+                if (editMember != null) {
+                    if (Widgets.ButtonImageFitted(constrainButton.ContractedBy(1f), Textures.EditTex))
+                        Find.WindowStack.Add(new Dialog_ItemSpecifier(item, editMember));
+                    TooltipHandler.TipRegion(constrainButton, Strings.SpecifyElementsToolTip);
+                }
 
                 var quantityFieldRect = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 2f);
                 item.quantityStr ??= item.Quantity.ToString();
@@ -340,9 +359,14 @@ namespace Inventory {
 
                 TooltipHandler.TipRegion(quantityFieldRect, Strings.EditQuantity);
 
-                // Name
-                Text.Anchor = TextAnchor.MiddleCenter;
-                Widgets.Label(itemRect, item.Label);
+                // Name, a group's alternatives are listed underneath its heading
+                if (ShowsMemberRows(item)) {
+                    Text.Anchor = TextAnchor.MiddleLeft;
+                    Widgets.Label(itemRect.RightPartPixels(itemRect.width - GenUI.GapSmall), Strings.OneOfHeading);
+                } else {
+                    Text.Anchor = TextAnchor.MiddleCenter;
+                    Widgets.Label(itemRect, item.Label);
+                }
                 Text.Anchor = TextAnchor.UpperLeft;
             }
             
@@ -351,11 +375,121 @@ namespace Inventory {
             Widgets.EndScrollView();
         }
 
+        private static bool ShowsMemberRows(Item item) => item.HasAlternatives;
+
+        // the member the item's edit dialog opens on, preferring one made from stuff (stuff is set per member, the
+        // dialog can switch between them); null if a group has nothing but hit points to pick
+        private static ItemMember SpecifiableMember(Item item) {
+            if (item.Members.Count == 1) return item.Members[0];
+
+            return item.Members.FirstOrDefault(m => m.Def.MadeFromStuff)
+                   ?? item.Members.FirstOrDefault(m => m.Def.HasComp(typeof(CompQuality)));
+        }
+
+        private static float ItemRowHeight(Item item) {
+            return UIC.SPACED_HEIGHT * 2 + (ShowsMemberRows(item) ? item.Members.Count * UIC.SPACED_HEIGHT : 0);
+        }
+
+        // one row per alternative, in order of preference, dragged to reorder
+        // [ Priority ] [ Icon ] [ Name ] [ Remove ]
+        private void DrawMemberRows(Rect rect, Item item) {
+            var members = item.members;
+            var rowRects = new List<Rect>();
+            for (var idx = 0; idx < members.Count; idx++) {
+                var member = members[idx];
+                var rowRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
+                rowRect.xMin += UIC.SMALL_ICON;
+                rowRects.Add(rowRect);
+
+                // priority, coloured as the loadout editor colours tags by priority
+                var priorityRect = rowRect.PopLeftPartPixels(UIC.SMALL_GAP).ContractedBy(0, 1f);
+                Widgets.DrawBoxSolid(priorityRect, Panel_ShowCoverage.GetColorForTagAtIndex(idx));
+                if (Mouse.IsOver(rowRect)) {
+                    var alpha = Mathf.Sin((Time.time % 2) / 2.0f * Mathf.PI) * 0.3f;
+                    GUI.color = new Color(0, 0, 0, 0.7f + alpha);
+                    Widgets.DrawTexturePart(priorityRect, new Rect(1 / 4f, 0, 1 / 2f, 1), Textures.DraggableTex);
+                    GUI.color = Color.white;
+                }
+                rowRect.PopLeftPartPixels(GenUI.GapTiny);
+
+                var iconRect = rowRect.PopLeftPartPixels(UIC.SPACED_HEIGHT);
+                GUIUtility.DrawItemIcon(iconRect.ContractedBy(2f), item, false, member.Def.DescriptionDetailed, member, badge: false);
+
+                // removing the last-but-one alternative leaves a plain item
+                var removeRect = rowRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
+                TooltipHandler.TipRegion(removeRect, Strings.RemoveAlternative);
+                if (Widgets.ButtonImageFitted(removeRect.ContractedBy(5f), TexButton.Delete)) {
+                    members.RemoveAt(idx);
+                    return;
+                }
+
+                Text.Anchor = TextAnchor.MiddleLeft;
+                Widgets.Label(rowRect, member.ListLabel);
+                Text.Anchor = TextAnchor.UpperLeft;
+                TooltipHandler.TipRegion(rowRect, Strings.ReorderAlternativeDesc);
+            }
+
+            DraggableMembers(item, rowRects);
+        }
+
+        // as `DraggableItems`, swapping a dragged alternative with its neighbour as the mouse passes them
+        private void DraggableMembers(Item item, List<Rect> rowRects) {
+            var members = item.members;
+            var cEvent = Event.current;
+
+            // also stop if the group shrank under the drag
+            if (cEvent.rawType == EventType.MouseUp || (draggingMembersOf == item && draggingMemberIdx >= rowRects.Count)) {
+                draggingMembersOf = null;
+                draggingMemberIdx = -1;
+            }
+
+            if (draggingMembersOf == item) {
+                var area = new Rect(rowRects[0].x, rowRects[0].y, rowRects[0].width, rowRects[rowRects.Count - 1].yMax - rowRects[0].y);
+                if (Mouse.IsOver(area.ExpandedBy(25f))) {
+                    var tRect = rowRects[draggingMemberIdx];
+                    var mPos = cEvent.mousePosition;
+
+                    if (!tRect.ExpandedBy(5f).Contains(mPos)) {
+                        if (draggingMemberIdx > 0 && mPos.y < tRect.y) {
+                            (members[draggingMemberIdx], members[draggingMemberIdx - 1]) = (members[draggingMemberIdx - 1], members[draggingMemberIdx]);
+                            draggingMemberIdx -= 1;
+                        } else if (draggingMemberIdx < members.Count - 1 && mPos.y > tRect.y) {
+                            (members[draggingMemberIdx], members[draggingMemberIdx + 1]) = (members[draggingMemberIdx + 1], members[draggingMemberIdx]);
+                            draggingMemberIdx += 1;
+                        }
+
+                        SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
+                    }
+
+                    Widgets.DrawLine(new Vector2(tRect.x, tRect.yMax), new Vector2(tRect.xMax, tRect.yMax), ReorderableWidget.LineColor, 2f);
+                    Widgets.DrawHighlight(tRect);
+                } else {
+                    draggingMembersOf = null;
+                    draggingMemberIdx = -1;
+                }
+            }
+
+            if (cEvent.rawType != EventType.MouseDown) return;
+
+            for (var idx = 0; idx < rowRects.Count; idx++) {
+                // the remove button stays clickable
+                var grabRect = rowRects[idx];
+                grabRect.xMax -= UIC.SPACED_HEIGHT * 1.5f;
+                if (!grabRect.Contains(cEvent.mousePosition)) continue;
+
+                draggingMembersOf = item;
+                draggingMemberIdx = idx;
+                break;
+            }
+        }
+
         private void DraggableItems(Rect rect, List<Item> items) {
             if (items.Count == 1) return;
             
+            // only the item's own row (not its alternatives) starts a drag, the full block is highlighted
             Rect RectForTag(int tIdx, bool full = false) 
-                => new Rect(rect.x, rect.y + tIdx * UIC.SPACED_HEIGHT * 2, rect.width - (full ? 0 : 6 * UIC.SPACED_HEIGHT), UIC.SPACED_HEIGHT * 2);
+                => new Rect(rect.x, rect.y + items.Take(tIdx).Sum(ItemRowHeight), rect.width - (full ? 0 : 9.5f * UIC.SPACED_HEIGHT),
+                    full ? ItemRowHeight(items[tIdx]) : UIC.SPACED_HEIGHT * 2);
 
             var cEvent = Event.current;
 
@@ -455,20 +589,27 @@ namespace Inventory {
                     DrawDefList(r, Utility.rangedWeapons, Dialog_ItemSpecifier.baseWeaponStats.Union(Dialog_ItemSpecifier.rangedWeaponStats).ToList());
                     break;
                 case State.Medicinal:
-                    DrawDefList(r, Utility.medicinalDefs);
+                    DrawDefList(r, Utility.medicinalDefs, pinned: ItemPreset.Medicine);
                     break;
                 case State.Items:
-                    DrawDefList(r, Utility.items);
+                    DrawDefList(r, Utility.items, pinned: ItemPreset.Meals);
                     break;
             }
         }
 
-        private void DrawDefList(Rect r, IReadOnlyList<ThingDef> defList, List<StatDef> extraStats = null) {
-            var itms = curTag.requiredItems.Select(it => it.Def).ToHashSet();
+        // `pinned` is a preset shown above the def list
+        private void DrawDefList(Rect r, IReadOnlyList<ThingDef> defList, List<StatDef> extraStats = null, ItemPreset pinned = null) {
+            if (addingAlternativesTo != null && !curTag.requiredItems.Contains(addingAlternativesTo)) {
+                addingAlternativesTo = null;
+            }
+
+            var itms = curTag.requiredItems.SelectMany(it => it.Defs).ToHashSet();
             List<ThingDef> defs = null;
 
-            // todo: cleanup
-            var slotsUsed = ApparelSlotMaker.Create(BodyDefOf.Human, curTag.requiredItems.Select(s => s.Def).Where(def => def.IsApparel).ToList());
+            // a def is hidden if it conflicts with any member of another item in the tag, alternatives may overlap the
+            // item they are an alternative of, as only one of them is worn
+            var otherItems = curTag.requiredItems.Where(s => s != addingAlternativesTo);
+            var slotsUsed = ApparelSlotMaker.Create(BodyDefOf.Human, otherItems.Where(s => s.IsApparel).SelectMany(s => s.Defs).ToList());
 
             if (defFilter != string.Empty) {
                 if (defFilter == lastDefFilter) {
@@ -496,6 +637,29 @@ namespace Inventory {
             }
             
             defs = defs.Where(t => !itms.Contains(t)).ToList();
+
+            if (addingAlternativesTo != null) {
+                // alternatives must be the same kind of thing
+                defs = defs.Where(t => t.IsApparel == addingAlternativesTo.IsApparel).ToList();
+
+                // [ Adding alternatives to X ] [ Done ], on one line, named by the item's best alternative
+                var bannerRect = r.PopTopPartPixels(UIC.SPACED_HEIGHT);
+                Widgets.DrawHighlightSelected(bannerRect);
+                var label = Strings.AddingAlternativesTo(addingAlternativesTo.RepresentativeDef.LabelCap);
+
+                var doneRect = bannerRect.PopRightPartPixels(Strings.Done.GetWidthCached() + UIC.SMALL_GAP * 2);
+                if (Widgets.ButtonText(doneRect.ContractedBy(2f), Strings.Done)) {
+                    addingAlternativesTo = null;
+                }
+
+                bannerRect.xMin += GenUI.GapTiny;
+                Text.Anchor = TextAnchor.MiddleLeft;
+                Text.WordWrap = false;
+                Widgets.Label(bannerRect, label.Truncate(bannerRect.width));
+                Text.WordWrap = true;
+                Text.Anchor = TextAnchor.UpperLeft;
+                TooltipHandler.TipRegion(bannerRect, label);
+            }
             
             if (onlyResearchedItems) {
                 var recipes = DefDatabase<RecipeDef>.AllDefs.Where(recipe => recipe.AvailableNow).ToList();
@@ -578,6 +742,11 @@ namespace Inventory {
             var inputFieldRect = topBarRect.ContractedBy(2f);
             GUIUtility.InputField(inputFieldRect, "Def List Filter", ref defFilter);
             TooltipHandler.TipRegion(inputFieldRect, Strings.SearchBarDesc);
+
+            // hidden while any of its defs are already in the tag, as a def can only be in one item
+            if (pinned != null && addingAlternativesTo == null && pinned.Defs.Any() && !pinned.Defs.Any(itms.Contains)) {
+                DrawPinnedPreset(r.PopTopPartPixels(UIC.DEFAULT_HEIGHT), pinned);
+            }
 
             var height = defs.Count * UIC.DEFAULT_HEIGHT;
             var width = r.width - (r.height > height ? 0 : UIC.SCROLL_WIDTH);
@@ -709,7 +878,26 @@ namespace Inventory {
             Widgets.EndScrollView();
         }
 
+        private void DrawPinnedPreset(Rect rowRect, ItemPreset preset) {
+            var descRect = rowRect.LeftPart(0.85f);
+            Widgets.DefIcon(descRect.LeftPart(.15f), preset.Defs.First());
+            Widgets.Label(descRect.RightPart(.85f), preset.Label);
+
+            Widgets.DrawLightHighlight(rowRect);
+            Widgets.DrawHighlightIfMouseover(rowRect);
+            TooltipHandler.TipRegion(rowRect, () => Strings.ItemPresetDesc + "\n\n" + preset.MakeItem().RankedMembersDescription(), preset.GetHashCode());
+
+            if (Widgets.ButtonInvisible(rowRect)) {
+                curTag.requiredItems.Add(preset.MakeItem());
+            }
+        }
+
         private void AddDefToTag(ThingDef def) {
+            if (addingAlternativesTo != null) {
+                addingAlternativesTo.AddAlternative(def);
+                return;
+            }
+
             curTag.Add(def);
         }
 

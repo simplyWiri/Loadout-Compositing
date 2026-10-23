@@ -211,15 +211,7 @@ namespace Inventory {
                         
                         var idx = i + j;
                         if (idx >= tag.requiredItems.Count) break;
-                        var item = tag.requiredItems[idx];
-                        if (item.Quantity > 1) {
-                            GUIUtility.FittedDefIconCount(drawRect, item.Def, item.RandomStuff, item.Quantity);
-                        }
-                        else {
-                            Widgets.DefIcon(drawRect, item.Def, item.RandomStuff);
-                        }
-
-                        TooltipHandler.TipRegion(drawRect, item.Def.LabelCap);
+                        GUIUtility.DrawItemIcon(drawRect, tag.requiredItems[idx]);
                     }
                 }
             }
@@ -415,7 +407,7 @@ namespace Inventory {
             // foreach (var apparelStat in apparelBonuses) {
             //     var totalScore = 0.0f;
             //     foreach (var apparel in hypotheticalApparel) {
-            //         totalScore += apparel.Def.GetStatValueAbstract(apparelStat, apparel.RandomStuff);
+            //         totalScore += apparel.Def.GetStatValueAbstract(apparelStat, apparel.RepresentativeStuff);
             //     }
             //     
             //     var statRect = viewRect.PopTopPartPixels(Text.LineHeight);
@@ -427,8 +419,10 @@ namespace Inventory {
             //     Widgets.Label(statRect.PopLeftPartPixels(statValueStr.GetWidthCached() + UIC.SMALL_GAP), statValueStr);
             // }
 
-            var hypotheticalApparel = component.Loadout.HypotheticalWornApparel(shownState, pawn.def.race.body).ToList();
-            var relevantItems = hypotheticalApparel.Union(loadoutItems.Where(item => !item.Def.IsApparel)).ToList();
+            var hypotheticalApparel = component.Loadout.HypotheticalWornApparel(shownState, pawn.def.race.body)
+                .Select(tuple => new Tuple<Item, ThingDef>(tuple.Item1, tuple.Item3)).ToList();
+            var relevantItems = hypotheticalApparel.Union(loadoutItems.Where(item => !item.IsApparel)
+                .Select(item => new Tuple<Item, ThingDef>(item, item.RepresentativeDef))).ToList();
 
             if ((hypotheticalApparel.Count + relevantItems.Count) < 0) {
                 statsHeight = GenUI.GapTiny + UIC.SPACED_HEIGHT;
@@ -439,12 +433,12 @@ namespace Inventory {
             GUIUtility.ListSeperator(ref viewRect, Strings.EquippedStatOffsets + " ", tooltip: Strings.EquippedStatOffsetsDesc);
             Text.Anchor = TextAnchor.UpperLeft;
             
-            var statBonuses = new Dictionary<StatDef, List<Item>>();
+            var statBonuses = new Dictionary<StatDef, List<Tuple<Item, ThingDef>>>();
 
             foreach (var potentialStatBoostingItem in relevantItems) {
-                foreach (var mod in potentialStatBoostingItem.Def.equippedStatOffsets ?? new List<StatModifier>()) {
+                foreach (var mod in potentialStatBoostingItem.Item2.equippedStatOffsets ?? new List<StatModifier>()) {
                     if (!statBonuses.TryGetValue(mod.stat, out var list)) {
-                        statBonuses.Add(mod.stat, new List<Item> { potentialStatBoostingItem });
+                        statBonuses.Add(mod.stat, new List<Tuple<Item, ThingDef>> { potentialStatBoostingItem });
                         continue;
                     }
                     list.Add(potentialStatBoostingItem);
@@ -452,7 +446,7 @@ namespace Inventory {
             }
 
             foreach (var (stat, items) in statBonuses) {
-                var totalScore = items.Sum(item => item.GetStatOffset(stat));
+                var totalScore = items.Sum(item => item.Item2.equippedStatOffsets.GetStatOffsetFromList(stat));
 
                 var statRect = viewRect.PopTopPartPixels(Text.LineHeight);
                 
@@ -462,10 +456,9 @@ namespace Inventory {
                 GUIUtility.WithModifiers(statRect.PopLeftPartPixels(statNameStr.GetWidthCached()), statNameStr, color: Color.gray);
                 Widgets.Label(statRect.PopLeftPartPixels(statValueStr.GetWidthCached() + UIC.SMALL_GAP), statValueStr);
                 
-                foreach (var item in items.OrderBy(it => it.GetStatOffset(stat))) {
+                foreach (var (item, def) in items.OrderBy(it => it.Item2.equippedStatOffsets.GetStatOffsetFromList(stat))) {
                     var iconRect = statRect.PopRightPartPixels(Text.LineHeight);
-                    Widgets.DefIcon(iconRect, item.Def, item.RandomStuff);
-                    TooltipHandler.TipRegion(iconRect, item.Label + " " + stat.Worker.ValueToString(item.GetStatOffset(stat), false));
+                    GUIUtility.DrawItemIcon(iconRect, item, false, item.Label + " " + stat.Worker.ValueToString(def.equippedStatOffsets.GetStatOffsetFromList(stat), false), item.MemberFor(def));
                 }
             }
 

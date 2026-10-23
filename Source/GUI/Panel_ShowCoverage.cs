@@ -74,7 +74,7 @@ namespace Inventory {
             float curY = rect.y + UIC.DEFAULT_HEIGHT;
             float beginY = curY;
 
-            var wornApparel = component.Loadout.HypotheticalWornApparelWithTag(parent.shownState, def).ToList();
+            var wornApparel = component.Loadout.HypotheticalWornApparel(parent.shownState, def).ToList();
 
             foreach (var category in ApparelUtility.GetBodyPartGroupFor(def).categories
                          .OrderByDescending(t => t.First().def.listOrder)) {
@@ -160,7 +160,7 @@ namespace Inventory {
         }
 
         public void DrawBodyPartGroup(BodyDef bodyDef, BodyPartGroup group, List<ApparelLayerDef> layers,
-            ref float curY, List<Rect> columns, List<Tuple<Item, Tag>> wornApparel) {
+            ref float curY, List<Rect> columns, List<Tuple<Item, Tag, ThingDef>> wornApparel) {
             var groupRect = new Rect(columns[0].x, curY, columns[0].width, UIC.SPACED_HEIGHT);
 
             var def = group.def;
@@ -176,16 +176,16 @@ namespace Inventory {
                 var columnRect = new Rect(columns[idx].x, curY, columns[idx].width, UIC.SPACED_HEIGHT);
                 var loadoutTags = component.Loadout.ElementsWith(parent.shownState).ToList();
 
-                var (overlappingApparel, overlappingTag) = wornApparel
+                var (overlappingApparel, overlappingTag, overlappingDef) = wornApparel
                                                                .FirstOrDefault(item =>
-                                                                   ApparelSlotMaker.Create(bodyDef, item.Item1.Def)
+                                                                   ApparelSlotMaker.Create(bodyDef, item.Item3)
                                                                        .Intersects(def, column)) ??
-                                                           new Tuple<Item, Tag>(null, null);
+                                                           new Tuple<Item, Tag, ThingDef>(null, null, null);
 
                 var possibleDefs = loadoutTags
                     .SelectMany(t =>
                         t.Tag.ItemsWithTagMatching(item =>
-                            item.Def.IsApparel && ApparelSlotMaker.Create(bodyDef, item.Def).Intersects(def, column)))
+                            item.IsApparel && item.Defs.Any(d => ApparelSlotMaker.Create(bodyDef, d).Intersects(def, column))))
                     .ToList();
 
                 if (overlappingApparel != null) {
@@ -203,28 +203,27 @@ namespace Inventory {
                         GUI.DrawTexture(columnRect.LeftPartPixels(columnRect.height).ContractedBy(1f), Textures.CornerTex);
                         GUI.color = Color.white;
                         
-                        Widgets.DefIcon(columnRect.ContractedBy(3f), overlappingApparel.Def,
-                            overlappingApparel.RandomStuff);
+                        GUIUtility.DrawItemIcon(columnRect.ContractedBy(3f), overlappingApparel, false, string.Empty, overlappingApparel.MemberFor(overlappingDef));
 
                         if (possibleDefs.Any()) {
                             var str = "";
                             foreach (var (pTag, pApparel) in possibleDefs) {
-                                str += $"\n - {pApparel.Def.LabelCap} from {pTag.name}";
+                                str += $"\n - {pApparel.ShortLabel} from {pTag.name}";
                             }
 
                             TooltipHandler.TipRegion(columnRect,
-                                $"{overlappingApparel.Def.LabelCap} from {overlappingTag.name} blocks:{str}");
+                                $"{overlappingDef.LabelCap} from {overlappingTag.name} blocks:{str}");
                         }
                     }
                     else {
                         var nextHighestPrio = possibleDefs.OrderBy(tup => component.Loadout.ElementsWith(parent.shownState).FirstIndexOf(e => e.Tag == overlappingTag)).First().Item2;
                         
                         Widgets.DrawBoxSolidWithOutline(columnRect, Widgets.WindowBGFillColor, Color.red);
-                        Widgets.DefIcon(columnRect.ContractedBy(3f), nextHighestPrio.Def, color: new Color(0.5f, 0.5f, 0.5f, 0.3f));
+                        Widgets.DefIcon(columnRect.ContractedBy(3f), nextHighestPrio.RepresentativeDef, color: new Color(0.5f, 0.5f, 0.5f, 0.3f));
 
                         var str = "Blocked Tags:";
                         foreach (var (pTag, pApparel) in possibleDefs) {
-                            str += $"\n - {pApparel.Def.LabelCap} from {pTag.name}";
+                            str += $"\n - {pApparel.ShortLabel} from {pTag.name}";
                         }
 
                         TooltipHandler.TipRegion(columnRect, str);

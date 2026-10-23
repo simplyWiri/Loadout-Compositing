@@ -62,6 +62,16 @@ namespace Inventory {
         public static string HitPointsAmount => $"{P}HitPointsAmount";
         public static string ToCopy => $"{P}ToCopy".TranslateSimple();
         public static string Customize => $"{P}Customize".TranslateSimple();
+        public static string ItemPresetDesc => $"{P}ItemPresetDesc".TranslateSimple();
+        public static string Done => $"{P}Done".TranslateSimple();
+        public static string AddAlternativeDesc => $"{P}AddAlternativeDesc".TranslateSimple();
+        public static string AddingAlternativesTo(string item) => $"{P}AddingAlternativesTo".Translate(item);
+        public static string OneOfHeading => $"{P}OneOfHeading".TranslateSimple();
+        public static string OneOf(string defs) => $"{P}OneOf".Translate(defs);
+        public static string RemoveAlternative => $"{P}RemoveAlternative".TranslateSimple();
+        public static string ReorderAlternativeDesc => $"{P}ReorderAlternativeDesc".TranslateSimple();
+        public static string EditingAlternative(string def) => $"{P}EditingAlternative".Translate(def);
+        public static string EditingAlternativeDesc => $"{P}EditingAlternativeDesc".TranslateSimple();
         public static string MouseOverDetails => $"{P}MouseOverDetails".TranslateSimple();
         public static string Statistics => $"{P}Statistics".TranslateSimple();
         public static string StuffFilter => $"{P}StuffFilter".TranslateSimple();

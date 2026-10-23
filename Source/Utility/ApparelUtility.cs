@@ -173,24 +173,21 @@ namespace Inventory {
             return bodyPartGroup;
         }
         
-        public static List<Tuple<Item, Tag>> WornApparelFor(BodyDef def, List<Tuple<Item, Tag, int>> apparels) {
-            var wornApparels = new List<Tuple<Item, Tag>>();
+        // returns the worn items, the tag they came from, and the def chosen to be worn for that item. Items are worn
+        // greedily in priority order, each wearing its best ranked member which fits around what is already worn.
+        public static List<Tuple<Item, Tag, ThingDef>> WornApparelFor(BodyDef def, List<Tuple<Item, Tag, int>> apparels) {
+            var wornApparels = new List<Tuple<Item, Tag, ThingDef>>();
             ApparelSlot wornApparelSlots = null;
             foreach (var (apparel, tag, _) in apparels.OrderBy(app => app.Item3)) {
-                // can obviously wear it if we aren't wearing anything
-                if (wornApparelSlots == null) {
-                    wornApparelSlots = ApparelSlotMaker.Create(def, apparel.Def);
-                    wornApparels.Add(new Tuple<Item, Tag>(apparel, tag));
-                    continue;
-                }
+                var apparelDef = apparel.RankedMembers
+                    .SelectMany(rank => rank)
+                    .Select(member => member.Def)
+                    .FirstOrDefault(memberDef => wornApparelSlots == null || !wornApparelSlots.Intersects(ApparelSlotMaker.Create(def, memberDef)));
 
-                var apparelSlots = ApparelSlotMaker.Create(def, apparel.Def);
+                if (apparelDef == null) continue;
 
-                if (!wornApparelSlots.Intersects(apparelSlots)) {
-                    wornApparels.Add(new Tuple<Item, Tag>(apparel, tag));
-
-                    wornApparelSlots = ApparelSlotMaker.Create(def, wornApparels.Select(kv => kv.Item1.Def));
-                }
+                wornApparels.Add(new Tuple<Item, Tag, ThingDef>(apparel, tag, apparelDef));
+                wornApparelSlots = ApparelSlotMaker.Create(def, wornApparels.Select(kv => kv.Item3));
             }
 
             return wornApparels;

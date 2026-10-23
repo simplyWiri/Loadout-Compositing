@@ -70,10 +70,8 @@ namespace Inventory
                 Action loadTagToGame = () => {
                     var newTag = tag.MakeCopy();
                     newTag.name = currentTagNextName;
-                    newTag.requiredItems = tag.requiredItems.Where((item) => item.WrappedDef.Valid).ToList();
-                    foreach (var item in newTag.requiredItems) {
-                        item.Filter.ClearInvalidStuffs();
-                    }
+                    // copies, so the in-game tag doesn't share (and edit) the saved tag's items
+                    newTag.requiredItems = tag.requiredItems.Select(item => item.CopyValid()).Where(item => item != null).ToList();
 
                     newTag.uniqueId = LoadoutManager.GetNextTagId();
                     LoadoutManager.AddTag(newTag);
@@ -138,18 +136,19 @@ namespace Inventory
 
         private List<Warning> MakeSaveWarnings(Tag tag) {
             var warnings = new List<Warning>();
-            foreach(var item in tag.requiredItems) {
-                if (!(item.Def.modContentPack?.IsCoreMod ?? true)) {
+            foreach(var member in tag.requiredItems.SelectMany(item => item.Members)) {
+                var def = member.Def;
+                if (!(def.modContentPack?.IsCoreMod ?? true)) {
                     warnings.Add(new Warning() {
-                        message = Strings.WarningItemDependsOnModLoad(item.Def.LabelCap, item.Def.modContentPack.Name),
+                        message = Strings.WarningItemDependsOnModLoad(def.LabelCap, def.modContentPack.Name),
                         tooltip = Strings.WarningItemDependsOnModLoadDesc,
                         severity = Warning.Severity.Note
                     });
                 }
-                foreach(var defFilter in item.filter.AllowedStuffs) {
+                foreach(var defFilter in member.AllowedStuffs) {
                     if (!(defFilter.Def.modContentPack?.IsCoreMod ?? true)) {
                         warnings.Add(new Warning() {
-                            message = Strings.WarningItemFilterDependsOnModLoad(item.Def.LabelCap, defFilter.Def.LabelCap, defFilter.Def.modContentPack.Name),
+                            message = Strings.WarningItemFilterDependsOnModLoad(def.LabelCap, defFilter.Def.LabelCap, defFilter.Def.modContentPack.Name),
                             tooltip = Strings.WarningItemFilterDependsOnModLoadDesc,
                             severity = Warning.Severity.Note
                         });
@@ -162,18 +161,19 @@ namespace Inventory
         private List<Warning> MakeLoadWarnings(Tag tag) {
             var warnings = new List<Warning>();
 
-            foreach (var item in tag.requiredItems)
+            foreach (var member in tag.requiredItems.SelectMany(item => item.Members))
             {
-                item.WrappedDef.Load();
-                if (!item.WrappedDef.Valid)
+                var wrappedDef = member.WrappedDef;
+                wrappedDef.Load();
+                if (!wrappedDef.Valid)
                 {
                     warnings.Add(new Warning() {
-                        message = Strings.WarningItemDependsOnModSave(item.WrappedDef.defName),
+                        message = Strings.WarningItemDependsOnModSave(wrappedDef.defName),
                         tooltip = Strings.WarningItemDependsOnModSaveDesc,
                         severity = Warning.Severity.Warn
                     });
                 }
-                foreach (var defFilter in item.filter.AllowedStuffs)
+                foreach (var defFilter in member.AllowedStuffs)
                 {
                     defFilter.Load();
                     if (!defFilter.Valid)
@@ -252,19 +252,7 @@ namespace Inventory
                             break;
                         }
 
-                        var item = tag.requiredItems[idx];
-                        if (item.Def == null) {
-                            Widgets.DrawTextureFitted(drawRect, Textures.PlaceholderDef, 1.0f);
-                            TooltipHandler.TipRegion(drawRect, item.WrappedDef.defName);
-                        } else {
-                            if (item.Quantity > 1) {
-                                GUIUtility.FittedDefIconCount(drawRect, item.Def, item.RandomStuff, item.Quantity);
-                            } else {
-                                Widgets.DefIcon(drawRect, item.Def, item.RandomStuff);
-                            }
-
-                            TooltipHandler.TipRegion(drawRect, item.Def.LabelCap);
-                        }
+                        GUIUtility.DrawItemIcon(drawRect, tag.requiredItems[idx]);
                     }
                 }
             }

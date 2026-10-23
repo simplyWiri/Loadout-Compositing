@@ -13,13 +13,20 @@ namespace Inventory {
             var comp = pawn.GetComp<LoadoutComponent>();
             var multiplier = comp?.Loadout.WeightAtWhichLoadoutDesires(ap) ?? 0;
             if (multiplier != 0) {
+                var rankWeight = comp.Loadout.RankWeight(pawn, ap);
+                if (rankWeight == 0) {
+                    // a better member of the same item is worn, never swap back to this one
+                    __result = -1000f;
+                    return;
+                }
+
                 if (ModBase.settings.biasLoadBearingItems && Utility.massBoostingClothes.TryGetValue(ap.def, out var func)) {
                     var hasQuality = ap.TryGetQuality(out var quality);
                     var score = func(hasQuality ? quality : QualityCategory.Normal);
                     __result += Mathf.Lerp(0.16f, 0.24f, score / 135f);
                 }
                 __result += 0.24f; // flat bonus for being an apparel in the loadout
-                __result *= multiplier;
+                __result *= multiplier * rankWeight;
             } else if ( ModBase.settings.onlyItemsFromLoadout ) {
                 __result = -1000f;
             }

@@ -39,9 +39,10 @@ namespace Inventory
             var items = new Dictionary<Item, Tag>();
             foreach (var tag in tags)
             {
-                foreach (var item in tag.requiredItems)
+                // a bill can only make one def, so items with alternatives are skipped
+                foreach (var item in tag.requiredItems.Where(item => item.Members.Count == 1))
                 {
-                    if (producedDefs.Contains(item.Def))
+                    if (producedDefs.Contains(item.RepresentativeDef))
                     {
                         items[item] = tag;
                     }
@@ -54,16 +55,16 @@ namespace Inventory
                 if (existingBill is not Bill_Production bp) continue;
                 if (bp.repeatMode != InvBillRepeatModeDefOf.W_PerTag) continue;
                         
-                items.RemoveAll(kp => bp.recipe.ProducedThingDef == kp.Key.Def && kp.Key.Filter.SubsetOf(bp));
+                items.RemoveAll(kp => bp.recipe.ProducedThingDef == kp.Key.RepresentativeDef && kp.Key.SubsetOf(bp));
             }
 
             foreach (var (item, tag) in items)
             {
-                var recipe = availableRecipes.First(r => r.ProducedThingDef == item.Def);
+                var recipe = availableRecipes.First(r => r.ProducedThingDef == item.RepresentativeDef);
                 var bill = recipe.MakeNewBill() as Bill_Production;
                 if (bill == null)
                 {
-                    Log.Error($"Failed to make bill for {item.Def.defName}");
+                    Log.Error($"Failed to make bill for {item.RepresentativeDef.defName}");
                     continue;
                 }
                         
@@ -73,18 +74,8 @@ namespace Inventory
                 bill.targetCount = 1;
                 bill.repeatCount = 0;
                 bill.includeEquipped = true;
-                bill.limitToAllowedStuff = true;
-                        
-                item.Filter.CopyTo(bill.ingredientFilter);
-                bill.limitToAllowedStuff = !item.Filter.Generic;
+                item.CopyTo(bill);
 
-                if (item.Filter.SpecificQualityRange)
-                    bill.qualityRange = item.Filter.QualityRange;
-
-                if (item.Filter.SpecificHitpointRange)
-                    bill.hpRange = item.Filter.HpRange;
-                        
-                        
                 workTable.BillStack.AddBill(bill);
                 
                 Messages.Message(Strings.BillAddedFlavour(item.Print(), tag.name), MessageTypeDefOf.SilentInput);

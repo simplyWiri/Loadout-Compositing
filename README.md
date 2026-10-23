@@ -10,6 +10,8 @@ It also features some utility to make procuring things for tags easier, in the f
 - Create tags containing items which a pawn will wear / pick up / equip automatically
 - Create loadouts consisting of multiple tags for flexibility
 - Create bills which make `x` number of items, where `x` is the number of pawns with the tag `y`
+- Give an item alternatives (e.g. a flak vest, or failing that a duster), pawns prefer the alternatives in order and upgrade when a better one becomes available
+- Add "Any medicine" or "Any meal" in one click, a group of every medicine / meal, best first
 
 An Example:
 I might create a series of tags, named Sniper, Recon Armor, Heavy Armor and Melee Rusher, Medic. I can then pick and choose which tags should be applied per pawn. As seen here
@@ -38,9 +40,15 @@ I am happy to accept contributions which add features / fix bugs. I do reserve t
 
 `Dialog_` - A window class 
 
-`Item` - A custom wrapper which effectively acts as a `ThingDef` coupled with a custom version of a `ThingFilter` and a quantity, this is use to represent un-realised `Thing`s in a tag.
+`Item` - Represents un-realised `Thing`s in a tag: an ordered list of `ItemMember`s (alternatives, best first), a `Filter` shared by all of them, and a quantity. A plain item is a group with one member.
 
-`Filter` - Custom version of a ThingFilter
+`ItemMember` - One `ThingDef` an `Item` accepts, along with the stuffs it may be made from.
+
+`Filter` - The quality and hit point ranges shared by every member of an `Item`.
+
+`ItemPreset` - A shortcut (any medicine, any meal) which adds an ordinary group of every def of that kind, ordered best first.
+
+`GearAssignment` - Decides which of a pawn's held things count towards which item of their loadout, anything left over is surplus and is unloaded. This is what lets pawns prefer better ranked members, and only drop a worse one once its replacement is held.
 
 `Tag` - A list of required `Item`s and a name (which does not have to be unique) these are owned exclusively by the `LoadoutManager` which is responsible for their deep saving / ownership.
 
