@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -36,10 +36,12 @@ namespace Inventory
             this.defName = defName;
         }
 
+        // Settings (tags saved for other games) load before the defs do, so a def which isn't found yet is looked up
+        // again later, rather than remembered as missing.
         public ThingDef Load()
         {
             DefDatabase<ThingDef>.defsByName.TryGetValue(defName, out def);
-            hasLoaded = true;
+            hasLoaded = def != null || PlayDataLoader.Loaded;
             return def;
         }
 
@@ -48,16 +50,17 @@ namespace Inventory
             return def?.defName ?? defName;
         }
 
+        private string Name => def?.defName ?? defName;
+
+        // by name, so they can be compared (e.g. stuffs in a set) before the defs have loaded, without every
+        // unloaded def comparing equal
         public override bool Equals(object obj)
         {
-            if (obj is SafeDef safeDef) {
-                return Def == safeDef.Def;
-            }
-            return false;
+            return obj is SafeDef safeDef && Name == safeDef.Name;
         }
         public override int GetHashCode()
         {
-            return Def?.GetHashCode() ?? 0;
+            return Name?.GetHashCode() ?? 0;
         }
 
         public static SafeDef FromString(string str) {
