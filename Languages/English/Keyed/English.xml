@@ -60,6 +60,9 @@
 	<CompositableLoadouts.OneOfHeading>One of:</CompositableLoadouts.OneOfHeading>
 	<CompositableLoadouts.OneOf>One of: {0}</CompositableLoadouts.OneOf>
 	<CompositableLoadouts.RemoveAlternative>Remove this alternative</CompositableLoadouts.RemoveAlternative>
+	<CompositableLoadouts.Prosthetics>Prosthetics, installed by surgery rather than carried</CompositableLoadouts.Prosthetics>
+	<CompositableLoadouts.InstalledLabel>{0} (installed)</CompositableLoadouts.InstalledLabel>
+	<CompositableLoadouts.InstalledOn>Installed on: {0}</CompositableLoadouts.InstalledOn>
 	<CompositableLoadouts.ReorderAlternativeDesc>Drag to change which alternatives pawns prefer, higher is preferred.</CompositableLoadouts.ReorderAlternativeDesc>
 	<CompositableLoadouts.EditingAlternative>Alternative: {0}</CompositableLoadouts.EditingAlternative>
 	<CompositableLoadouts.EditingAlternativeDesc>Pick which alternative to edit. Stuff is set for each alternative, quality and hit points are shared by every alternative of this item.</CompositableLoadouts.EditingAlternativeDesc>
