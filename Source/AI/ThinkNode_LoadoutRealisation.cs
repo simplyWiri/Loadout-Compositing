@@ -119,10 +119,7 @@ namespace Inventory {
         // a heavily modified version of JobGiver_OptimizeApparel:TryGiveJob
         private Job SatisfyLoadoutClothingJob(Pawn pawn, Loadout loadout) {
             var wornApparel = pawn.apparel.WornApparel;
-            // `lookInHaulSources` includes apparel held by things such as outfit stands
-            var candidates = new List<Thing>();
-            pawn.Map.listerThings.GetAllThings(candidates, ThingRequestGroup.Apparel, thing => thing is Apparel app && loadout.Items.Any(item => item.Allows(app)), true);
-            var list = candidates.Cast<Apparel>().ToList();
+            var list = CandidateApparel(pawn, loadout);
 
             if (list.Count == 0) {
                 return null;
@@ -143,10 +140,6 @@ namespace Inventory {
             var bestApparelScore = 0f;
 
             foreach (var apparel in list) {
-                if (!ValidApparelFor(apparel, pawn)) {
-                    continue;
-                }
-
                 var apparelScore = OptimizeApparel.ApparelScoreGain(pawn, apparel, OptimizeApparel.wornApparelScores);
 
                 if (apparelScore < 0.05f || apparelScore < bestApparelScore) continue;
@@ -158,6 +151,38 @@ namespace Inventory {
             }
 
             return bestApparel == null ? null : JobMaker.MakeJob(EquipApparel, bestApparel);
+        }
+
+        // Apparel which an active apparel item accepts and the pawn could wear. Looked up by the items' defs rather than
+        // scanning all apparel on the map, and filtered before any (expensive) scoring.
+        private List<Apparel> CandidateApparel(Pawn pawn, Loadout loadout) {
+            var candidates = new List<Apparel>();
+            var apparelItems = loadout.Items.Where(item => item.IsApparel).Distinct().ToList();
+            if (apparelItems.Count == 0) {
+                return candidates;
+            }
+
+            void Consider(Thing thing) {
+                if (thing is Apparel apparel && apparelItems.Any(item => item.Allows(apparel)) && ValidApparelFor(apparel, pawn)) {
+                    candidates.Add(apparel);
+                }
+            }
+
+            var lister = pawn.Map.listerThings;
+            foreach (var def in apparelItems.SelectMany(item => item.Defs).ToHashSet()) {
+                foreach (var thing in lister.ThingsOfDef(def)) {
+                    Consider(thing);
+                }
+            }
+
+            // apparel held by things such as outfit stands isn't spawned, so isn't listed by def
+            foreach (var source in lister.haulSources) {
+                foreach (var thing in source.GetDirectlyHeldThings()) {
+                    Consider(thing);
+                }
+            }
+
+            return candidates;
         }
 
         // strict preference: swap worn apparel for a better ranked member of the same item, regardless of score
@@ -172,7 +197,7 @@ namespace Inventory {
                     .OrderBy(item.RankOf);
 
                 foreach (var apparel in betterApparel) {
-                    if (!ValidApparelFor(apparel, pawn) || !OnlyDisplacesItem(pawn, loadout, item, apparel)) continue;
+                    if (!OnlyDisplacesItem(pawn, loadout, item, apparel)) continue;
                     if (!CanReachToWear(pawn, apparel)) continue;
 
                     return JobMaker.MakeJob(EquipApparel, apparel);
