@@ -275,7 +275,7 @@ namespace Inventory {
             curTag.name ??= " ";
 
             var viewRect = new Rect(r.x, r.y, rect.width - UIC.SCROLL_WIDTH,
-                (curTag.requiredItems.Count * UIC.SPACED_HEIGHT * 2));
+                curTag.requiredItems.Sum(ItemRowHeight));
             Widgets.BeginScrollView(r, ref curItemScroll, viewRect);
 
             var visibilityRect = r;
@@ -287,16 +287,21 @@ namespace Inventory {
             // [ Info ] [ Icon ] [ Name ] [ Edit Filter ] [ Edit Quantity ] [ Remove ]  
             foreach (var item in curTag.requiredItems.ToList()) {
                 var def = item.RepresentativeDef;
-                var itemRect = baseRect.PopTopPartPixels(UIC.SPACED_HEIGHT * 2);
+                var blockRect = baseRect.PopTopPartPixels(ItemRowHeight(item));
 
-                if (!itemRect.Overlaps(visibilityRect)) {
+                if (!blockRect.Overlaps(visibilityRect)) {
                     continue;
                 }
 
                 if (i % 2 == 0) {
-                    Widgets.DrawLightHighlight(itemRect);
+                    Widgets.DrawLightHighlight(blockRect);
                 }
                 i++;
+
+                var itemRect = blockRect.PopTopPartPixels(UIC.SPACED_HEIGHT * 2);
+                if (ShowsMemberRows(item)) {
+                    DrawMemberRows(blockRect, item);
+                }
 
                 // Info
                 Rect infoRect = itemRect.PopLeftPartPixels(UIC.SMALL_ICON);
@@ -345,11 +350,66 @@ namespace Inventory {
             Widgets.EndScrollView();
         }
 
+        private static bool ShowsMemberRows(Item item) => !item.IsGeneric && item.Members.Count > 1;
+
+        private static float ItemRowHeight(Item item) {
+            return UIC.SPACED_HEIGHT * 2 + (ShowsMemberRows(item) ? item.Members.Count * UIC.SPACED_HEIGHT : 0);
+        }
+
+        // one row per alternative, in order of preference
+        // [ Icon ] [ Name ] [ Edit Stuff ] [ Up ] [ Down ] [ Remove ]
+        private void DrawMemberRows(Rect rect, Item item) {
+            var members = item.members;
+            for (var idx = 0; idx < members.Count; idx++) {
+                var member = members[idx];
+                var rowRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
+                rowRect.xMin += UIC.SMALL_ICON + UIC.SPACED_HEIGHT;
+
+                var iconRect = rowRect.PopLeftPartPixels(UIC.SPACED_HEIGHT);
+                GUIUtility.DrawItemIcon(iconRect.ContractedBy(2f), item, false, member.Def.DescriptionDetailed, member);
+
+                // removing the last-but-one alternative leaves a plain item
+                var removeRect = rowRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
+                TooltipHandler.TipRegion(removeRect, Strings.RemoveAlternative);
+                if (Widgets.ButtonImageFitted(removeRect.ContractedBy(5f), TexButton.Delete)) {
+                    members.RemoveAt(idx);
+                    return;
+                }
+
+                var downRect = rowRect.PopRightPartPixels(UIC.SPACED_HEIGHT);
+                var upRect = rowRect.PopRightPartPixels(UIC.SPACED_HEIGHT);
+                TooltipHandler.TipRegion(downRect, Strings.LowerAlternative);
+                TooltipHandler.TipRegion(upRect, Strings.RaiseAlternative);
+                if (idx < members.Count - 1 && Widgets.ButtonImageFitted(downRect.ContractedBy(5f), TexButton.ReorderDown)) {
+                    (members[idx], members[idx + 1]) = (members[idx + 1], members[idx]);
+                    return;
+                }
+                if (idx > 0 && Widgets.ButtonImageFitted(upRect.ContractedBy(5f), TexButton.ReorderUp)) {
+                    (members[idx], members[idx - 1]) = (members[idx - 1], members[idx]);
+                    return;
+                }
+
+                var editRect = rowRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
+                if (member.Def.MadeFromStuff) {
+                    TooltipHandler.TipRegion(editRect, Strings.SpecifyElementsToolTip);
+                    if (Widgets.ButtonImageFitted(editRect.ContractedBy(3f), Textures.EditTex)) {
+                        Find.WindowStack.Add(new Dialog_ItemSpecifier(item, member));
+                    }
+                }
+
+                Text.Anchor = TextAnchor.MiddleLeft;
+                Widgets.Label(rowRect, $"{idx + 1}. {member.Label}");
+                Text.Anchor = TextAnchor.UpperLeft;
+            }
+        }
+
         private void DraggableItems(Rect rect, List<Item> items) {
             if (items.Count == 1) return;
             
+            // only the item's own row (not its alternatives) starts a drag, the full block is highlighted
             Rect RectForTag(int tIdx, bool full = false) 
-                => new Rect(rect.x, rect.y + tIdx * UIC.SPACED_HEIGHT * 2, rect.width - (full ? 0 : 6 * UIC.SPACED_HEIGHT), UIC.SPACED_HEIGHT * 2);
+                => new Rect(rect.x, rect.y + items.Take(tIdx).Sum(ItemRowHeight), rect.width - (full ? 0 : 6 * UIC.SPACED_HEIGHT),
+                    full ? ItemRowHeight(items[tIdx]) : UIC.SPACED_HEIGHT * 2);
 
             var cEvent = Event.current;
 
