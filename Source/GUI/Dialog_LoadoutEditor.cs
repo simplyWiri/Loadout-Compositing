@@ -383,7 +383,7 @@ namespace Inventory {
 
             viewRect.AdjVertBy(GenUI.GapTiny);
 
-            var loadoutItems = component.Loadout.ItemsWith(shownState).ToList();
+            var loadoutItems = component.Loadout.CarriedItemsWith(shownState).ToList();
 
             GUIUtility.BarWithOverlay(
                 viewRect.PopTopPartPixels(UIC.SPACED_HEIGHT),
