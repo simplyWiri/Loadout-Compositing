@@ -139,6 +139,11 @@ namespace Inventory {
             this.quantity = 1;
         }
 
+        // one line per rank, best first, members of the same rank share a line
+        public string RankedMembersDescription() {
+            return string.Join("\n", RankedMembers.Select((rank, idx) => $"{idx + 1}. " + string.Join(", ", rank.Select(m => m.Label))));
+        }
+
         // the new alternative is the least preferred
         public void AddAlternative(ThingDef def) {
             members.Add(new ItemMember(new SafeDef(def), new HashSet<SafeDef>()));

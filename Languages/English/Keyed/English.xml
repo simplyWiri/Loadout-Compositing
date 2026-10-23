@@ -53,6 +53,7 @@
 	<CompositableLoadouts.HitPointsAmount>Hit points {0}</CompositableLoadouts.HitPointsAmount>
 
 	<CompositableLoadouts.Customize>Customize</CompositableLoadouts.Customize>
+	<CompositableLoadouts.GenericCategoryDesc>Any of the following counts towards this item, pawns take the best available first. Rotten things never count, and meals only count if the pawn is willing to eat them.</CompositableLoadouts.GenericCategoryDesc>
 	<CompositableLoadouts.Done>Done</CompositableLoadouts.Done>
 	<CompositableLoadouts.AddAlternativeDesc>Add alternatives to this item, any one of them satisfies it. Pawns prefer alternatives higher in the list.</CompositableLoadouts.AddAlternativeDesc>
 	<CompositableLoadouts.AddingAlternativesTo>Adding alternatives to {0}</CompositableLoadouts.AddingAlternativesTo>
