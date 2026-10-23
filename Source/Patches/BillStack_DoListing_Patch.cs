@@ -54,7 +54,7 @@ namespace Inventory
                 if (existingBill is not Bill_Production bp) continue;
                 if (bp.repeatMode != InvBillRepeatModeDefOf.W_PerTag) continue;
                         
-                items.RemoveAll(kp => bp.recipe.ProducedThingDef == kp.Key.Def && kp.Key.Filter.SubsetOf(bp));
+                items.RemoveAll(kp => bp.recipe.ProducedThingDef == kp.Key.Def && kp.Key.SubsetOf(bp));
             }
 
             foreach (var (item, tag) in items)
@@ -75,8 +75,9 @@ namespace Inventory
                 bill.includeEquipped = true;
                 bill.limitToAllowedStuff = true;
                         
-                item.Filter.CopyTo(bill.ingredientFilter);
-                bill.limitToAllowedStuff = !item.Filter.Generic;
+                var member = item.MemberFor(recipe.ProducedThingDef);
+                member.CopyTo(bill.ingredientFilter);
+                bill.limitToAllowedStuff = !member.GenericStuff;
 
                 if (item.Filter.SpecificQualityRange)
                     bill.qualityRange = item.Filter.QualityRange;

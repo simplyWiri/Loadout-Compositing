@@ -318,13 +318,14 @@ namespace Inventory {
 
                 // Copy, Paste
                 var copyPasteButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 3);
-                GUIUtility.DraggableCopyPaste(copyPasteButton, ref item.filter, Filter.CopyFrom);
+                var pasteTarget = item;
+                GUIUtility.DraggableCopyPaste(copyPasteButton, ref pasteTarget, Item.PasteFilter);
                 TooltipHandler.TipRegion(copyPasteButton, Strings.CopyPasteExplain);
 
                 // Edit 
                 var constrainButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
                 if (Widgets.ButtonImageFitted(constrainButton.ContractedBy(1f), Textures.EditTex))
-                    Find.WindowStack.Add(new Dialog_ItemSpecifier(item.Filter));
+                    Find.WindowStack.Add(new Dialog_ItemSpecifier(item, item.Members[0]));
                 TooltipHandler.TipRegion(constrainButton, Strings.SpecifyElementsToolTip);
 
                 var quantityFieldRect = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 2f);

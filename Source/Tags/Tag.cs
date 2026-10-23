@@ -90,17 +90,21 @@ namespace Inventory {
             Scribe_Values.Look(ref defaultCondition, nameof(defaultCondition), ActiveCondition.StateActive);
 
             if (!GenericLoad && idType != "GenericTag_") {
-                var count = requiredItems.RemoveAll(item => item.Def == null);
-                if (count != 0) {
-                    Log.Error($"Attempting to load a null def, have you removed a mod? - Removing item from {name} - ({GetUniqueLoadID()})");
-                }
-
-                foreach(var item in requiredItems) {
-                    count = item.filter.stuffs.RemoveWhere(thing => thing.Def is null);
+                foreach (var item in requiredItems) {
+                    var count = item.members.RemoveAll(member => member.Def == null);
                     if (count != 0) {
-                        Log.Error($"Attempted to load a null stuff in a filter, have you removed a mod?");
+                        Log.Error($"Attempting to load a null def, have you removed a mod? - Removing item from {name} - ({GetUniqueLoadID()})");
+                    }
+
+                    foreach (var member in item.members) {
+                        count = member.stuffs.RemoveWhere(thing => thing.Def is null);
+                        if (count != 0) {
+                            Log.Error($"Attempted to load a null stuff in a filter, have you removed a mod?");
+                        }
                     }
                 }
+
+                requiredItems.RemoveAll(item => item.members.Count == 0);
 
                 idType = "Tag_";
             } else {
