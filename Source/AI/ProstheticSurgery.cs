@@ -68,7 +68,7 @@ namespace Inventory {
         private static BodyPartRecord ChoosePart(Pawn pawn, RecipeDef recipe, ProstheticSlots slots, HashSet<ThingDef> required) {
             if (!recipe.targetsBodyPart) return null;
 
-            var def = recipe.ingredients[0].FixedIngredient;
+            var def = ProstheticUtility.ProstheticInstalledBy(recipe);
             var billedParts = pawn.BillStack.Bills.OfType<Bill_Medical>().Select(bill => bill.Part).ToHashSet();
             var hediffSet = pawn.health.hediffSet;
 
