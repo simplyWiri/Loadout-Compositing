@@ -164,6 +164,14 @@ namespace Inventory {
             }
         }
 
+        public override void GameComponentTick() {
+            if (Find.TickManager.TicksGame % ProstheticSurgery.CheckInterval != 0) return;
+
+            foreach (var map in Find.Maps) {
+                ProstheticSurgery.QueueBills(map);
+            }
+        }
+
         public override void GameComponentOnGUI() {
             if (InvKeyBindingDefOf.CL_OpenLoadoutEditor?.KeyDownEvent ?? false) {
                 if (Find.WindowStack.WindowOfType<Dialog_LoadoutEditor>() == null) {

@@ -31,6 +31,23 @@ namespace Inventory {
             return pawn.health.hediffSet.hediffs.Count(hediff => hediffs.Contains(hediff.def));
         }
 
+        // how many of `def`'s target parts have it, or a better prosthetic, installed
+        public static int SatisfiedCount(Pawn pawn, ThingDef def) {
+            var recipe = InstallRecipeFor(pawn, def);
+            if (recipe == null) return InstalledCount(pawn, def);
+
+            var targets = TargetParts(pawn.RaceProps.body, recipe).ToHashSet();
+            return pawn.health.hediffSet.hediffs.Count(h => h.def == recipe.addsHediff || (h.Part != null && targets.Contains(h.Part) && IsBetter(h.def, recipe.addsHediff)));
+        }
+
+        // whether the part `hediff` adds works better than the one `than` adds, e.g. an archotech over a bionic leg
+        public static bool IsBetter(HediffDef hediff, HediffDef than) {
+            return hediff.addedPartProps != null && than.addedPartProps != null && hediff.addedPartProps.partEfficiency > than.addedPartProps.partEfficiency;
+        }
+
+        // an added part replaces its body part, and everything below it, rather than sitting on it as an implant does
+        public static bool IsAddedPart(RecipeDef recipe) => typeof(Hediff_AddedPart).IsAssignableFrom(recipe.addsHediff.hediffClass);
+
         // whether `pawn` could ever have `def`, ignoring research and what's already installed (e.g. not for their race,
         // or not at their age)
         public static bool CanEverInstall(Pawn pawn, ThingDef def) {
