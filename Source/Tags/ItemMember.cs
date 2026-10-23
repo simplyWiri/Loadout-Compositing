@@ -15,6 +15,18 @@ namespace Inventory {
         public HashSet<SafeDef> AllowedStuffs => stuffs;
         public bool GenericStuff => stuffs.Count == 0;
 
+        // Stuff? Def.LabelCap
+        public string Label {
+            get {
+                if (!Def.MadeFromStuff) return Def.LabelCap;
+
+                var stuffLabel = stuffs.Count == 0 ? Strings.Generic
+                    : stuffs.Count == 1 ? stuffs.First().Def.LabelCap.ToString()
+                    : Strings.Generic + "*";
+                return stuffLabel + " " + Def.LabelCap;
+            }
+        }
+
         public ThingDef RepresentativeStuff => !Def.MadeFromStuff ? null : stuffs.Any() ? stuffs.First() : GenStuff.AllowedStuffsFor(Def).First();
 
         public ItemMember() {

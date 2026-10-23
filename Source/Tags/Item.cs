@@ -93,18 +93,17 @@ namespace Inventory {
 
             var stringBuilder = new StringBuilder();
 
-            var def = RepresentativeDef;
-            if (def.MadeFromStuff) {
-                var stuffs = RepresentativeMember.AllowedStuffs;
-                var count = stuffs.Count;
-                if (count == 0) stringBuilder.Append(Strings.Generic);
-                else if (count == 1) stringBuilder.Append(stuffs.First().Def.LabelCap);
-                else stringBuilder.Append(Strings.Generic + "*");
-                stringBuilder.Append(" ");
+            // One of: A, B +n
+            if (members.Count > 1) {
+                const int shownMembers = 2;
+                var labels = string.Join(", ", members.Take(shownMembers).Select(m => m.Def.LabelCap.ToString()));
+                if (members.Count > shownMembers) labels += $" +{members.Count - shownMembers}";
+                stringBuilder.Append(Strings.OneOf(labels));
+            } else {
+                stringBuilder.Append(RepresentativeMember.Label);
             }
 
-            stringBuilder.Append(def.LabelCap);
-            if (def.HasComp(typeof(CompQuality))) {
+            if (Defs.Any(def => def.HasComp(typeof(CompQuality)))) {
                 stringBuilder.Append(" (");
 
                 if (filter.QualityRange.min != filter.QualityRange.max)
