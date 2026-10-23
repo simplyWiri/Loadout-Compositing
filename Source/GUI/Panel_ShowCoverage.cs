@@ -203,7 +203,7 @@ namespace Inventory {
                         GUI.DrawTexture(columnRect.LeftPartPixels(columnRect.height).ContractedBy(1f), Textures.CornerTex);
                         GUI.color = Color.white;
                         
-                        GUIUtility.DrawItemIcon(columnRect.ContractedBy(3f), overlappingApparel, false, string.Empty);
+                        GUIUtility.DrawItemIcon(columnRect.ContractedBy(3f), overlappingApparel, false, string.Empty, overlappingApparel.MemberFor(overlappingDef));
 
                         if (possibleDefs.Any()) {
                             var str = "";

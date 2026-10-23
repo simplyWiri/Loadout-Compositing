@@ -458,7 +458,7 @@ namespace Inventory {
                 
                 foreach (var (item, def) in items.OrderBy(it => it.Item2.equippedStatOffsets.GetStatOffsetFromList(stat))) {
                     var iconRect = statRect.PopRightPartPixels(Text.LineHeight);
-                    GUIUtility.DrawItemIcon(iconRect, item, false, item.Label + " " + stat.Worker.ValueToString(def.equippedStatOffsets.GetStatOffsetFromList(stat), false));
+                    GUIUtility.DrawItemIcon(iconRect, item, false, item.Label + " " + stat.Worker.ValueToString(def.equippedStatOffsets.GetStatOffsetFromList(stat), false), item.MemberFor(def));
                 }
             }
 
