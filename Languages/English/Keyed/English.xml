@@ -53,6 +53,8 @@
 	<CompositableLoadouts.HitPointsAmount>Hit points {0}</CompositableLoadouts.HitPointsAmount>
 
 	<CompositableLoadouts.Customize>Customize</CompositableLoadouts.Customize>
+	<CompositableLoadouts.EditingAlternative>Alternative: {0}</CompositableLoadouts.EditingAlternative>
+	<CompositableLoadouts.EditingAlternativeDesc>Pick which alternative to edit. Stuff is set for each alternative, quality and hit points are shared by every alternative of this item.</CompositableLoadouts.EditingAlternativeDesc>
 	<CompositableLoadouts.MouseOverDetails>(Mouse Over Numbers for Details)</CompositableLoadouts.MouseOverDetails>
 	<CompositableLoadouts.Statistics>Statistics</CompositableLoadouts.Statistics>
 	<CompositableLoadouts.StuffFilter>Stuff Filter</CompositableLoadouts.StuffFilter>
