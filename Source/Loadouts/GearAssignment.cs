@@ -12,7 +12,7 @@ namespace Inventory {
         private readonly Dictionary<Item, Dictionary<int, int>> heldByRank = new Dictionary<Item, Dictionary<int, int>>();
         private readonly Dictionary<Thing, int> unassigned;
 
-        public GearAssignment(IEnumerable<Item> items, List<Thing> heldThings) {
+        public GearAssignment(Pawn pawn, IEnumerable<Item> items, List<Thing> heldThings) {
             var distinctItems = items.Distinct().ToList();
             unassigned = heldThings.ToDictionary(thing => thing, thing => thing.stackCount);
 
@@ -20,9 +20,9 @@ namespace Inventory {
                 var counts = new Dictionary<int, int>();
                 var needed = item.Quantity;
 
-                var candidates = heldThings.Where(item.Allows)
+                var candidates = heldThings.Where(thing => item.AllowsFor(pawn, thing))
                     .OrderBy(item.RankOf)
-                    .ThenBy(thing => distinctItems.Count(other => other != item && other.Allows(thing)))
+                    .ThenBy(thing => distinctItems.Count(other => other != item && other.AllowsFor(pawn, thing)))
                     .ThenByDescending(thing => thing.ParentHolder is Pawn_EquipmentTracker)
                     .ThenBy(thing => thing.stackCount);
 

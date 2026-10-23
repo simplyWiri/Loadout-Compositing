@@ -47,6 +47,14 @@ namespace Inventory {
         // rotten things never count towards generic items
         public bool Allows(Thing thing) => MemberAllowing(thing) != null && Filter.Allows(thing) && !(IsGeneric && IsRotten(thing));
 
+        // whether `thing` counts towards this item for `pawn` specifically, i.e. a meal they are willing to eat
+        public bool AllowsFor(Pawn pawn, Thing thing) {
+            if (!Allows(thing)) return false;
+            if (Category == GenericCategory.Meals && !pawn.WillEat(thing)) return false;
+
+            return true;
+        }
+
         public ItemMember MemberFor(ThingDef def) => MemberList.FirstOrDefault(m => m.Def == def);
         public ItemMember MemberAllowing(Thing thing) => MemberList.FirstOrDefault(m => m.Allows(thing));
 
@@ -71,7 +79,6 @@ namespace Inventory {
             if (Filter.SpecificHitpointRange)
                 bill.hpRange = Filter.HpRange;
         }
-        public int CountIn(List<Thing> things) => things.Where(Allows).Sum(s => s.stackCount);
 
         private static bool IsRotten(Thing thing) {
             var rottable = thing.TryGetComp<CompRottable>();

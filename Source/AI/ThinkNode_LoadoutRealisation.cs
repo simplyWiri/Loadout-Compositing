@@ -94,7 +94,7 @@ namespace Inventory {
         private Job RemoveThingsJob(Pawn pawn, Loadout loadout) {
 
             var pawnGear = pawn.InventoryAndEquipment().ToList();
-            var assignment = loadout.AssignGear(pawnGear);
+            var assignment = loadout.AssignGear(pawn, pawnGear);
 
             foreach (var item in loadout.ThingsToRemove.ToList()) {
                 // anything the removed item accepts which the active items have not claimed is no longer needed
@@ -215,7 +215,7 @@ namespace Inventory {
 
         private Job SatisfyLoadoutItemsJob(Pawn pawn, Loadout loadout) {
             var pawnGear = pawn.InventoryAndEquipment().ToList();
-            var assignment = loadout.AssignGear(pawnGear);
+            var assignment = loadout.AssignGear(pawn, pawnGear);
             var items = loadout.Items.Where(item => !item.IsApparel).Distinct().ToList();
 
             foreach (var item in items) {
@@ -237,7 +237,8 @@ namespace Inventory {
             }
 
             // things are only surplus once the items accepting them are full, so we never drop something before
-            // its replacement is held. Multiple tags wanting the same thing are accounted for by the assignment.
+            // its replacement is held. Multiple tags wanting the same thing are accounted for by the assignment, as
+            // are things this pawn can't use (e.g. meals their food policy disallows), which are always surplus.
             foreach (var thing in assignment.SurplusThings) {
                 if (items.Any(item => item.Allows(thing))) {
                     return UnloadJob(thing, assignment.Surplus(thing));
@@ -248,7 +249,7 @@ namespace Inventory {
         }
 
         private Job FindItem(Pawn pawn, Item item, int rank, int count) {
-            var things = item.ThingsOnMap(pawn.Map).Where(thing => item.RankOf(thing) == rank).ToList();
+            var things = item.ThingsOnMap(pawn.Map).Where(thing => item.RankOf(thing) == rank && item.AllowsFor(pawn, thing)).ToList();
             var primary = pawn.equipment.Primary;
 
             var orderedList = count == 1
