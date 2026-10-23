@@ -50,6 +50,8 @@ namespace Inventory {
         }
 
         public void CopyTo(ThingFilter thingFilter) {
+            // the filter's ingredients only stand for stuff when the thing is made from stuff, e.g. not for medicine
+            if (!Def.MadeFromStuff) return;
             thingFilter.allowedDefs = stuffs.Count == 0 ? GenStuff.AllowedStuffsFor(Def).ToHashSet() : AllowedStuffs.Select(d => d.Def).ToHashSet();
         }
 

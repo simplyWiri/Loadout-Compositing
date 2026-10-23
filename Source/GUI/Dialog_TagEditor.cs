@@ -17,8 +17,17 @@ namespace Inventory {
             Melee,
             Ranged,
             Medicinal,
-            Items
+            Items,
+            Prosthetics
 
+        }
+
+        // which things the def list is limited to
+        enum ShowOnly {
+            All,
+            Researched,
+            // in storage, or carried, worn or equipped by a colonist
+            InColony
         }
 
         enum SortBy
@@ -43,11 +52,15 @@ namespace Inventory {
         private string lastDefFilter = string.Empty;
         private List<ThingDef> lastDefList = null;
 
-        private bool onlyResearchedItems = false;
+        private ShowOnly showOnly = ShowOnly.All;
+        private HashSet<ThingDef> colonyDefs = null;
+        private float colonyDefsTime = -1;
         private static Dictionary<ThingDef, float> statCache = new Dictionary<ThingDef, float>();
         private SortBy sortedByKind = SortBy.Name;
         private bool ascending = false;
         private StatDef selectedStat = null;
+        // a prosthetic's effect being sorted by instead of a stat, see `ProstheticUtility.EffectsOf`
+        private string selectedEffect = null;
         private float statLength = UIC.DEFAULT_HEIGHT;
         private Color conflictingApparelColour = new Color(.75f, 0.2f, 0.0f, .8f);
         private ThingDef hoveredDef = null;
@@ -82,6 +95,7 @@ namespace Inventory {
         void ResetTabState() {
             sortedByKind = SortBy.Name;
             selectedStat = null;
+            selectedEffect = null;
             statLength = UIC.DEFAULT_HEIGHT;
 
             statCache = new Dictionary<ThingDef, float>();
@@ -287,6 +301,8 @@ namespace Inventory {
             visibilityRect.y += curItemScroll.y;
             var baseRect = viewRect;
 
+            var prostheticSlots = new ProstheticSlots(BodyDefOf.Human, curTag.ItemsWithTagMatching(item => item.IsProsthetic));
+
             var i = 0;
             // List each item in the currently required items
             // [ Info ] [ Icon ] [ Name ] [ Edit Filter ] [ Edit Quantity ] [ Remove ]  
@@ -320,6 +336,9 @@ namespace Inventory {
                 var iconRect = itemRect.PopLeftPartPixels(UIC.SPACED_HEIGHT * 2);
                 // a group's tooltip defaults to listing its alternatives
                 var iconTooltip = item.HasAlternatives ? null : def.DescriptionDetailed;
+                if (item.IsProsthetic) {
+                    iconTooltip += "\n\n" + Strings.InstalledOn(ProstheticUtility.TargetPartsLabel(BodyDefOf.Human, def));
+                }
                 GUIUtility.DrawItemIcon(iconRect, item, tooltip: iconTooltip);
 
                 // Remove
@@ -336,12 +355,14 @@ namespace Inventory {
                 GUIUtility.DraggableCopyPaste(copyPasteButton, ref pasteTarget, Item.PasteFilter);
                 TooltipHandler.TipRegion(copyPasteButton, Strings.CopyPasteExplain);
 
-                // Add alternative
+                // Add alternative, prosthetics can't have any. The space is kept so quantities line up
                 var alternativeButton = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 1.5f);
-                if (Widgets.ButtonImageFitted(alternativeButton.ContractedBy(4f), TexButton.Plus)) {
-                    addingAlternativesTo = item;
+                if (!item.IsProsthetic) {
+                    if (Widgets.ButtonImageFitted(alternativeButton.ContractedBy(4f), TexButton.Plus)) {
+                        addingAlternativesTo = item;
+                    }
+                    TooltipHandler.TipRegion(alternativeButton, Strings.AddAlternativeDesc);
                 }
-                TooltipHandler.TipRegion(alternativeButton, Strings.AddAlternativeDesc);
 
                 // Edit, for a group only if one of its alternatives has a quality or stuff to pick. The space is kept
                 // so quantities line up
@@ -355,7 +376,9 @@ namespace Inventory {
 
                 var quantityFieldRect = itemRect.PopRightPartPixels(UIC.SPACED_HEIGHT * 2f);
                 item.quantityStr ??= item.Quantity.ToString();
-                Widgets.TextFieldNumeric(quantityFieldRect.ContractedBy(0, quantityFieldRect.height / 4.0f), ref item.quantity, ref item.quantityStr, 1);
+                // no more prosthetics than a body has parts for
+                var maxQuantity = item.IsProsthetic ? ProstheticUtility.MaxInstallable(BodyDefOf.Human, def) : 1E+09f;
+                Widgets.TextFieldNumeric(quantityFieldRect.ContractedBy(0, quantityFieldRect.height / 4.0f), ref item.quantity, ref item.quantityStr, 1, maxQuantity);
 
                 TooltipHandler.TipRegion(quantityFieldRect, Strings.EditQuantity);
 
@@ -365,7 +388,10 @@ namespace Inventory {
                     Widgets.Label(itemRect.RightPartPixels(itemRect.width - GenUI.GapSmall), Strings.OneOfHeading);
                 } else {
                     Text.Anchor = TextAnchor.MiddleCenter;
-                    Widgets.Label(itemRect, item.Label);
+                    Widgets.Label(itemRect, item.IsProsthetic ? Strings.InstalledLabel(item.Label) : item.Label);
+                    if (prostheticSlots.Conflicting(item)) {
+                        GUIUtility.ProstheticConflictOverlay(itemRect, prostheticSlots.Conflicts[item]);
+                    }
                 }
                 Text.Anchor = TextAnchor.UpperLeft;
             }
@@ -380,6 +406,8 @@ namespace Inventory {
         // the member the item's edit dialog opens on, preferring one made from stuff (stuff is set per member, the
         // dialog can switch between them); null if a group has nothing but hit points to pick
         private static ItemMember SpecifiableMember(Item item) {
+            // nothing about a prosthetic changes once it is installed
+            if (item.IsProsthetic) return null;
             if (item.Members.Count == 1) return item.Members[0];
 
             return item.Members.FirstOrDefault(m => m.Def.MadeFromStuff)
@@ -567,13 +595,15 @@ namespace Inventory {
             DrawOptionButton(Textures.RangedTex, "Ranged", State.Ranged);
             DrawOptionButton(Textures.MedicalTex, "Medicine", State.Medicinal);
             DrawOptionButton(Textures.MiscItemsTex, "Items", State.Items);
+            DrawOptionButton(Textures.ProstheticsTex, Strings.Prosthetics, State.Prosthetics);
 
-            if (selectedStat != null) {
+            var sortLabel = selectedStat?.LabelCap.ToString() ?? selectedEffect;
+            if (sortLabel != null) {
                 Text.Font = GameFont.Tiny;
                 Text.WordWrap = false;
-                var strLen = selectedStat.LabelCap.GetWidthCached();
+                var strLen = sortLabel.GetWidthCached();
                 topRect.width = Mathf.Max(topRect.width, strLen);
-                GUIUtility.WithModifiers(topRect, selectedStat.LabelCap, color: Color.gray, anchor: TextAnchor.MiddleRight);
+                GUIUtility.WithModifiers(topRect, sortLabel, color: Color.gray, anchor: TextAnchor.MiddleRight);
                 Text.Font = GameFont.Small;
                 Text.WordWrap = true;
             }
@@ -593,6 +623,9 @@ namespace Inventory {
                     break;
                 case State.Items:
                     DrawDefList(r, Utility.items, pinned: ItemPreset.Meals);
+                    break;
+                case State.Prosthetics:
+                    DrawDefList(r, Utility.prostheticDefs);
                     break;
             }
         }
@@ -625,7 +658,9 @@ namespace Inventory {
                                || (td.modContentPack?.Name.ToLowerInvariant().Contains(filter) ?? false)
                                || ((td.IsApparel || td.IsWeapon) && (td.statBases?.Any(s => stats.Contains(s.stat)) ?? false))
                                || ((td.IsApparel || td.IsWeapon) && (td.equippedStatOffsets?.Any(s => stats.Contains(s.stat)) ?? false))
-                               || (td.IsApparel && td.apparel.layers.Intersect(acceptedLayers).Any());
+                               || (td.IsApparel && td.apparel.layers.Intersect(acceptedLayers).Any())
+                               // e.g. "food poisoning", or "infection" for any prosthetic which prevents one
+                               || ProstheticUtility.EffectsOf(td).Keys.Any(effect => effect.ToLowerInvariant().Contains(filter));
                     }).ToList();
 
                     lastDefFilter = defFilter;
@@ -638,9 +673,14 @@ namespace Inventory {
             
             defs = defs.Where(t => !itms.Contains(t)).ToList();
 
+            // as with apparel, a prosthetic is hidden if it overlaps any of the tag's other prosthetics, e.g. any other leg
+            // once the tag has a bionic leg, or a field hand once it has a bionic arm
+            var prostheticSlots = new ProstheticSlots(BodyDefOf.Human, curTag.ItemsWithTagMatching(item => item.IsProsthetic));
+            defs = defs.Where(t => !ProstheticUtility.IsProsthetic(t) || prostheticSlots.Fits(t)).ToList();
+
             if (addingAlternativesTo != null) {
-                // alternatives must be the same kind of thing
-                defs = defs.Where(t => t.IsApparel == addingAlternativesTo.IsApparel).ToList();
+                // alternatives must be the same kind of thing, and prosthetics can't be alternatives
+                defs = defs.Where(t => t.IsApparel == addingAlternativesTo.IsApparel && !ProstheticUtility.IsProsthetic(t)).ToList();
 
                 // [ Adding alternatives to X ] [ Done ], on one line, named by the item's best alternative
                 var bannerRect = r.PopTopPartPixels(UIC.SPACED_HEIGHT);
@@ -661,11 +701,14 @@ namespace Inventory {
                 TooltipHandler.TipRegion(bannerRect, label);
             }
             
-            if (onlyResearchedItems) {
+            if (showOnly == ShowOnly.Researched) {
                 var recipes = DefDatabase<RecipeDef>.AllDefs.Where(recipe => recipe.AvailableNow).ToList();
                 
                 defs = defs.Where(def => def.IsBuildingArtificial || recipes.Any(recipe => recipe.products.Any(pc => pc.thingDef == def))).ToList();
                 defs = defs.Where(def => !def.IsBuildingArtificial || def.IsResearchFinished).ToList();
+            } else if (showOnly == ShowOnly.InColony) {
+                var inColony = ColonyDefs();
+                defs = defs.Where(inColony.Contains).ToList();
             }
 
             string NameSelector(ThingDef td) => td.LabelCap.RawText;
@@ -687,12 +730,25 @@ namespace Inventory {
 
             var topBarRect = r.PopTopPartPixels(UIC.SPACED_HEIGHT);
             
-            var onlyResearchedRect = topBarRect.PopRightPartPixels(UIC.DEFAULT_HEIGHT).MiddlePartPixels(Text.LineHeight);
-            onlyResearchedRect.CenterWithWidth(Text.LineHeight);
-            if (Widgets.ButtonImage(onlyResearchedRect, Textures.FilterByResearchedTex)) {
-                onlyResearchedItems = !onlyResearchedItems;
+            var showOnlyRect = topBarRect.PopRightPartPixels(UIC.DEFAULT_HEIGHT).MiddlePartPixels(Text.LineHeight);
+            showOnlyRect.CenterWithWidth(Text.LineHeight);
+            // highlighted while it hides anything
+            if (Widgets.ButtonImage(showOnlyRect, Textures.FilterByResearchedTex, showOnly == ShowOnly.All ? Color.white : GenUI.MouseoverColor)) {
+                FloatMenuOption ShowOnlyOption(ShowOnly mode, string label) {
+                    return new FloatMenuOption(label, () => showOnly = mode);
+                }
+
+                var opts = new List<FloatMenuOption> {
+                    ShowOnlyOption(ShowOnly.All, Strings.ShowAllThings),
+                    ShowOnlyOption(ShowOnly.Researched, Strings.ShowResearchedThings),
+                };
+                // the colony's things are only known in a game, e.g. not when editing tags from the main menu
+                if (Current.Game != null) {
+                    opts.Add(ShowOnlyOption(ShowOnly.InColony, Strings.ShowThingsInColony));
+                }
+                Find.WindowStack.Add(new FloatMenu(opts));
             }
-            TooltipHandler.TipRegion(onlyResearchedRect, Strings.ResearchedItemsDesc);
+            TooltipHandler.TipRegion(showOnlyRect, Strings.ShowOnlyDesc);
 
             topBarRect.PopRightPartPixels(3f);
             
@@ -711,14 +767,18 @@ namespace Inventory {
                         new FloatMenuOption("Name", () => {
                             sortedByKind = SortBy.Name;
                             selectedStat = null;
+                            selectedEffect = null;
                             statLength = UIC.DEFAULT_HEIGHT;
                         })
                     };
-                    
-                    foreach (var stat in stats.OrderBy(st => st.LabelCap.RawText)) {
-                        opts.Add(new FloatMenuOption(stat.LabelCap, () => {
+
+                    // stats and prosthetics' effects, sorted together by label
+                    var statOpts = new List<FloatMenuOption>();
+                    foreach (var stat in stats) {
+                        statOpts.Add(new FloatMenuOption(stat.LabelCap, () => {
                             sortedByKind = SortBy.Stat;
                             selectedStat = stat;
+                            selectedEffect = null;
                             statLength = UIC.DEFAULT_HEIGHT;
                             
                             foreach(var def in defList) {
@@ -731,6 +791,22 @@ namespace Inventory {
                             }
                         }));
                     }
+
+                    var effects = defs.SelectMany(td => ProstheticUtility.EffectsOf(td).Keys).ToHashSet();
+                    foreach (var effect in effects) {
+                        statOpts.Add(new FloatMenuOption(effect, () => {
+                            sortedByKind = SortBy.Stat;
+                            selectedStat = null;
+                            selectedEffect = effect;
+                            statLength = UIC.DEFAULT_HEIGHT;
+
+                            foreach (var def in defList) {
+                                statCache[def] = ProstheticUtility.EffectsOf(def).TryGetValue(effect, out var value) ? value : INVALID_STAT_VALUE;
+                            }
+                        }));
+                    }
+
+                    opts.AddRange(statOpts.OrderBy(opt => opt.Label));
                     Find.WindowStack.Add(new FloatMenu(opts));
                 } else {
                     ascending = !ascending;
@@ -813,7 +889,7 @@ namespace Inventory {
                 Widgets.DefIcon(descRect.LeftPart(.15f), def);
                 Widgets.Label(descRect.RightPart(.85f), def.LabelCap);
 
-                if (Mouse.IsOver(rowRect) && def.IsApparel)
+                if (Mouse.IsOver(rowRect) && (def.IsApparel || ProstheticUtility.IsProsthetic(def)))
                 {
                     hoveredDef = def;
                     conflictingApparelColour.a = (Mathf.Sin((float)(DateTime.Now.TimeOfDay.TotalMilliseconds % 3000) / 3000 * Mathf.PI * 2) * 0.25f) + 0.75f;
@@ -824,6 +900,12 @@ namespace Inventory {
                     if (def.IsApparel)
                     {
                         return $"{def.DescriptionDetailed}\n\n" + Strings.ApparelOverlapFlavour(def.LabelCap);
+                    }
+
+                    if (ProstheticUtility.IsProsthetic(def))
+                    {
+                        return $"{def.DescriptionDetailed}\n\n" + Strings.InstalledOn(ProstheticUtility.TargetPartsLabel(BodyDefOf.Human, def))
+                               + "\n\n" + Strings.ProstheticOverlapFlavour(def.LabelCap);
                     }
                     
                     return def.DescriptionDetailed;
@@ -846,11 +928,17 @@ namespace Inventory {
 
             if (hoveredDef != null)
             {
-                var coveringSlots = ApparelSlotMaker.Create(BodyDefOf.Human, hoveredDef);
+                var coveringSlots = hoveredDef.IsApparel ? ApparelSlotMaker.Create(BodyDefOf.Human, hoveredDef) : null;
                 
+                // apparel covering the same layers, or prosthetics replacing the same body parts
+                bool Conflicts(ThingDef otherDef) {
+                    if (coveringSlots != null) return otherDef.IsApparel && coveringSlots.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, otherDef));
+                    return ProstheticUtility.IsProsthetic(otherDef) && ProstheticSlots.Overlaps(BodyDefOf.Human, hoveredDef, otherDef);
+                }
+
                 void DrawHighlightIfConflicts(ThingDef otherDef, Rect rect)
                 {
-                    if (!otherDef.IsApparel || !coveringSlots.Intersects(ApparelSlotMaker.Create(BodyDefOf.Human, otherDef)))
+                    if (!Conflicts(otherDef))
                         return;
 
                     if (otherDef == hoveredDef)
@@ -876,6 +964,30 @@ namespace Inventory {
 
             GUI.EndGroup();
             Widgets.EndScrollView();
+        }
+
+        // the defs of things in storage, or carried, worn or equipped by colonists, on any map. Looked up at most once a
+        // second, as there may be thousands of things
+        private HashSet<ThingDef> ColonyDefs() {
+            if (colonyDefs != null && Time.realtimeSinceStartup - colonyDefsTime < 1f) return colonyDefs;
+
+            colonyDefs = new HashSet<ThingDef>();
+            colonyDefsTime = Time.realtimeSinceStartup;
+            if (Current.Game == null) return colonyDefs;
+
+            foreach (var map in Find.Maps) {
+                foreach (var thing in map.listerThings.ThingsInGroup(ThingRequestGroup.HaulableEver).Where(t => t.IsInAnyStorage())) {
+                    colonyDefs.Add(thing.def);
+                }
+
+                foreach (var pawn in map.mapPawns.FreeColonistsSpawned) {
+                    colonyDefs.AddRange(pawn.inventory?.innerContainer.Select(t => t.def) ?? Enumerable.Empty<ThingDef>());
+                    colonyDefs.AddRange(pawn.apparel?.WornApparel.Select(t => t.def) ?? Enumerable.Empty<ThingDef>());
+                    colonyDefs.AddRange(pawn.equipment?.AllEquipmentListForReading.Select(t => t.def) ?? Enumerable.Empty<ThingDef>());
+                }
+            }
+
+            return colonyDefs;
         }
 
         private void DrawPinnedPreset(Rect rowRect, ItemPreset preset) {

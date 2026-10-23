@@ -46,12 +46,17 @@ namespace Inventory {
         }
 
         public static int ColonistCountFor(Bill_Production bill) {
+            return PawnsFor(bill).Count();
+        }
+
+        // the pawns on the bill's map with the tag it targets
+        public static IEnumerable<Pawn> PawnsFor(Bill_Production bill) {
             // if the extra data has not been set (just switched to the bill, this is a valid
             // state to be in).
             var tag = TagFor(bill);
-            if (tag == null) return 0;
-            
-            return instance.pawnTags[tag].Count(p => p != null && p.Map == bill.Map && p.IsValidLoadoutHolder());
+            if (tag == null) return Enumerable.Empty<Pawn>();
+
+            return instance.pawnTags[tag].Where(p => p != null && p.Map == bill.Map && p.IsValidLoadoutHolder());
         }
 
         public LoadoutManager(Game game) { }
@@ -115,6 +120,7 @@ namespace Inventory {
         
         public override void FinalizeInit() {
             instance = this;
+            ThinkNode_LoadoutRealisation.ResetUpdateTicks();
 
             // Ugly workaround detailed on the type itself.
             BetterPawnControl_EmergencyToggle_Patch.TryPatch(ModBase.harmony);
@@ -156,6 +162,14 @@ namespace Inventory {
                     }
                 }
                 pawnTags.Do(kv => kv.Value?.RemoveAll(p => p is null));
+            }
+        }
+
+        public override void GameComponentTick() {
+            if (Find.TickManager.TicksGame % ProstheticSurgery.CheckInterval != 0) return;
+
+            foreach (var map in Find.Maps) {
+                ProstheticSurgery.QueueBills(map);
             }
         }
 
@@ -233,7 +247,8 @@ namespace Inventory {
                         pawn.jobs.ClearQueuedJobs();
                         pawn.jobs.CleanupCurrentJob(Verse.AI.JobCondition.InterruptForced, true);
                     }
-                } else {
+                } else if (comp.Loadout.InPanicMode) {
+                    // pawns which panicking didn't change were never put into panic mode, so have no state to go back to
                     comp.Loadout.DeactivatePanicMode();
                 }
             }

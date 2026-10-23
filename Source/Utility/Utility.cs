@@ -18,6 +18,7 @@ namespace Inventory {
         public static List<ThingDef> meleeWeapons = null;
         public static List<ThingDef> rangedWeapons = null;
         public static List<ThingDef> medicinalDefs = null;
+        public static List<ThingDef> prostheticDefs = null;
         public static List<ThingDef> items = null;
 
         public static void CalculateDefLists() {
@@ -29,6 +30,10 @@ namespace Inventory {
                 || typeof(UnfinishedThing).IsAssignableFrom(td.thingClass)
                 || typeof(MinifiedThing).IsAssignableFrom(td.thingClass)
                 || td.IsCorpse)).ToList();
+
+            // prosthetics are installed rather than carried, so they are listed apart from the other items
+            prostheticDefs ??= items.Where(ProstheticUtility.IsProsthetic).ToList();
+            items.RemoveAll(ProstheticUtility.IsProsthetic);
 
             apparelDefs ??= items.Where(def => def.IsApparel).ToList();
             massBoostingClothes = new Dictionary<ThingDef, Func<QualityCategory, float>>();
@@ -143,11 +148,14 @@ namespace Inventory {
 
             dictionary.Add(key, elements.ToHashSet());
         }
-        public static bool ShouldAttemptToEquip(Pawn pawn, Thing thing, bool checkReach = false) {
+        // `stackCount`: when only part of a stack is wanted, other pawns may be taking the rest of it (as vanilla's
+        // take to inventory job reserves only what it takes)
+        public static bool ShouldAttemptToEquip(Pawn pawn, Thing thing, bool checkReach = false, int stackCount = -1) {
             if (thing.IsForbidden(pawn)) return false;
             if (thing.IsBurning()) return false;
             if (CompBiocodable.IsBiocoded(thing) && !CompBiocodable.IsBiocodedFor(thing, pawn)) return false;
-            if (checkReach && !pawn.CanReserveAndReach(thing, PathEndMode.OnCell, pawn.NormalMaxDanger())) return false;
+            var maxPawns = stackCount == -1 ? 1 : 10;
+            if (checkReach && !pawn.CanReserveAndReach(thing, PathEndMode.OnCell, pawn.NormalMaxDanger(), maxPawns, stackCount)) return false;
             
             return true;
         }

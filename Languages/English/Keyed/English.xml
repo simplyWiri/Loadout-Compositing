@@ -60,6 +60,15 @@
 	<CompositableLoadouts.OneOfHeading>One of:</CompositableLoadouts.OneOfHeading>
 	<CompositableLoadouts.OneOf>One of: {0}</CompositableLoadouts.OneOf>
 	<CompositableLoadouts.RemoveAlternative>Remove this alternative</CompositableLoadouts.RemoveAlternative>
+	<CompositableLoadouts.Prosthetics>Prosthetics, installed by surgery rather than carried</CompositableLoadouts.Prosthetics>
+	<CompositableLoadouts.InstalledLabel>{0} (installed)</CompositableLoadouts.InstalledLabel>
+	<CompositableLoadouts.InstalledOn>Installed on: {0}</CompositableLoadouts.InstalledOn>
+	<CompositableLoadouts.ProstheticConflict>Can't be installed: {0} wants prosthetics on the same body parts, and comes first.</CompositableLoadouts.ProstheticConflict>
+	<CompositableLoadouts.ObjectsToProsthetics>{0} objects to prosthetics ({1}), but {2} asks for them.</CompositableLoadouts.ObjectsToProsthetics>
+	<CompositableLoadouts.CantEverInstall>{0} can never have a {1} installed, which {2} asks for.</CompositableLoadouts.CantEverInstall>
+	<CompositableLoadouts.NoRoomForProsthetic>{0} hasn't enough body parts for all the {1}s which {2} asks for.</CompositableLoadouts.NoRoomForProsthetic>
+	<CompositableLoadouts.ProstheticConflictsWith>{0} can't have the {1} which {2} asks for, as {3} wants prosthetics on the same body parts and comes first.</CompositableLoadouts.ProstheticConflictsWith>
+	<CompositableLoadouts.ProstheticNoRoom>Can't be installed: there aren't enough free body parts for this many.</CompositableLoadouts.ProstheticNoRoom>
 	<CompositableLoadouts.ReorderAlternativeDesc>Drag to change which alternatives pawns prefer, higher is preferred.</CompositableLoadouts.ReorderAlternativeDesc>
 	<CompositableLoadouts.EditingAlternative>Alternative: {0}</CompositableLoadouts.EditingAlternative>
 	<CompositableLoadouts.EditingAlternativeDesc>Pick which alternative to edit. Stuff is set for each alternative, quality and hit points are shared by every alternative of this item.</CompositableLoadouts.EditingAlternativeDesc>
@@ -162,7 +171,10 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.WarningItemFilterDependsOnModSave>Can not load filter item {0}</CompositableLoadouts.WarningItemFilterDependsOnModSave> 
 	<CompositableLoadouts.WarningItemFilterDependsOnModSaveDesc>This item will be dropped from the filter automatically, its mod is most likely not loaded.</CompositableLoadouts.WarningItemFilterDependsOnModSaveDesc> 
 
-	<CompositableLoadouts.ResearchedItemsDesc>Filter only to show things which have already been researched (hide non-researched things)</CompositableLoadouts.ResearchedItemsDesc> 
+	<CompositableLoadouts.ShowOnlyDesc>Choose which things to show: all of them, only those already researched, or only those the colony has in storage or which a colonist carries, wears or has equipped</CompositableLoadouts.ShowOnlyDesc>
+	<CompositableLoadouts.ShowAllThings>Show all things</CompositableLoadouts.ShowAllThings>
+	<CompositableLoadouts.ShowResearchedThings>Only researched things</CompositableLoadouts.ShowResearchedThings>
+	<CompositableLoadouts.ShowThingsInColony>Only things in storage or carried</CompositableLoadouts.ShowThingsInColony>
 	<CompositableLoadouts.SortThingsByDesc>Choose an attribute to sort the things listed by, right click to specify what attribute, left click to switch between ascending/descending</CompositableLoadouts.SortThingsByDesc> 
 
 	<CompositableLoadouts.EquippedStatOffsets>Equipped stat offsets</CompositableLoadouts.EquippedStatOffsets> 
@@ -175,6 +187,7 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.BillAddedFlavour>Bill added for {0} from {1}</CompositableLoadouts.BillAddedFlavour> 
 
 	<CompositableLoadouts.ApparelOverlapFlavour>If equipped, {0} would prevent the highlighted apparel being worn</CompositableLoadouts.ApparelOverlapFlavour>
+	<CompositableLoadouts.ProstheticOverlapFlavour>If installed, {0} would prevent the highlighted prosthetics being installed</CompositableLoadouts.ProstheticOverlapFlavour>
 	<CompositableLoadouts.RemovingDeletedTagPawn>Removing {0} from {1}</CompositableLoadouts.RemovingDeletedTagPawn>
 	<CompositableLoadouts.RemovingDeletedTagBill>Suspending bill {0} in {1} as it referenced {2}</CompositableLoadouts.RemovingDeletedTagBill>
 	<CompositableLoadouts.UnknownLocation>Unknown building</CompositableLoadouts.UnknownLocation>
@@ -203,5 +216,21 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.Settings.DisableCustomScrollDesc>It may fix issues relating to perpetually inivisble mouses on linux platforms.</CompositableLoadouts.Settings.DisableCustomScrollDesc>
 	
 	<CompositableLoadouts.Settings.NoPanicAlert>Disable panic alert</CompositableLoadouts.Settings.NoPanicAlert>
+	<CompositableLoadouts.SurgeryAwaitingApproval>Surgery awaiting approval</CompositableLoadouts.SurgeryAwaitingApproval>
+	<CompositableLoadouts.SurgeryAwaitingApprovalDesc>These pawns have suspended surgeries to install the prosthetics their tags ask for. Unsuspend a surgery in the pawn's Operations tab to approve it, or delete it to decline it.\n\nNew surgeries are queued suspended. This can be changed in the mod settings.</CompositableLoadouts.SurgeryAwaitingApprovalDesc>
+	<CompositableLoadouts.ProstheticStatus.Installed>Installed</CompositableLoadouts.ProstheticStatus.Installed>
+	<CompositableLoadouts.ProstheticStatus.HasBetter>Has a better prosthetic</CompositableLoadouts.ProstheticStatus.HasBetter>
+	<CompositableLoadouts.ProstheticStatus.SurgeryQueued>Surgery queued</CompositableLoadouts.ProstheticStatus.SurgeryQueued>
+	<CompositableLoadouts.ProstheticStatus.NoRoom>Not enough body parts</CompositableLoadouts.ProstheticStatus.NoRoom>
+	<CompositableLoadouts.ProstheticStatus.Conflicts>Conflicts with {0}</CompositableLoadouts.ProstheticStatus.Conflicts>
+	<CompositableLoadouts.ProstheticStatus.CantEverInstall>Can't be installed on this pawn</CompositableLoadouts.ProstheticStatus.CantEverInstall>
+	<CompositableLoadouts.ProstheticStatus.Declined>Surgery declined, re-add the tag to queue it again</CompositableLoadouts.ProstheticStatus.Declined>
+	<CompositableLoadouts.ProstheticStatus.AutoSurgeryOff>Surgeries are off in the mod settings</CompositableLoadouts.ProstheticStatus.AutoSurgeryOff>
+	<CompositableLoadouts.ProstheticStatus.WaitingForPart>Waiting for a spare one</CompositableLoadouts.ProstheticStatus.WaitingForPart>
+	<CompositableLoadouts.Settings.AutoSurgery>Prosthetic surgeries</CompositableLoadouts.Settings.AutoSurgery>
+	<CompositableLoadouts.Settings.AutoSurgeryDesc>Once a spare prosthetic which a pawn's tags ask for is on the map, queue the surgery to install it.\n\nSuspended: queue it suspended, for you to approve by unsuspending it in the pawn's Operations tab.\nActive: queue it ready for a doctor.\nOff: never queue surgeries.</CompositableLoadouts.Settings.AutoSurgeryDesc>
+	<CompositableLoadouts.Settings.AutoSurgeryOff>Off</CompositableLoadouts.Settings.AutoSurgeryOff>
+	<CompositableLoadouts.Settings.AutoSurgerySuspended>Suspended</CompositableLoadouts.Settings.AutoSurgerySuspended>
+	<CompositableLoadouts.Settings.AutoSurgeryActive>Active</CompositableLoadouts.Settings.AutoSurgeryActive>
 	<CompositableLoadouts.Settings.NoPanicAlertDesc>Disable the check to raise an alert when there are pawns with their panic state active.</CompositableLoadouts.Settings.NoPanicAlertDesc>
 </LanguageData>

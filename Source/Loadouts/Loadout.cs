@@ -13,6 +13,9 @@ namespace Inventory {
         private LoadoutState currentState;
         private bool needsUpdate = false;
 
+        // prosthetics whose surgery the player deleted, which aren't queued again until the tags change
+        private HashSet<ThingDef> declinedProsthetics = new HashSet<ThingDef>();
+
         private bool panicMode = false;
         private LoadoutState priorState = null;
 
@@ -32,6 +35,10 @@ namespace Inventory {
         public IEnumerable<Tag> TagsWith(LoadoutState state) => elements.Where(e => e.Active(state)).Select(e => e.Tag);
         public IEnumerable<Item> Items => Tags.SelectMany(t => t.requiredItems);
         public IEnumerable<Item> ItemsWith(LoadoutState state) => TagsWith(state).SelectMany(t => t.requiredItems);
+
+        // the items which are worn or held, i.e. everything but prosthetics, which are installed instead
+        public IEnumerable<Item> CarriedItems => Items.Where(item => !item.IsProsthetic);
+        public IEnumerable<Item> CarriedItemsWith(LoadoutState state) => ItemsWith(state).Where(item => !item.IsProsthetic);
 
         public Loadout() {
             elements = new List<LoadoutElement>();
@@ -59,7 +66,7 @@ namespace Inventory {
         }
 
         public void UpdateState(LoadoutElement element, bool active) {  
-            foreach (var item in element.Tag.requiredItems.Where(item => !item.IsApparel)) {
+            foreach (var item in element.Tag.requiredItems.Where(item => !item.IsApparel && !item.IsProsthetic)) {
                 if (!active) {
                     AddItemToRemove(item);
                 }
@@ -68,6 +75,19 @@ namespace Inventory {
             if (ModBase.settings.immediatelyResolveLoadout) {
                 needsUpdate = true;
             }
+        }
+
+        public bool Declined(ThingDef prosthetic) => declinedProsthetics.Contains(prosthetic);
+
+        // only prosthetics an active tag asks for can be declined
+        public void Decline(ThingDef prosthetic) {
+            if (Items.Any(item => item.IsProsthetic && item.RepresentativeDef == prosthetic)) {
+                declinedProsthetics.Add(prosthetic);
+            }
+        }
+
+        public void TagsChanged() {
+            declinedProsthetics.Clear();
         }
 
         public void RequiresUpdate() {
@@ -112,16 +132,16 @@ namespace Inventory {
 
         // which of `pawnGear` counts towards each of the active items, and which is surplus
         public GearAssignment AssignGear(Pawn pawn, List<Thing> pawnGear) {
-            return new GearAssignment(pawn, Items, pawnGear);
+            return new GearAssignment(pawn, CarriedItems, pawnGear);
         }
 
         public bool Desires(Thing thing, bool allTags = false) {
-            return (allTags ? AllTags : Tags).Any(t => t.ItemsMatching(item => item.Allows(thing)).Any());
+            return (allTags ? AllTags : Tags).Any(t => t.ItemsMatching(item => !item.IsProsthetic && item.Allows(thing)).Any());
         }
 
         public IEnumerable<Item> ItemsAccepting(Thing thing) {
             return Tags.SelectMany(t => t
-                .ItemsMatching(item => item.Allows(thing)));
+                .ItemsMatching(item => !item.IsProsthetic && item.Allows(thing)));
         }
 
         // (item, tag it came from, def chosen to be worn for the item)
@@ -135,8 +155,14 @@ namespace Inventory {
             return wornApparel;
         }
 
+        // where the prosthetics of the tags active in `state` would go, higher priority tags first
+        public ProstheticSlots HypotheticalProsthetics(LoadoutState state, BodyDef body) {
+            var items = TagsWith(state).SelectMany(t => t.ItemsWithTagMatching(item => item.IsProsthetic));
+            return new ProstheticSlots(body, items);
+        }
+
         public IEnumerable<Item> DesiredItems(List<Thing> heldThings) {
-            var desiredThings = Items.Where(t => !t.IsApparel);
+            var desiredThings = CarriedItems.Where(t => !t.IsApparel);
             foreach (var thing in desiredThings) {
                 var count = heldThings.Where(heldThing => thing.Allows(heldThing))
                     .Sum(heldThing => heldThing.stackCount);
@@ -160,6 +186,9 @@ namespace Inventory {
             panicMode = false;
             SetState(priorState);
             priorState = null;
+
+            // as on activating, put the panic gear away now rather than at the next routine check
+            RequiresUpdate();
         }
 
         public void ExposeData() {
@@ -170,9 +199,19 @@ namespace Inventory {
 
             Scribe_Values.Look(ref panicMode, nameof(panicMode));
             Scribe_References.Look(ref priorState, nameof(priorState));
+            Scribe_Collections.Look(ref declinedProsthetics, nameof(declinedProsthetics), LookMode.Def);
 
-            itemsToRemove = new List<Item>();
+            // pending removals are kept, so gear a pawn was about to put away is still put away after loading. Any
+            // whose things no longer exist (a removed mod) are dropped, as tags drop such items
+            itemsToRemove ??= new List<Item>();
+            if (Scribe.mode == LoadSaveMode.PostLoadInit) {
+                itemsToRemove.RemoveAll(item => item?.members == null || item.members.All(member => member.Def == null));
+                itemsToRemove.ForEach(item => item.members.RemoveAll(member => member.Def == null));
+            }
             elements ??= new List<LoadoutElement>();
+            declinedProsthetics ??= new HashSet<ThingDef>();
+            // a prosthetic from a removed mod loads as null
+            declinedProsthetics.Remove(null);
         }
     }
 

@@ -69,6 +69,30 @@ namespace Inventory {
         public static string OneOfHeading => $"{P}OneOfHeading".TranslateSimple();
         public static string OneOf(string defs) => $"{P}OneOf".Translate(defs);
         public static string RemoveAlternative => $"{P}RemoveAlternative".TranslateSimple();
+
+        public static string Prosthetics => $"{P}Prosthetics".TranslateSimple();
+        public static string InstalledLabel(string item) => $"{P}InstalledLabel".Translate(item);
+        public static string InstalledOn(string parts) => $"{P}InstalledOn".Translate(parts);
+        public static string ProstheticConflict(string tag) => $"{P}ProstheticConflict".Translate(tag);
+        public static string ProstheticNoRoom => $"{P}ProstheticNoRoom".TranslateSimple();
+        public static string SurgeryAwaitingApproval => $"{P}SurgeryAwaitingApproval".TranslateSimple();
+        public static string SurgeryAwaitingApprovalDesc => $"{P}SurgeryAwaitingApprovalDesc".TranslateSimple();
+        public static string StatusInstalled => $"{P}ProstheticStatus.Installed".TranslateSimple();
+        public static string StatusHasBetter => $"{P}ProstheticStatus.HasBetter".TranslateSimple();
+        public static string StatusSurgeryQueued => $"{P}ProstheticStatus.SurgeryQueued".TranslateSimple();
+        public static string StatusNoRoom => $"{P}ProstheticStatus.NoRoom".TranslateSimple();
+        public static string StatusConflicts(string tag) => $"{P}ProstheticStatus.Conflicts".Translate(tag);
+        public static string StatusCantEverInstall => $"{P}ProstheticStatus.CantEverInstall".TranslateSimple();
+        public static string StatusDeclined => $"{P}ProstheticStatus.Declined".TranslateSimple();
+        public static string StatusAutoSurgeryOff => $"{P}ProstheticStatus.AutoSurgeryOff".TranslateSimple();
+        public static string StatusWaitingForPart => $"{P}ProstheticStatus.WaitingForPart".TranslateSimple();
+        public static string AutoSurgery => $"{P}Settings.AutoSurgery".TranslateSimple();
+        public static string AutoSurgeryDesc => $"{P}Settings.AutoSurgeryDesc".TranslateSimple();
+        public static string AutoSurgeryMode(Inventory.AutoSurgery mode) => $"{P}Settings.AutoSurgery{mode}".TranslateSimple();
+        public static string ObjectsToProsthetics(Pawn p, string objection, Tag tag) => $"{P}ObjectsToProsthetics".Translate(p.LabelShort, objection, tag.name);
+        public static string CantEverInstall(Pawn p, ThingDef def, Tag tag) => $"{P}CantEverInstall".Translate(p.LabelShort, def.LabelCap, tag.name);
+        public static string NoRoomForProsthetic(Pawn p, ThingDef def, Tag tag) => $"{P}NoRoomForProsthetic".Translate(p.LabelShort, def.LabelCap, tag.name);
+        public static string ProstheticConflictsWith(Pawn p, ThingDef def, Tag tag, Tag blocker) => $"{P}ProstheticConflictsWith".Translate(p.LabelShort, def.LabelCap, tag.name, blocker.name);
         public static string ReorderAlternativeDesc => $"{P}ReorderAlternativeDesc".TranslateSimple();
         public static string EditingAlternative(string def) => $"{P}EditingAlternative".Translate(def);
         public static string EditingAlternativeDesc => $"{P}EditingAlternativeDesc".TranslateSimple();
@@ -147,7 +171,10 @@ namespace Inventory {
         public static string WarningItemDependsOnModSaveDesc => $"{P}WarningItemDependsOnModSaveDesc".TranslateSimple();
         public static string WarningItemFilterDependsOnModSaveDesc => $"{P}WarningItemFilterDependsOnModSaveDesc".TranslateSimple();
 
-        public static string ResearchedItemsDesc => $"{P}ResearchedItemsDesc".TranslateSimple();
+        public static string ShowOnlyDesc => $"{P}ShowOnlyDesc".TranslateSimple();
+        public static string ShowAllThings => $"{P}ShowAllThings".TranslateSimple();
+        public static string ShowResearchedThings => $"{P}ShowResearchedThings".TranslateSimple();
+        public static string ShowThingsInColony => $"{P}ShowThingsInColony".TranslateSimple();
         public static string SortThingsByDesc => $"{P}SortThingsByDesc".TranslateSimple();
         
         public static string EquippedStatOffsets => $"{P}EquippedStatOffsets".TranslateSimple();
@@ -159,6 +186,7 @@ namespace Inventory {
         public static string AutomaticBillDesc => $"{P}AutomaticBillTooltip".TranslateSimple();
         public static string BillAddedFlavour(string item, string tagName) => $"{P}BillAddedFlavour".Translate(item, tagName);
         public static string ApparelOverlapFlavour(string defDesc) => $"{P}ApparelOverlapFlavour".Translate(defDesc);
+        public static string ProstheticOverlapFlavour(string defDesc) => $"{P}ProstheticOverlapFlavour".Translate(defDesc);
         public static string RemovingDeletedTagPawn(string tag, string pawn) => $"{P}RemovingDeletedTagPawn".Translate(tag, pawn);
         public static string RemovingDeletedTagBill(string bill, string building, string tag) => $"{P}RemovingDeletedTagBill".Translate(bill, building, tag);
         public static string UnknownLocation => $"{P}UnknownLocation".TranslateSimple();

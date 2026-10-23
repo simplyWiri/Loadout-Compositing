@@ -67,15 +67,8 @@ namespace Inventory
             var iconRect = buttonRect.PopRightPartPixels(Mathf.Max(UIC.SPACED_HEIGHT * 3, Strings.Load.GetWidthCached() + 5f));
 
             if (Widgets.ButtonText(iconRect, Strings.Load) && !existingWithSameName)  {
-                Action loadTagToGame = () => {
-                    var newTag = tag.MakeCopy();
-                    newTag.name = currentTagNextName;
-                    // copies, so the in-game tag doesn't share (and edit) the saved tag's items
-                    newTag.requiredItems = tag.requiredItems.Select(item => item.CopyValid()).Where(item => item != null).ToList();
-
-                    newTag.uniqueId = LoadoutManager.GetNextTagId();
-                    LoadoutManager.AddTag(newTag);
-                };
+                var name = currentTagNextName;
+                Action loadTagToGame = () => LoadIntoGame(tag, name);
                 
                 var warnings = MakeLoadWarnings(tag);
                 if (warnings.Count > 0) {
@@ -95,6 +88,30 @@ namespace Inventory
             }
         }
 
+        // adds a copy of the saved `tag` to the game, named `name`
+        internal static Tag LoadIntoGame(Tag tag, string name) {
+            var newTag = tag.MakeCopy();
+            newTag.name = name;
+            // copies, so the in-game tag doesn't share (and edit) the saved tag's items
+            newTag.requiredItems = tag.requiredItems.Select(item => item.CopyValid()).Where(item => item != null).ToList();
+
+            newTag.uniqueId = LoadoutManager.GetNextTagId();
+            LoadoutManager.AddTag(newTag);
+            return newTag;
+        }
+
+        // saves a copy of the in-game `tag` to the settings, named `name`, for use in other games
+        internal static Tag SaveToSettings(Tag tag, string name, List<Tag> savedTags) {
+            var newTag = tag.MakeCopy();
+            newTag.name = name;
+            // copies, so editing the in-game tag afterwards doesn't edit (and on the next settings write, save) this one
+            newTag.requiredItems = tag.requiredItems.Select(item => item.CopyValid()).Where(item => item != null).ToList();
+            newTag.uniqueId = savedTags.Count == 0 ? 0 : savedTags.MaxBy(t => t.uniqueId).uniqueId + 1;
+            savedTags.Add(newTag);
+            ModBase.settings.Write();
+            return newTag;
+        }
+
         private void DrawSaveButton(ref Rect rect, Tag tag, List<Tag> savedTags) {
             var buttonRect = rect.PopTopPartPixels(UIC.DEFAULT_HEIGHT);
             bool existingWithSameName = savedTags.Any(t => t.name == currentTagNextName);
@@ -103,14 +120,9 @@ namespace Inventory
             var saveButtonRect = buttonRect.PopRightPartPixels(Mathf.Max(UIC.SPACED_HEIGHT * 3, Strings.Save.GetWidthCached() + 5f));
             
             if (Widgets.ButtonText(saveButtonRect, Strings.Save) && !existingWithSameName) {
-                Find.WindowStack.Add(new Dialog_ConfirmSettings(() => {
-                    var newTag = tag.MakeCopy();
-                    newTag.name = currentTagNextName;
-                    newTag.requiredItems = selectedTag.requiredItems.ToList();
-                    newTag.uniqueId = savedTags.Count == 0 ? 0 : savedTags.MaxBy(t => t.uniqueId).uniqueId + 1;
-                    savedTags.Add(newTag);
-                    ModBase.settings.Write();
-                }, Strings.SaveTagDialogue(tag.name, currentTagNextName), MakeSaveWarnings(tag)));
+                var name = currentTagNextName;
+                Find.WindowStack.Add(new Dialog_ConfirmSettings(() => SaveToSettings(tag, name, savedTags),
+                    Strings.SaveTagDialogue(tag.name, currentTagNextName), MakeSaveWarnings(tag)));
             }
 
             if (existingWithSameName) {

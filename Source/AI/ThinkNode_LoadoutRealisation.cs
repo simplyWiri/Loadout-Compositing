@@ -13,7 +13,11 @@ namespace Inventory {
 
     public class ThinkNode_LoadoutRealisation : ThinkNode_ConditionalColonist {
 
-        private Dictionary<Pawn, int> nextUpdateTick = new Dictionary<Pawn, int>();
+        // Think nodes outlive games, so this is cleared whenever a game is started or loaded: otherwise a loaded game's
+        // pawns would inherit the previous game's timers, and the previous game's pawns would never be released.
+        private static Dictionary<Pawn, int> nextUpdateTick = new Dictionary<Pawn, int>();
+
+        public static void ResetUpdateTicks() => nextUpdateTick.Clear();
 
         private static JobDef EquipApparel => JobDefOf.Wear;
         private static JobDef EquipItem => JobDefOf.TakeInventory;
@@ -241,7 +245,7 @@ namespace Inventory {
         private Job SatisfyLoadoutItemsJob(Pawn pawn, Loadout loadout) {
             var pawnGear = pawn.InventoryAndEquipment().ToList();
             var assignment = loadout.AssignGear(pawn, pawnGear);
-            var items = loadout.Items.Where(item => !item.IsApparel).Distinct().ToList();
+            var items = loadout.CarriedItems.Where(item => !item.IsApparel).Distinct().ToList();
 
             foreach (var item in items) {
                 // fetch the best ranked members first, lower ranks only make up what the better ranks can't
@@ -283,12 +287,14 @@ namespace Inventory {
                 : things.OrderByDescending(t => t.stackCount);
             
             foreach (var thing in orderedList) {
-                if (!Utility.ShouldAttemptToEquip(pawn, thing, true)) {
+                // equipping swaps out a worse ranked primary of the same item
+                var equip = count == 1 && thing.def.IsWeapon && (primary is null || item.RankOf(primary) > rank.Key);
+                // taking to inventory reserves only the part of a stack taken, so pawns can share a stack
+                if (!Utility.ShouldAttemptToEquip(pawn, thing, true, equip ? -1 : Mathf.Min(count, thing.stackCount))) {
                     continue;
                 }
 
-                // equipping swaps out a worse ranked primary of the same item
-                if (count == 1 && thing.def.IsWeapon && (primary is null || item.RankOf(primary) > rank.Key))
+                if (equip)
                 {
                     return JobMaker.MakeJob(HoldItem, thing);
                 } else {
