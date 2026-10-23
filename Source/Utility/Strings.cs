@@ -171,7 +171,10 @@ namespace Inventory {
         public static string WarningItemDependsOnModSaveDesc => $"{P}WarningItemDependsOnModSaveDesc".TranslateSimple();
         public static string WarningItemFilterDependsOnModSaveDesc => $"{P}WarningItemFilterDependsOnModSaveDesc".TranslateSimple();
 
-        public static string ResearchedItemsDesc => $"{P}ResearchedItemsDesc".TranslateSimple();
+        public static string ShowOnlyDesc => $"{P}ShowOnlyDesc".TranslateSimple();
+        public static string ShowAllThings => $"{P}ShowAllThings".TranslateSimple();
+        public static string ShowResearchedThings => $"{P}ShowResearchedThings".TranslateSimple();
+        public static string ShowThingsInColony => $"{P}ShowThingsInColony".TranslateSimple();
         public static string SortThingsByDesc => $"{P}SortThingsByDesc".TranslateSimple();
         
         public static string EquippedStatOffsets => $"{P}EquippedStatOffsets".TranslateSimple();
