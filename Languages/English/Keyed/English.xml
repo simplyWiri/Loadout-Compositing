@@ -171,7 +171,10 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.WarningItemFilterDependsOnModSave>Can not load filter item {0}</CompositableLoadouts.WarningItemFilterDependsOnModSave> 
 	<CompositableLoadouts.WarningItemFilterDependsOnModSaveDesc>This item will be dropped from the filter automatically, its mod is most likely not loaded.</CompositableLoadouts.WarningItemFilterDependsOnModSaveDesc> 
 
-	<CompositableLoadouts.ResearchedItemsDesc>Filter only to show things which have already been researched (hide non-researched things)</CompositableLoadouts.ResearchedItemsDesc> 
+	<CompositableLoadouts.ShowOnlyDesc>Choose which things to show: all of them, only those already researched, or only those the colony has in storage or which a colonist carries, wears or has equipped</CompositableLoadouts.ShowOnlyDesc>
+	<CompositableLoadouts.ShowAllThings>Show all things</CompositableLoadouts.ShowAllThings>
+	<CompositableLoadouts.ShowResearchedThings>Only researched things</CompositableLoadouts.ShowResearchedThings>
+	<CompositableLoadouts.ShowThingsInColony>Only things in storage or carried</CompositableLoadouts.ShowThingsInColony>
 	<CompositableLoadouts.SortThingsByDesc>Choose an attribute to sort the things listed by, right click to specify what attribute, left click to switch between ascending/descending</CompositableLoadouts.SortThingsByDesc> 
 
 	<CompositableLoadouts.EquippedStatOffsets>Equipped stat offsets</CompositableLoadouts.EquippedStatOffsets> 
