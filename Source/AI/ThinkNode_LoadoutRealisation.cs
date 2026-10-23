@@ -287,12 +287,14 @@ namespace Inventory {
                 : things.OrderByDescending(t => t.stackCount);
             
             foreach (var thing in orderedList) {
-                if (!Utility.ShouldAttemptToEquip(pawn, thing, true)) {
+                // equipping swaps out a worse ranked primary of the same item
+                var equip = count == 1 && thing.def.IsWeapon && (primary is null || item.RankOf(primary) > rank.Key);
+                // taking to inventory reserves only the part of a stack taken, so pawns can share a stack
+                if (!Utility.ShouldAttemptToEquip(pawn, thing, true, equip ? -1 : Mathf.Min(count, thing.stackCount))) {
                     continue;
                 }
 
-                // equipping swaps out a worse ranked primary of the same item
-                if (count == 1 && thing.def.IsWeapon && (primary is null || item.RankOf(primary) > rank.Key))
+                if (equip)
                 {
                     return JobMaker.MakeJob(HoldItem, thing);
                 } else {
