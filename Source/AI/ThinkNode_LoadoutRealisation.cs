@@ -251,7 +251,7 @@ namespace Inventory {
 
                     var held = assignment.HeldOfRank(item, rank.Key);
                     if (held < remaining) {
-                        var job = FindItem(pawn, item, rank.Key, remaining - held);
+                        var job = FindItem(pawn, item, rank, remaining - held);
                         if (job != null) {
                             return job;
                         }
@@ -273,8 +273,9 @@ namespace Inventory {
             return null;
         }
 
-        private Job FindItem(Pawn pawn, Item item, int rank, int count) {
-            var things = item.ThingsOnMap(pawn.Map).Where(thing => item.RankOf(thing) == rank && item.AllowsFor(pawn, thing)).ToList();
+        // fetch `count` of the members of `rank`
+        private Job FindItem(Pawn pawn, Item item, IGrouping<int, ItemMember> rank, int count) {
+            var things = item.ThingsOnMap(pawn, rank).ToList();
             var primary = pawn.equipment.Primary;
 
             var orderedList = count == 1
@@ -287,7 +288,7 @@ namespace Inventory {
                 }
 
                 // equipping swaps out a worse ranked primary of the same item
-                if (count == 1 && thing.def.IsWeapon && (primary is null || item.RankOf(primary) > rank))
+                if (count == 1 && thing.def.IsWeapon && (primary is null || item.RankOf(primary) > rank.Key))
                 {
                     return JobMaker.MakeJob(HoldItem, thing);
                 } else {
