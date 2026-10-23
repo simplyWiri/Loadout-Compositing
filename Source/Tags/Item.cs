@@ -23,23 +23,31 @@ namespace Inventory {
 
         public Filter Filter => filter;
         public IReadOnlyList<ItemMember> Members => members;
-        public ThingDef Def => members[0].Def;
         public int Quantity => quantity;
 
-        public SafeDef WrappedDef => members[0].WrappedDef;
-
-        public bool IsApparel => Def.IsApparel;
+        // all members are either apparel, or not
+        public bool IsApparel => RepresentativeDef.IsApparel;
         public IEnumerable<ThingDef> Defs => members.Select(m => m.Def);
 
-        // the def used when only one can be shown or used for an estimate (icons, mass, stats)
-        public ThingDef RepresentativeDef => Def;
-        public ThingDef RepresentativeStuff => members[0].RepresentativeStuff;
+        // the best ranked member, used when only one can be shown or used for an estimate (icons, mass, stats)
+        public ItemMember RepresentativeMember => members[0];
+        public ThingDef RepresentativeDef => RepresentativeMember.Def;
+        public ThingDef RepresentativeStuff => RepresentativeMember.RepresentativeStuff;
         public QualityCategory RandomQuality => (QualityCategory)Mathf.FloorToInt(((int)filter.QualityRange.max + (int)filter.QualityRange.min) / 2.0f);
         public string Label => Print();
 
-        public bool Allows(Thing thing) => members[0].Allows(thing) && Filter.Allows(thing);
+        public bool Allows(Thing thing) => MemberAllowing(thing) != null && Filter.Allows(thing);
 
         public ItemMember MemberFor(ThingDef def) => members.FirstOrDefault(m => m.Def == def);
+        public ItemMember MemberAllowing(Thing thing) => members.FirstOrDefault(m => m.Allows(thing));
+
+        // lower is better, members may share a rank
+        public int RankOf(ItemMember member) => members.IndexOf(member);
+        // the rank of the member which accepts `thing`, or -1 if this item does not accept it
+        public int RankOf(Thing thing) => Allows(thing) ? RankOf(MemberAllowing(thing)) : -1;
+
+        // members grouped by rank, best first
+        public IEnumerable<IGrouping<int, ItemMember>> RankedMembers => members.GroupBy(RankOf).OrderBy(g => g.Key);
         public bool SubsetOf(Bill_Production bill) => (MemberFor(bill.recipe.ProducedThingDef)?.StuffSubsetOf(bill) ?? false) && Filter.SubsetOf(bill);
         public int CountIn(List<Thing> things) => things.Where(Allows).Sum(s => s.stackCount);
 
@@ -47,8 +55,9 @@ namespace Inventory {
         public string Print() {
             var stringBuilder = new StringBuilder();
 
-            if (Def.MadeFromStuff) {
-                var stuffs = members[0].AllowedStuffs;
+            var def = RepresentativeDef;
+            if (def.MadeFromStuff) {
+                var stuffs = RepresentativeMember.AllowedStuffs;
                 var count = stuffs.Count;
                 if (count == 0) stringBuilder.Append(Strings.Generic);
                 else if (count == 1) stringBuilder.Append(stuffs.First().Def.LabelCap);
@@ -56,8 +65,8 @@ namespace Inventory {
                 stringBuilder.Append(" ");
             }
 
-            stringBuilder.Append(Def.LabelCap);
-            if (Def.HasComp(typeof(CompQuality))) {
+            stringBuilder.Append(def.LabelCap);
+            if (def.HasComp(typeof(CompQuality))) {
                 stringBuilder.Append(" (");
 
                 if (filter.QualityRange.min != filter.QualityRange.max)
@@ -107,10 +116,12 @@ namespace Inventory {
 
         // exists to make generic `Items` easier
         public IEnumerable<Thing> ThingsOnMap(Map map) {
-            var things = map.listerThings.ThingsOfDef(Def);
-            if (things.NullOrEmpty()) yield break;
-            foreach (var thing in things.Where(Allows)) {
-                yield return thing;
+            foreach (var member in members) {
+                var things = map.listerThings.ThingsOfDef(member.Def);
+                if (things.NullOrEmpty()) continue;
+                foreach (var thing in things.Where(Allows)) {
+                    yield return thing;
+                }
             }
         }
 
