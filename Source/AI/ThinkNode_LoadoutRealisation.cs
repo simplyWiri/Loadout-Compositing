@@ -330,21 +330,22 @@ namespace Inventory {
                         return comp != null && comp.CodedPawn != null && comp.CodedPawn != pawn;
                     });
                 
-                    // If there exists a weapon which is coded to our pawn, lets equip that instead of an uncoded one, 
-                    // otherwise pick the closest occurence.
+                    // If there exists a weapon which is coded to our pawn, lets equip that instead of an uncoded one,
+                    // otherwise pick the closest occurence. Only if they can pick it up though, a coded weapon which is
+                    // forbidden, reserved or unreachable shouldn't stop them taking another.
                     var marked = things.Where(t => t.TryGetComp<CompBiocodable>()?.CodedPawn == pawn).ToList();
-                    if (marked.Any())
+                    if (marked.Any(t => Utility.ShouldAttemptToEquip(pawn, t, true)))
                     {
                         things = marked;
-                        // Special case the case we have a bonded weapon, but its forbidden
-                        if (things.All(t => t.IsForbidden(pawn)))
-                        {
-                            Messages.Message(new Message(
-                                $"{pawn.Name} cannot equip {string.Join(", ", things.Select(t => t.LabelShort))} as it is forbidden.", 
-                                MessageTypeDefOf.SilentInput,
-                                things
-                            ));
-                        }
+                    }
+                    // Special case the case we have a bonded weapon, but its forbidden
+                    else if (marked.Any() && marked.All(t => t.IsForbidden(pawn)))
+                    {
+                        Messages.Message(new Message(
+                            $"{pawn.Name} cannot equip {string.Join(", ", marked.Select(t => t.LabelShort))} as it is forbidden.",
+                            MessageTypeDefOf.SilentInput,
+                            marked
+                        ));
                     }
                 }
 
