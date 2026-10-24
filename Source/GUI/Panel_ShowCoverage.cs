@@ -9,11 +9,12 @@ namespace Inventory {
 
     public class Panel_ShowCoverage {
 
-        public enum CoverageTab { Apparel }
+        public enum CoverageTab { Apparel, BodyParts }
 
         private Dialog_LoadoutEditor parent;
         private Pawn pawn;
         private ApparelCoverage apparelCoverage;
+        private BodyPartCoverage bodyPartCoverage;
         private static List<Color> coloursByIdx = null;
 
         public bool ShouldDraw { get; set; } = false;
@@ -58,6 +59,7 @@ namespace Inventory {
             this.pawn = parent.pawn;
             this.ShouldDraw = shouldDraw;
             this.apparelCoverage = new ApparelCoverage(parent);
+            this.bodyPartCoverage = new BodyPartCoverage(parent);
         }
 
         public void Draw(Rect rect) {
@@ -65,19 +67,25 @@ namespace Inventory {
 
             var tabs = new List<TabRecord> {
                 new TabRecord(Strings.ApparelTab, () => Tab = CoverageTab.Apparel, Tab == CoverageTab.Apparel),
+                new TabRecord(Strings.BodyPartsTab, () => Tab = CoverageTab.BodyParts, Tab == CoverageTab.BodyParts),
             };
 
             Widgets.DrawMenuSection(rect);
             TabDrawer.DrawTabs(rect, tabs);
 
-            apparelCoverage.Draw(rect.ContractedBy(GenUI.GapSmall), pawn.RaceProps.body);
+            var contents = rect.ContractedBy(GenUI.GapSmall);
+            if (Tab == CoverageTab.Apparel) {
+                apparelCoverage.Draw(contents, pawn.RaceProps.body);
+            } else {
+                bodyPartCoverage.Draw(contents, pawn.RaceProps.body);
+            }
         }
 
         private void DrawInfoButton(Rect tabRow) {
             var bRect = tabRow.RightPartPixels(UIC.SMALL_ICON).MiddlePartPixels(UIC.SMALL_ICON);
 
             Widgets.ButtonImageFitted(bRect, TexButton.Info);
-            TooltipHandler.TipRegion(bRect.ExpandedBy(5f), () => Strings.CoverageExplanation, 489588371);
+            TooltipHandler.TipRegion(bRect.ExpandedBy(5f), () => Tab == CoverageTab.Apparel ? Strings.CoverageExplanation : Strings.BodyPartCoverageExplanation, 489588371);
         }
 
     }
