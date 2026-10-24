@@ -429,15 +429,6 @@ namespace Inventory {
             var relevantItems = hypotheticalApparel.Union(loadoutItems.Where(item => !item.IsApparel)
                 .Select(item => new Tuple<Item, ThingDef>(item, item.RepresentativeDef))).ToList();
 
-            if ((hypotheticalApparel.Count + relevantItems.Count) < 0) {
-                statsHeight = GenUI.GapTiny + UIC.SPACED_HEIGHT;
-                return;
-            } 
-                
-            Text.Anchor = TextAnchor.MiddleRight;
-            GUIUtility.ListSeperator(ref viewRect, Strings.EquippedStatOffsets + " ", tooltip: Strings.EquippedStatOffsetsDesc);
-            Text.Anchor = TextAnchor.UpperLeft;
-            
             var statBonuses = new Dictionary<StatDef, List<Tuple<Item, ThingDef>>>();
 
             foreach (var potentialStatBoostingItem in relevantItems) {
@@ -450,24 +441,33 @@ namespace Inventory {
                 }
             }
 
-            foreach (var (stat, items) in statBonuses) {
-                var totalScore = items.Sum(item => item.Item2.equippedStatOffsets.GetStatOffsetFromList(stat));
+            height += GenUI.GapTiny + UIC.SPACED_HEIGHT + UIC.LIST_SEP_HEIGHT;
 
-                var statRect = viewRect.PopTopPartPixels(Text.LineHeight);
-                
-                string statNameStr = $"{stat.LabelCap} "
-                    , statValueStr = $"{stat.Worker.ValueToString(totalScore, false)}";
-                
-                GUIUtility.WithModifiers(statRect.PopLeftPartPixels(statNameStr.GetWidthCached()), statNameStr, color: Color.gray);
-                Widgets.Label(statRect.PopLeftPartPixels(statValueStr.GetWidthCached() + UIC.SMALL_GAP), statValueStr);
-                
-                foreach (var (item, def) in items.OrderBy(it => it.Item2.equippedStatOffsets.GetStatOffsetFromList(stat))) {
-                    var iconRect = statRect.PopRightPartPixels(Text.LineHeight);
-                    GUIUtility.DrawItemIcon(iconRect, item, false, item.Label + " " + stat.Worker.ValueToString(def.equippedStatOffsets.GetStatOffsetFromList(stat), false), item.MemberFor(def));
+            if (statBonuses.Any()) {
+                GUIUtility.ListSeperator(ref viewRect, Strings.EquippedStatOffsets, tooltip: Strings.EquippedStatOffsetsDesc);
+
+                // values line up in one column after the longest stat name, as in the game's stat lists
+                var labelWidth = statBonuses.Keys.Max(stat => stat.LabelCap.GetWidthCached()) + UIC.SMALL_GAP;
+                var idx = 0;
+                foreach (var (stat, items) in statBonuses) {
+                    var totalScore = items.Sum(item => item.Item2.equippedStatOffsets.GetStatOffsetFromList(stat));
+
+                    var statRect = viewRect.PopTopPartPixels(Text.LineHeight);
+                    if (idx++ % 2 == 0) Widgets.DrawLightHighlight(statRect);
+                    Widgets.DrawHighlightIfMouseover(statRect);
+
+                    GUIUtility.WithModifiers(statRect.PopLeftPartPixels(labelWidth), stat.LabelCap, color: Color.gray);
+                    var valueStr = stat.Worker.ValueToString(totalScore, false);
+                    Widgets.Label(statRect.PopLeftPartPixels(valueStr.GetWidthCached() + UIC.SMALL_GAP), valueStr);
+
+                    foreach (var (item, def) in items.OrderBy(it => it.Item2.equippedStatOffsets.GetStatOffsetFromList(stat))) {
+                        var iconRect = statRect.PopRightPartPixels(Text.LineHeight);
+                        GUIUtility.DrawItemIcon(iconRect, item, false, item.Label + " " + stat.Worker.ValueToString(def.equippedStatOffsets.GetStatOffsetFromList(stat), false), item.MemberFor(def));
+                    }
                 }
-            }
 
-            height += GenUI.GapTiny + UIC.SPACED_HEIGHT + (2 * UIC.LIST_SEP_HEIGHT) + (statBonuses.Count * Text.LineHeight);
+                height += UIC.LIST_SEP_HEIGHT + statBonuses.Count * Text.LineHeight;
+            }
             
             Widgets.EndScrollView();
 
