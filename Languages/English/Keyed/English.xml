@@ -51,7 +51,7 @@
 	<CompositableLoadouts.BodyPartsTab>Body parts</CompositableLoadouts.BodyPartsTab>
 	<CompositableLoadouts.BodyPart>Body part</CompositableLoadouts.BodyPart>
 	<CompositableLoadouts.ProstheticsHeader>Prosthetics and implants</CompositableLoadouts.ProstheticsHeader>
-	<CompositableLoadouts.NoProstheticParts>No prosthetics can be installed on this body.</CompositableLoadouts.NoProstheticParts>
+	<CompositableLoadouts.NoProstheticParts>No prosthetics are in these tags.</CompositableLoadouts.NoProstheticParts>
 	<CompositableLoadouts.ProstheticsBlocked>Blocked:</CompositableLoadouts.ProstheticsBlocked>
 	<CompositableLoadouts.NaturalPart>natural part</CompositableLoadouts.NaturalPart>
 	<CompositableLoadouts.CurrentlyOnPart>Currently: {0}</CompositableLoadouts.CurrentlyOnPart>
@@ -101,10 +101,9 @@ Boxes are coloured to represent their current status:
 A semi-transparent apparel will be drawn, showing the highest priority apparel which would cover this slot, and hovering over the slot will show which apparel is blocking it.
 - Other: The remaining colours used in the visualization represents the tag an apparel is coming from and can be used to cross-reference corresponding layers with the primary tag.</CompositableLoadouts.CoverageExplanation>
 
-	<CompositableLoadouts.BodyPartCoverageExplanation>Each box is a body part which a prosthetic or implant can be installed on, showing what this loadout would install there.
+	<CompositableLoadouts.BodyPartCoverageExplanation>Each box is a body part which a prosthetic or implant in these tags would go on (or replace), showing what this loadout would install there.
 
 Boxes are coloured to represent their current status:
-- Grey: No prosthetic in this loadout goes on this part.
 - Faded: The part is reserved (e.g. the other shoulder, when asking for one bionic arm), or replaced along with an added part above it (e.g. the foot under a bionic leg).
 - Red: Every prosthetic which would go on this part is blocked by one from a higher priority tag. Hovering over the part shows which.
 - Other: The corner colour is the tag the prosthetic comes from, as in the applied tags list.
