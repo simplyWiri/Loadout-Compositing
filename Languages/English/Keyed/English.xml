@@ -46,6 +46,8 @@
 	<CompositableLoadouts.AppliedTags>Applied Tags (priority high to low)</CompositableLoadouts.AppliedTags>
 	<CompositableLoadouts.PawnStats>Pawn Stats</CompositableLoadouts.PawnStats>
 	<CompositableLoadouts.Coverage>Coverage</CompositableLoadouts.Coverage>
+	<CompositableLoadouts.ApparelTab>Apparel</CompositableLoadouts.ApparelTab>
+	<CompositableLoadouts.BodyGroup>Body group</CompositableLoadouts.BodyGroup>
 	<CompositableLoadouts.LoadoutStatistics>Loadout Statistics (when fully satisfied)</CompositableLoadouts.LoadoutStatistics>
 	<CompositableLoadouts.Weight>Weight</CompositableLoadouts.Weight>
 	<CompositableLoadouts.WeightOverCapacity>The weight of gear carried by the pawn, vs the carry capacity of the pawn</CompositableLoadouts.WeightOverCapacity>

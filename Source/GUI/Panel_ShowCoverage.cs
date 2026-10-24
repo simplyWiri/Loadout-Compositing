@@ -9,12 +9,15 @@ namespace Inventory {
 
     public class Panel_ShowCoverage {
 
+        public enum CoverageTab { Apparel }
+
         private Dialog_LoadoutEditor parent;
         private Pawn pawn;
         private ApparelCoverage apparelCoverage;
         private static List<Color> coloursByIdx = null;
 
         public bool ShouldDraw { get; set; } = false;
+        public CoverageTab Tab { get; set; } = CoverageTab.Apparel;
 
         static Panel_ShowCoverage() {
             Color HexColor(int hex) {
@@ -58,13 +61,20 @@ namespace Inventory {
         }
 
         public void Draw(Rect rect) {
-            apparelCoverage.Draw(rect, pawn.RaceProps.body);
-            DrawPrelude(rect);
+            DrawInfoButton(rect.PopTopPartPixels(TabDrawer.TabHeight));
+
+            var tabs = new List<TabRecord> {
+                new TabRecord(Strings.ApparelTab, () => Tab = CoverageTab.Apparel, Tab == CoverageTab.Apparel),
+            };
+
+            Widgets.DrawMenuSection(rect);
+            TabDrawer.DrawTabs(rect, tabs);
+
+            apparelCoverage.Draw(rect.ContractedBy(GenUI.GapSmall), pawn.RaceProps.body);
         }
-        
-        public void DrawPrelude(Rect rect) {
-            var bRect = rect.TopPartPixels(UIC.SMALL_ICON);
-            bRect = bRect.RightPartPixels(UIC.SMALL_ICON);
+
+        private void DrawInfoButton(Rect tabRow) {
+            var bRect = tabRow.RightPartPixels(UIC.SMALL_ICON).MiddlePartPixels(UIC.SMALL_ICON);
 
             Widgets.ButtonImageFitted(bRect, TexButton.Info);
             TooltipHandler.TipRegion(bRect.ExpandedBy(5f), () => Strings.CoverageExplanation, 489588371);

@@ -53,6 +53,8 @@ namespace Inventory {
         public static string AppliedTags => $"{P}AppliedTags".TranslateSimple();
         public static string PawnStats => $"{P}PawnStats".TranslateSimple();
         public static string Coverage => $"{P}Coverage".TranslateSimple();
+        public static string ApparelTab => $"{P}ApparelTab".TranslateSimple();
+        public static string BodyGroup => $"{P}BodyGroup".TranslateSimple();
         public static string LoadoutStatistics => $"{P}LoadoutStatistics".TranslateSimple();
         public static string Weight => $"{P}Weight".TranslateSimple();
         public static string WeightOverCapacity => $"{P}WeightOverCapacity".TranslateSimple();

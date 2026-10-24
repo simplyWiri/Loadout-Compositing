@@ -58,7 +58,7 @@ namespace Inventory {
             this.pawn = pawn;
             this.component = pawn.GetComp<LoadoutComponent>();
             this.shownState = component.Loadout.CurrentState;
-            coveragePanel = new Panel_ShowCoverage(this, old.coveragePanel.ShouldDraw);
+            coveragePanel = new Panel_ShowCoverage(this, old.coveragePanel.ShouldDraw) { Tab = old.coveragePanel.Tab };
             pawnStatPanel = new Panel_PawnStats(this, old.pawnStatPanel.ShouldDraw);
 
             doCloseX = true;
