@@ -12,6 +12,7 @@ namespace Inventory {
     public static class ProstheticUtility {
         private static Dictionary<ThingDef, List<RecipeDef>> installRecipes = null;
         private static Dictionary<ThingDef, Dictionary<string, float>> effects = new Dictionary<ThingDef, Dictionary<string, float>>();
+        private static Dictionary<BodyDef, List<BodyPartRecord>> targetableParts = new Dictionary<BodyDef, List<BodyPartRecord>>();
 
         private static Dictionary<ThingDef, List<RecipeDef>> InstallRecipes => installRecipes ??= BuildIndex();
 
@@ -97,6 +98,20 @@ namespace Inventory {
         public static IEnumerable<BodyPartRecord> TargetParts(BodyDef body, RecipeDef recipe) {
             return body.AllParts.Where(part => (recipe.appliedOnFixedBodyParts?.Contains(part.def) ?? false)
                                                || (recipe.appliedOnFixedBodyPartGroups?.Any(group => part.groups.Contains(group)) ?? false));
+        }
+
+        // the parts of `body` which any prosthetic goes on, in body order
+        public static IReadOnlyList<BodyPartRecord> TargetableParts(BodyDef body) {
+            if (targetableParts.TryGetValue(body, out var cached)) return cached;
+
+            var parts = InstallRecipes.Values.SelectMany(recipes => recipes)
+                .Where(recipe => recipe.targetsBodyPart)
+                .SelectMany(recipe => TargetParts(body, recipe))
+                .ToHashSet();
+
+            var result = body.AllParts.Where(parts.Contains).ToList();
+            targetableParts.Add(body, result);
+            return result;
         }
 
         // the most of `def` which could be installed on a pawn with `body` at once
