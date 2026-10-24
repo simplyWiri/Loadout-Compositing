@@ -36,6 +36,7 @@ namespace Inventory {
             get {
                 var width = WIDTH;
                 if (pawnStatPanel.ShouldDraw) width += Panel_PawnStats.WIDTH;
+                if (coveragePanel.ShouldDraw) width += Panel_ShowCoverage.MIN_WIDTH;
                 return new Vector2(width, HEIGHT);
             }
         }
@@ -67,15 +68,20 @@ namespace Inventory {
             fromOtherRect = new Rect(old.windowRect);
         }
 
-        // does nothing
+        // when switching pawns, the new window takes the old one's place and size (e.g. as the coverage grid widened it)
         public override void SetInitialSizeAndPosition()
         {
             base.SetInitialSizeAndPosition();
             if (!fromOtherRect.HasValue) return;
-            
-            windowRect.x = fromOtherRect.Value.x;
-            windowRect.y = fromOtherRect.Value.y;
+
+            windowRect = fromOtherRect.Value;
             fromOtherRect = null;
+            KeepOnScreen();
+        }
+
+        // moves the window left, if it's grown past the right of the screen
+        public void KeepOnScreen() {
+            windowRect.x = Mathf.Max(0f, Mathf.Min(windowRect.x, UI.screenWidth - windowRect.width));
         }
 
         public override void DoWindowContents(Rect inRect) {
@@ -324,12 +330,11 @@ namespace Inventory {
             }
 
             if (GUIUtility.ToggleButton(buttonRect, Strings.Coverage, coveragePanel.ShouldDraw)) {
-                // Active -> Inactive, reset back to default widths
-                if (coveragePanel.ShouldDraw) {
-                    this.windowRect.width = (pawnStatPanel.ShouldDraw ? Panel_PawnStats.WIDTH : 0) + WIDTH;
-                }
-
                 coveragePanel.ShouldDraw = !coveragePanel.ShouldDraw;
+                // back to the default width when hidden, and room for the panel when shown (the apparel grid widens
+                // it further if it needs to)
+                this.windowRect.width = InitialSize.x;
+                KeepOnScreen();
             }
 
             var selectStateButtonRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
