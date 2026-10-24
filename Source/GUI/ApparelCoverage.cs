@@ -25,8 +25,7 @@ namespace Inventory {
             var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, apparelSlotsHeight);
             Widgets.BeginScrollView(rect, ref apparelSlotsScroll, viewRect);
 
-            float curY = rect.y + UIC.DEFAULT_HEIGHT;
-            float beginY = curY;
+            float curY = viewRect.y;
 
             var wornApparel = component.Loadout.HypotheticalWornApparel(parent.shownState, def).ToList();
 
@@ -34,31 +33,14 @@ namespace Inventory {
                          .OrderByDescending(t => t.First().def.listOrder)) {
                 var layers = category.SelectMany(c => c.GetLayers()).Distinct().OrderByDescending(d => d.drawOrder)
                     .ToList();
-                var cols = DrawHeader(new Rect(viewRect.x, curY, viewRect.width, UIC.SPACED_HEIGHT), layers, category,
-                    curY).ToList();
+                var cols = DrawHeader(new Rect(viewRect.x, curY, viewRect.width, UIC.SPACED_HEIGHT), layers, category);
 
-                curY += UIC.SPACED_HEIGHT + UIC.DEFAULT_HEIGHT;
+                curY += UIC.SPACED_HEIGHT;
 
-                // should prevent labels from being cut off on both x and y axis. Extends the window width if the
-                // required summed width of the strings/rects does not fit in the current rect we have been given.
-                var sumWidth = layers.Sum(layer => layer.LabelCap.GetWidthCached() + 5);
-                var rectWidth = cols.Sum(rect => rect.width);
-                var maxWidth = Mathf.Max(sumWidth, rectWidth);
-                if (maxWidth > rect.width) {
-                    var extraWidth = maxWidth + UIC.SCROLL_WIDTH * 2;
-                    parent.windowRect.width = Mathf.Max(parent.windowRect.width, parent.InitialSize.x + extraWidth);
-                }
-
-                for (int i = 0; i < cols.Count; i++) {
-                    var col = cols[i];
-                    col.x = Mathf.Floor(col.x);
-                    col.y = Mathf.Floor(col.y);
-                    col.width = Mathf.Floor(col.width);
-                    col.height = Mathf.Floor(col.height);
-                    if (i == cols.Count - 1) continue;
-
-                    var next = cols[i + 1];
-                    next.x = (col.x + col.width) + 1;
+                // widen the window when the columns don't fit, so no labels or slots are cut off
+                var overflow = cols.Last().xMax - viewRect.xMax;
+                if (overflow > 0) {
+                    parent.windowRect.width += Mathf.Ceil(overflow);
                 }
 
                 foreach (var bp in category) {
@@ -68,49 +50,29 @@ namespace Inventory {
                 curY += UIC.DEFAULT_HEIGHT;
             }
 
-            apparelSlotsHeight = (curY - beginY) + UIC.DEFAULT_HEIGHT;
+            apparelSlotsHeight = curY - viewRect.y;
 
             Widgets.EndScrollView();
         }
 
-        public static IEnumerable<Rect> DrawHeader(Rect rect, List<ApparelLayerDef> layers,
-            List<BodyPartGroup> category, float curY) {
-            var longestName = category.Max(c => c.def.LabelCap.GetWidthCached() + 15f);
-            if (longestName < ("Body Group".GetWidthCached() + 15f)) {
-                longestName = "Body Group".GetWidthCached() + 15f;
+        // draws the column headings (body group, then each layer), returning the columns. Columns are whole pixels
+        // wide, so the slots' outlines are drawn crisply, and wide enough for the longest label
+        public static List<Rect> DrawHeader(Rect rect, List<ApparelLayerDef> layers, List<BodyPartGroup> category) {
+            var headers = new List<string> { Strings.BodyGroup };
+            headers.AddRange(layers.Select(layer => layer.LabelCap.ToString()));
+
+            var longestLabel = category.Select(c => c.def.LabelCap.ToString()).Concat(headers).Max(label => label.GetWidthCached());
+            var width = Mathf.Floor(Mathf.Max(longestLabel + UIC.SMALL_GAP, rect.width / headers.Count));
+            var x = Mathf.Floor(rect.x);
+
+            var cols = new List<Rect>();
+            for (int i = 0; i < headers.Count; i++) {
+                var headerRect = new Rect(x + i * width, rect.y, width, UIC.SPACED_HEIGHT);
+                GUIUtility.WithModifiers(headerRect, headers[i], color: Color.gray, anchor: i == 0 ? TextAnchor.MiddleLeft : TextAnchor.MiddleCenter);
+                cols.Add(headerRect);
             }
 
-            string GetHeader(int i) {
-                return i == 0 ? "Body Group" : layers[i - 1].LabelCap;
-            }
-
-            var numCols = layers.Count + 1;
-            var width = Mathf.Max(longestName, rect.width / numCols);
-            var curX = rect.x;
-
-            Text.Anchor = TextAnchor.MiddleCenter;
-            Widgets.Label(rect.RightPart(.70f), "Apparel Layers");
-            curY += UIC.DEFAULT_HEIGHT;
-            Text.Anchor = TextAnchor.UpperLeft;
-
-            for (int i = 0; i < numCols; i++) {
-                var headerRect = new Rect(curX, curY, width, UIC.SPACED_HEIGHT);
-
-                if (i != 0) {
-                    Text.Anchor = TextAnchor.MiddleCenter;
-                    GUI.color = Color.gray;
-                }
-
-                Widgets.Label(headerRect, GetHeader(i));
-                Text.Anchor = TextAnchor.UpperLeft;
-
-                yield return new Rect(curX, curY, width, rect.height - UIC.SPACED_HEIGHT);
-
-                curX += headerRect.width;
-            }
-
-            GUI.color = Color.white;
-            Text.Anchor = TextAnchor.UpperLeft;
+            return cols;
         }
 
         public void DrawBodyPartGroup(BodyDef bodyDef, BodyPartGroup group, List<ApparelLayerDef> layers,
