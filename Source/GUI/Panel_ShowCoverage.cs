@@ -11,6 +11,9 @@ namespace Inventory {
 
         public enum CoverageTab { Apparel, BodyParts }
 
+        // the least room the panel is given; the apparel grid widens the window further when its columns need it
+        public const float MIN_WIDTH = 480f;
+
         private Dialog_LoadoutEditor parent;
         private Pawn pawn;
         private ApparelCoverage apparelCoverage;
