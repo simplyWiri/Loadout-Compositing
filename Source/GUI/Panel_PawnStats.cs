@@ -50,21 +50,24 @@ namespace Inventory {
                 var skillRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
                 var skill = skillList[i];
 
+                if (Mouse.IsOver(skillRect)) Widgets.DrawHighlight(skillRect);
+
+                // as on the character card: passion, then a bar with the skill's name, and its level at the end
+                var passionRect = skillRect.PopLeftPartPixels(UIC.SMALL_ICON);
                 if (skill.passion > Passion.None) {
                     Texture2D image = (skill.passion == Passion.Major)
                         ? SkillUI.PassionMajorIcon
                         : SkillUI.PassionMinorIcon;
-                    Widgets.DrawTextureFitted(skillRect.LeftPartPixels(24), image, 1);
+                    Widgets.DrawTextureFitted(passionRect, image, 1);
                 }
 
+                var barRect = skillRect.ContractedBy(0f, 2f);
                 var fillPercent = Mathf.Max(0.01f, skill.Level / 20f);
-                Widgets.FillableBar(skillRect, fillPercent, SkillUI.SkillBarFillTex, null, false);
+                Widgets.FillableBar(barRect, fillPercent, SkillUI.SkillBarFillTex, null, false);
 
-                Text.Anchor = TextAnchor.MiddleRight;
-                GUI.color = Color.gray;
-                Widgets.Label(skillRect.LeftPart(0.95f), $"{skill.def.skillLabel.CapitalizeFirst()} ({skill.Level})");
-                GUI.color = Color.white;
-                Text.Anchor = TextAnchor.UpperLeft;
+                var labelRect = barRect.ContractedBy(4f, 0f);
+                GUIUtility.WithModifiers(labelRect, skill.def.skillLabel.CapitalizeFirst(), anchor: TextAnchor.MiddleLeft);
+                GUIUtility.WithModifiers(labelRect, skill.Level.ToString(), anchor: TextAnchor.MiddleRight);
 
                 TooltipHandler.TipRegion(skillRect,
                     new TipSignal(() => SkillUI.GetSkillDescription(skill), skill.def.GetHashCode() * 397945));

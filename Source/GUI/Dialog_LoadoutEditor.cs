@@ -191,12 +191,12 @@ namespace Inventory {
                     }
                     while (truncatedName.GetWidthCached() + UIC.SMALL_GAP > (tagRect.width - UIC.SPACED_HEIGHT * 4));
 
-                    var nameRect = tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + UIC.SMALL_GAP);
-                    Widgets.Label(nameRect, truncatedName);
+                    var nameRect = tagRect.PopLeftPartPixels(tag.name.GetWidthCached() + UIC.SMALL_GAP).TopPartPixels(UIC.SPACED_HEIGHT);
+                    GUIUtility.WithModifiers(nameRect, truncatedName, anchor: TextAnchor.MiddleLeft);
                     TooltipHandler.TipRegion(nameRect, tag.name);
                 } else {
-                    var nameRect = tagRect.PopLeftPartPixels(longestName + UIC.SMALL_GAP);
-                    Widgets.Label(nameRect, tag.name);
+                    var nameRect = tagRect.PopLeftPartPixels(longestName + UIC.SMALL_GAP).TopPartPixels(UIC.SPACED_HEIGHT);
+                    GUIUtility.WithModifiers(nameRect, tag.name, anchor: TextAnchor.MiddleLeft);
                 }
 
                 var iconsRect = tagRect.PopLeftPartPixels(UIC.SPACED_HEIGHT * 4);
@@ -311,18 +311,19 @@ namespace Inventory {
             var buttonRect = rect.PopTopPartPixels(UIC.SPACED_HEIGHT);
             buttonRect.PopRightPartPixels(Margin);
 
-            if (Widgets.ButtonText(buttonRect.PopLeftPartPixels(rect.width / 3f), Strings.PawnStats)) {
+            var buttonWidth = buttonRect.width / 3f;
+            if (GUIUtility.ToggleButton(buttonRect.PopLeftPartPixels(buttonWidth), Strings.PawnStats, pawnStatPanel.ShouldDraw)) {
                 // We pop back the panel's x value because we want the 'central' panel to stay in the same position
                 this.windowRect.x += Panel_PawnStats.WIDTH * (pawnStatPanel.ShouldDraw ? 1 : -1);
                 this.windowRect.width += Panel_PawnStats.WIDTH * (pawnStatPanel.ShouldDraw ? -1 : 1);
                 pawnStatPanel.ShouldDraw = !pawnStatPanel.ShouldDraw;
             }
 
-            if (Widgets.ButtonText(buttonRect.LeftHalf(), Strings.AddTag)) {
+            if (Widgets.ButtonText(buttonRect.PopLeftPartPixels(buttonWidth), Strings.AddTag)) {
                 Find.WindowStack.Add(new Dialog_TagSelector(LoadoutManager.Tags.Except(elements.Select(elem => elem.Tag)).ToList(), t => component.AddTag(t)));
             }
 
-            if (Widgets.ButtonText(buttonRect.RightHalf(), coveragePanel.ShouldDraw ? Strings.HideCoverage : Strings.ShowCoverage)) {
+            if (GUIUtility.ToggleButton(buttonRect, Strings.Coverage, coveragePanel.ShouldDraw)) {
                 // Active -> Inactive, reset back to default widths
                 if (coveragePanel.ShouldDraw) {
                     this.windowRect.width = (pawnStatPanel.ShouldDraw ? Panel_PawnStats.WIDTH : 0) + WIDTH;

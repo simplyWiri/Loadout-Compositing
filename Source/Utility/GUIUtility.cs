@@ -263,6 +263,13 @@ namespace Inventory {
             }
         }
 
+        // a button for showing/hiding something, highlighted while it is shown
+        public static bool ToggleButton(Rect rect, string label, bool on) {
+            var clicked = Widgets.ButtonText(rect, label);
+            if (on) Widgets.DrawHighlightSelected(rect);
+            return clicked;
+        }
+
         public static void CenterWithWidth(this ref Rect rect, float width) {
             var c = rect.center;
             rect.x = c.x - width / 2.0f;
