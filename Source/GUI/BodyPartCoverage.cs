@@ -79,12 +79,11 @@ namespace Inventory {
                 GUI.DrawTexture(rect.LeftPartPixels(rect.height).ContractedBy(1f), Textures.CornerTex);
                 GUI.color = Color.white;
 
-                // several implants can share a part (e.g. the brain), so their icons sit side by side
-                var iconSize = rect.height - 6f;
-                var iconsRect = rect.ContractedBy(3f);
-                iconsRect.CenterWithWidth(iconSize * placements.Count);
+                // several implants can share a part (e.g. the brain), so their icons sit side by side, then their names
+                var contents = rect.ContractedBy(3f);
+                contents.AdjHorzBy(GenUI.GapTiny);
                 foreach (var placement in placements) {
-                    var iconRect = iconsRect.PopLeftPartPixels(iconSize);
+                    var iconRect = contents.PopLeftPartPixels(contents.height);
                     if (placement.use == ProstheticSlots.PartUse.Installed) {
                         GUIUtility.DrawItemIcon(iconRect, placement.item, false, string.Empty, placement.item.MemberFor(placement.def));
                     } else {
@@ -93,8 +92,14 @@ namespace Inventory {
 
                     lines.Add(Strings.ProstheticPlacement(placement.use, placement.def.LabelCap, placement.tag.name));
                 }
+
+                var installed = placements.Any(p => p.use == ProstheticSlots.PartUse.Installed);
+                DrawName(contents, string.Join(", ", placements.Select(p => p.def.LabelCap.ToString()).Distinct()), installed ? Color.white : Color.gray);
             } else if (blocked.Any()) {
-                Widgets.DefIcon(rect.ContractedBy(3f), blocked[0].Item1.RepresentativeDef, color: FadedIconColor);
+                var contents = rect.ContractedBy(3f);
+                contents.AdjHorzBy(GenUI.GapTiny);
+                Widgets.DefIcon(contents.PopLeftPartPixels(contents.height), blocked[0].Item1.RepresentativeDef, color: FadedIconColor);
+                DrawName(contents, blocked[0].Item1.RepresentativeDef.LabelCap, Color.gray);
             }
 
             if (blocked.Any()) {
@@ -113,6 +118,11 @@ namespace Inventory {
             if (lines.Any()) {
                 TooltipHandler.TipRegion(rect, string.Join("\n", lines));
             }
+        }
+
+        private static void DrawName(Rect rect, string name, Color color) {
+            rect.AdjHorzBy(GenUI.GapTiny);
+            GUIUtility.WithModifiers(rect, name.Truncate(rect.width), color: color, anchor: TextAnchor.MiddleLeft);
         }
 
         // what the pawn has on `part` now, which a prosthetic would replace
