@@ -41,6 +41,8 @@ namespace Inventory {
                 var overflow = cols.Last().xMax - viewRect.xMax;
                 if (overflow > 0) {
                     parent.windowRect.width += Mathf.Ceil(overflow);
+                    // grows leftwards once it reaches the edge of the screen
+                    parent.windowRect.x = Mathf.Max(0f, Mathf.Min(parent.windowRect.x, UI.screenWidth - parent.windowRect.width));
                 }
 
                 foreach (var bp in category) {
