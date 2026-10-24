@@ -6,8 +6,8 @@ using Verse;
 
 namespace Inventory {
 
-    // The body part half of the coverage panel: each part of a pawn which a prosthetic can go on, showing which of the
-    // loadout's prosthetics would take it, and what they block. Drawn in the same style as the apparel grid
+    // The body part half of the coverage panel: each part of a pawn which the loadout's prosthetics would take (or are
+    // blocked from), showing which take it, and what they block. Drawn in the same style as the apparel grid
     public class BodyPartCoverage {
 
         private static readonly Color FadedIconColor = new Color(0.5f, 0.5f, 0.5f, 0.3f);
@@ -23,7 +23,8 @@ namespace Inventory {
         }
 
         public void Draw(Rect rect, BodyDef body) {
-            var parts = ProstheticUtility.TargetableParts(body);
+            var slots = component.Loadout.HypotheticalProsthetics(parent.shownState, body);
+            var parts = body.AllParts.Where(part => slots.PlacementsOn(part).Any() || slots.BlockedOn(part).Any()).ToList();
             if (parts.Count == 0) {
                 GUIUtility.WithModifiers(rect.TopPartPixels(UIC.SPACED_HEIGHT), Strings.NoProstheticParts, color: Color.gray);
                 return;
@@ -32,7 +33,6 @@ namespace Inventory {
             var viewRect = new Rect(rect.x, rect.y, rect.width - UIC.SCROLL_WIDTH, height);
             Widgets.BeginScrollView(rect, ref scroll, viewRect);
 
-            var slots = component.Loadout.HypotheticalProsthetics(parent.shownState, body);
             var shown = parts.ToHashSet();
 
             // nested parts are indented under the closest shown part above them, as in the health tab
