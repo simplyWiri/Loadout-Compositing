@@ -57,6 +57,7 @@
 	<CompositableLoadouts.CurrentlyOnPart>Currently: {0}</CompositableLoadouts.CurrentlyOnPart>
 	<CompositableLoadouts.ProstheticInstalled>{0} from {1}</CompositableLoadouts.ProstheticInstalled>
 	<CompositableLoadouts.ProstheticReserved>Reserved by {0} from {1}</CompositableLoadouts.ProstheticReserved>
+	<CompositableLoadouts.ProstheticCovers>Also replaces: {0}</CompositableLoadouts.ProstheticCovers>
 	<CompositableLoadouts.ProstheticReplaced>Replaced by {0} from {1}</CompositableLoadouts.ProstheticReplaced>
 	<CompositableLoadouts.LoadoutStatistics>Loadout Statistics (when fully satisfied)</CompositableLoadouts.LoadoutStatistics>
 	<CompositableLoadouts.Weight>Weight</CompositableLoadouts.Weight>
@@ -104,7 +105,8 @@ A semi-transparent apparel will be drawn, showing the highest priority apparel w
 	<CompositableLoadouts.BodyPartCoverageExplanation>Each box is a body part which a prosthetic or implant in these tags would go on (or replace), showing what this loadout would install there.
 
 Boxes are coloured to represent their current status:
-- Faded: The part is reserved (e.g. the other shoulder, when asking for one bionic arm), or replaced along with an added part above it (e.g. the foot under a bionic leg).
+- Faded: The part is reserved (e.g. the other shoulder, when asking for one bionic arm).
+Parts replaced along with an added part above them (e.g. the foot under a bionic leg) aren't listed, the added part's tooltip names them.
 - Red: Every prosthetic which would go on this part is blocked by one from a higher priority tag. Hovering over the part shows which.
 - Other: The corner colour is the tag the prosthetic comes from, as in the applied tags list.
 

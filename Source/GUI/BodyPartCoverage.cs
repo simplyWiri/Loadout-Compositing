@@ -24,7 +24,9 @@ namespace Inventory {
 
         public void Draw(Rect rect, BodyDef body) {
             var slots = component.Loadout.HypotheticalProsthetics(parent.shownState, body);
-            var parts = body.AllParts.Where(part => slots.PlacementsOn(part).Any() || slots.BlockedOn(part).Any()).ToList();
+            // parts which are only replaced along with an added part above them (e.g. the toes under a bionic leg) are
+            // folded into that part's tooltip, unless something is blocked on them
+            var parts = body.AllParts.Where(part => slots.PlacementsOn(part).Any(p => p.use != ProstheticSlots.PartUse.Replaced) || slots.BlockedOn(part).Any()).ToList();
             if (parts.Count == 0) {
                 GUIUtility.WithModifiers(rect.TopPartPixels(UIC.SPACED_HEIGHT), Strings.NoProstheticParts, color: Color.gray);
                 return;
@@ -91,6 +93,10 @@ namespace Inventory {
                     }
 
                     lines.Add(Strings.ProstheticPlacement(placement.use, placement.def.LabelCap, placement.tag.name));
+                    if (placement.use != ProstheticSlots.PartUse.Replaced) {
+                        var covered = Below(part).Where(p => slots.PlacementsOn(p).Any(o => o.use == ProstheticSlots.PartUse.Replaced && o.def == placement.def)).ToList();
+                        if (covered.Any()) lines.Add(Strings.ProstheticCovers(string.Join(", ", covered.Select(p => p.Label))));
+                    }
                 }
 
                 var installed = placements.Any(p => p.use == ProstheticSlots.PartUse.Installed);
@@ -123,6 +129,13 @@ namespace Inventory {
         private static void DrawName(Rect rect, string name, Color color) {
             rect.AdjHorzBy(GenUI.GapTiny);
             GUIUtility.WithModifiers(rect, name.Truncate(rect.width), color: color, anchor: TextAnchor.MiddleLeft);
+        }
+
+        private static IEnumerable<BodyPartRecord> Below(BodyPartRecord part) {
+            foreach (var child in part.parts) {
+                yield return child;
+                foreach (var descendant in Below(child)) yield return descendant;
+            }
         }
 
         // what the pawn has on `part` now, which a prosthetic would replace

@@ -61,6 +61,7 @@ namespace Inventory {
         public static string NoProstheticParts => $"{P}NoProstheticParts".TranslateSimple();
         public static string ProstheticsBlocked => $"{P}ProstheticsBlocked".TranslateSimple();
         public static string NaturalPart => $"{P}NaturalPart".TranslateSimple();
+        public static string ProstheticCovers(string parts) => $"{P}ProstheticCovers".Translate(parts);
         public static string CurrentlyOnPart(string labels) => $"{P}CurrentlyOnPart".Translate(labels);
         public static string ProstheticPlacement(ProstheticSlots.PartUse use, string def, string tag) => $"{P}Prosthetic{use}".Translate(def, tag);
         public static string LoadoutStatistics => $"{P}LoadoutStatistics".TranslateSimple();
