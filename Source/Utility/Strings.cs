@@ -55,6 +55,14 @@ namespace Inventory {
         public static string Coverage => $"{P}Coverage".TranslateSimple();
         public static string ApparelTab => $"{P}ApparelTab".TranslateSimple();
         public static string BodyGroup => $"{P}BodyGroup".TranslateSimple();
+        public static string BodyPartsTab => $"{P}BodyPartsTab".TranslateSimple();
+        public static string BodyPart => $"{P}BodyPart".TranslateSimple();
+        public static string ProstheticsHeader => $"{P}ProstheticsHeader".TranslateSimple();
+        public static string NoProstheticParts => $"{P}NoProstheticParts".TranslateSimple();
+        public static string ProstheticsBlocked => $"{P}ProstheticsBlocked".TranslateSimple();
+        public static string NaturalPart => $"{P}NaturalPart".TranslateSimple();
+        public static string CurrentlyOnPart(string labels) => $"{P}CurrentlyOnPart".Translate(labels);
+        public static string ProstheticPlacement(ProstheticSlots.PartUse use, string def, string tag) => $"{P}Prosthetic{use}".Translate(def, tag);
         public static string LoadoutStatistics => $"{P}LoadoutStatistics".TranslateSimple();
         public static string Weight => $"{P}Weight".TranslateSimple();
         public static string WeightOverCapacity => $"{P}WeightOverCapacity".TranslateSimple();
@@ -105,6 +113,7 @@ namespace Inventory {
         public static string PreviewQuality => $"{P}PreviewQuality".TranslateSimple();
 
         public static string CoverageExplanation => $"{P}CoverageExplanation".TranslateSimple();
+        public static string BodyPartCoverageExplanation => $"{P}BodyPartCoverageExplanation".TranslateSimple();
 
         public static string ModifyStates => $"{P}ModifyStates".TranslateSimple();
         public static string SelectState => $"{P}SelectState".TranslateSimple();

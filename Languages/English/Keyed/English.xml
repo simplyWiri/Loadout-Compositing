@@ -48,6 +48,16 @@
 	<CompositableLoadouts.Coverage>Coverage</CompositableLoadouts.Coverage>
 	<CompositableLoadouts.ApparelTab>Apparel</CompositableLoadouts.ApparelTab>
 	<CompositableLoadouts.BodyGroup>Body group</CompositableLoadouts.BodyGroup>
+	<CompositableLoadouts.BodyPartsTab>Body parts</CompositableLoadouts.BodyPartsTab>
+	<CompositableLoadouts.BodyPart>Body part</CompositableLoadouts.BodyPart>
+	<CompositableLoadouts.ProstheticsHeader>Prosthetics and implants</CompositableLoadouts.ProstheticsHeader>
+	<CompositableLoadouts.NoProstheticParts>No prosthetics can be installed on this body.</CompositableLoadouts.NoProstheticParts>
+	<CompositableLoadouts.ProstheticsBlocked>Blocked:</CompositableLoadouts.ProstheticsBlocked>
+	<CompositableLoadouts.NaturalPart>natural part</CompositableLoadouts.NaturalPart>
+	<CompositableLoadouts.CurrentlyOnPart>Currently: {0}</CompositableLoadouts.CurrentlyOnPart>
+	<CompositableLoadouts.ProstheticInstalled>{0} from {1}</CompositableLoadouts.ProstheticInstalled>
+	<CompositableLoadouts.ProstheticReserved>Reserved by {0} from {1}</CompositableLoadouts.ProstheticReserved>
+	<CompositableLoadouts.ProstheticReplaced>Replaced by {0} from {1}</CompositableLoadouts.ProstheticReplaced>
 	<CompositableLoadouts.LoadoutStatistics>Loadout Statistics (when fully satisfied)</CompositableLoadouts.LoadoutStatistics>
 	<CompositableLoadouts.Weight>Weight</CompositableLoadouts.Weight>
 	<CompositableLoadouts.WeightOverCapacity>The weight of gear carried by the pawn, vs the carry capacity of the pawn</CompositableLoadouts.WeightOverCapacity>
@@ -90,6 +100,16 @@ Boxes are coloured to represent their current status:
 - Red: There are multiple apparels which cover this slot. 
 A semi-transparent apparel will be drawn, showing the highest priority apparel which would cover this slot, and hovering over the slot will show which apparel is blocking it.
 - Other: The remaining colours used in the visualization represents the tag an apparel is coming from and can be used to cross-reference corresponding layers with the primary tag.</CompositableLoadouts.CoverageExplanation>
+
+	<CompositableLoadouts.BodyPartCoverageExplanation>Each box is a body part which a prosthetic or implant can be installed on, showing what this loadout would install there.
+
+Boxes are coloured to represent their current status:
+- Grey: No prosthetic in this loadout goes on this part.
+- Faded: The part is reserved (e.g. the other shoulder, when asking for one bionic arm), or replaced along with an added part above it (e.g. the foot under a bionic leg).
+- Red: Every prosthetic which would go on this part is blocked by one from a higher priority tag. Hovering over the part shows which.
+- Other: The corner colour is the tag the prosthetic comes from, as in the applied tags list.
+
+Hovering over a part also shows what the pawn has there now, when it differs.</CompositableLoadouts.BodyPartCoverageExplanation>
 
 	<CompositableLoadouts.ModifyStates>Edit Loadout States</CompositableLoadouts.ModifyStates>
 	<CompositableLoadouts.SelectState>Select State</CompositableLoadouts.SelectState>
