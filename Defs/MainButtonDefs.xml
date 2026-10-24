@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+  <!-- hidden unless enabled in the mod settings, see `MainButtonWorker_LoadoutOverview`; the hotkey works either way -->
+  <MainButtonDef>
+    <defName>CL_LoadoutOverview</defName>
+    <label>loadouts</label>
+    <description>An overview of every colonist's tags. Drag tags between colonists to move them, or onto colonists from the list of tags to add them.</description>
+    <tabWindowClass>Inventory.MainTabWindow_LoadoutOverview</tabWindowClass>
+    <workerClass>Inventory.MainButtonWorker_LoadoutOverview</workerClass>
+    <order>35</order>
+    <hotKey>CL_OpenOverview</hotKey>
+    <closesWorldView>true</closesWorldView>
+  </MainButtonDef>
+
+</Defs>

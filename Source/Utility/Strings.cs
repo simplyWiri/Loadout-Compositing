@@ -193,6 +193,29 @@ namespace Inventory {
         
         public static string HasRightClick => $"{P}HasRightClick".TranslateSimple();
 
+        public static string OverviewName => $"{P}Overview.Name".TranslateSimple();
+        public static string OverviewState => $"{P}Overview.State".TranslateSimple();
+        public static string OverviewTags => $"{P}Overview.Tags".TranslateSimple();
+        public static string OverviewNoPawns => $"{P}Overview.NoPawns".TranslateSimple();
+        public static string OverviewActiveWhen(string state) => $"{P}Overview.ActiveWhen".Translate(state);
+        public static string OverviewInactive => $"{P}Overview.Inactive".TranslateSimple();
+        public static string OverviewSelectDesc => $"{P}Overview.SelectDesc".TranslateSimple();
+        public static string OverviewChangeState => $"{P}Overview.ChangeState".TranslateSimple();
+        public static string OverviewEditTag(string tag) => $"{P}Overview.EditTag".Translate(tag);
+        public static string OverviewRemoveTag(Pawn pawn) => $"{P}Overview.RemoveTag".Translate(pawn.LabelShort);
+        public static string OverviewRemoveFromSelected(int count) => $"{P}Overview.RemoveFromSelected".Translate(count);
+        public static string OverviewAlreadyHas(Pawn pawn, string tag) => $"{P}Overview.AlreadyHas".Translate(pawn.LabelShort, tag);
+        public static string OverviewChipHint => $"{P}Overview.ChipHint".TranslateSimple();
+        public static string OverviewSelectedCount(int count) => $"{P}Overview.SelectedCount".Translate(count);
+        public static string OverviewRemoveTags => $"{P}Overview.RemoveTags".TranslateSimple();
+        public static string OverviewPasteToSelected(int count) => $"{P}Overview.PasteToSelected".Translate(count);
+        public static string OverviewSearchDesc => $"{P}Overview.SearchDesc".TranslateSimple();
+        public static string OverviewScope<T>(T scope) => $"{P}Overview.Scope{scope}".TranslateSimple();
+        public static string OverviewOwnState => $"{P}Overview.OwnState".TranslateSimple();
+        public static string OverviewSortDesc => $"{P}Overview.SortDesc".TranslateSimple();
+        public static string OverviewShowStats => $"{P}Overview.ShowStats".TranslateSimple();
+        public static string OverviewHideStats => $"{P}Overview.HideStats".TranslateSimple();
+
         public static string Options => $"{P}{S}Options".TranslateSimple();
         public static string Keybinds => $"{P}{S}Keybinds".TranslateSimple();
         public static string ItemFilterDefaults => $"{P}{S}ItemFilterDefaults".TranslateSimple();
@@ -212,6 +235,8 @@ namespace Inventory {
         public static string DisableCustomScrollDesc => $"{P}{S}DisableCustomScrollDesc".TranslateSimple();
         public static string NoPanicAlert => $"{P}{S}NoPanicAlert".TranslateSimple();
         public static string NoPanicAlertDesc => $"{P}{S}NoPanicAlertDesc".TranslateSimple();
+        public static string ShowOverviewButton => $"{P}{S}ShowOverviewButton".TranslateSimple();
+        public static string ShowOverviewButtonDesc => $"{P}{S}ShowOverviewButtonDesc".TranslateSimple();
         
     }
 

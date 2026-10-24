@@ -17,6 +17,13 @@
 
   <KeyBindingDef>
     <category>MainTabs</category>
+    <defName>CL_OpenOverview</defName>
+    <label>Open Loadout Overview</label>
+    <defaultKeyCodeA></defaultKeyCodeA>
+  </KeyBindingDef>
+
+  <KeyBindingDef>
+    <category>MainTabs</category>
     <defName>CL_PanicButton</defName>
     <label>Panic Button</label>
     <defaultKeyCodeA></defaultKeyCodeA>

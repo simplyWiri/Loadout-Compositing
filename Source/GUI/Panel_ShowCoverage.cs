@@ -47,6 +47,11 @@ namespace Inventory {
             return coloursByIdx[index % 10];
         }
 
+        // the same colour for a tag wherever it is shown, unlike its index in a pawn's tags
+        public static Color GetColorForTag(Tag tag) {
+            return GetColorForTagAtIndex(Mathf.Max(0, LoadoutManager.Tags.IndexOf(tag)));
+        }
+
         public Panel_ShowCoverage(Dialog_LoadoutEditor parent, bool shouldDraw = false) {
             this.parent = parent;
             this.pawn = parent.pawn;
