@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Linq;
 using JetBrains.Annotations;
 using RimWorld;
+using UnityEngine;
 using Verse;
 using Verse.AI;
 using Color = UnityEngine.Color;
@@ -62,13 +63,18 @@ namespace Inventory {
         }
         
         public void AddElement(LoadoutElement elem) {
+            InsertElement(elem, Loadout.elements.Count);
+        }
+
+        // adds `elem` at `index` in the pawn's tags, the earlier a tag is the higher its priority
+        public void InsertElement(LoadoutElement elem, int index) {
             if (!LoadoutManager.PawnsWithTags.TryGetValue(elem.Tag, out var pList)) {
                 pList = new List<Pawn>();
                 LoadoutManager.PawnsWithTags.Add(elem.Tag, pList);
             }
 
             pList.Add(Pawn);
-            Loadout.elements.Add(elem);
+            Loadout.elements.Insert(Mathf.Clamp(index, 0, Loadout.elements.Count), elem);
 
             Loadout.TagsChanged();
             WarnAboutProsthetics(elem.Tag);

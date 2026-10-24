@@ -233,4 +233,30 @@ Right click a button in the below column to mass assign all pawns on the same Ma
 	<CompositableLoadouts.Settings.AutoSurgerySuspended>Suspended</CompositableLoadouts.Settings.AutoSurgerySuspended>
 	<CompositableLoadouts.Settings.AutoSurgeryActive>Active</CompositableLoadouts.Settings.AutoSurgeryActive>
 	<CompositableLoadouts.Settings.NoPanicAlertDesc>Disable the check to raise an alert when there are pawns with their panic state active.</CompositableLoadouts.Settings.NoPanicAlertDesc>
+	<CompositableLoadouts.Settings.ShowOverviewButton>Show the loadouts tab</CompositableLoadouts.Settings.ShowOverviewButton>
+	<CompositableLoadouts.Settings.ShowOverviewButtonDesc>Adds a "loadouts" button to the bottom bar, opening an overview of every colonist's tags. The overview can also be opened with its keybind while the button is hidden.</CompositableLoadouts.Settings.ShowOverviewButtonDesc>
+	<CompositableLoadouts.Overview.Name>Name</CompositableLoadouts.Overview.Name>
+	<CompositableLoadouts.Overview.State>State</CompositableLoadouts.Overview.State>
+	<CompositableLoadouts.Overview.Tags>Tags</CompositableLoadouts.Overview.Tags>
+	<CompositableLoadouts.Overview.NoPawns>No colonists to show</CompositableLoadouts.Overview.NoPawns>
+	<CompositableLoadouts.Overview.ActiveWhen>State: {0}</CompositableLoadouts.Overview.ActiveWhen>
+	<CompositableLoadouts.Overview.Inactive>Inactive in the state shown</CompositableLoadouts.Overview.Inactive>
+	<CompositableLoadouts.Overview.SelectDesc>Click to select, ctrl-click to add to or remove from the selection, shift-click to select a range. Double-click to jump to the pawn.\n\nDropping a tag onto a selected pawn adds it to every selected pawn.</CompositableLoadouts.Overview.SelectDesc>
+	<CompositableLoadouts.Overview.ChangeState>Change state</CompositableLoadouts.Overview.ChangeState>
+	<CompositableLoadouts.Overview.EditTag>Edit {0}</CompositableLoadouts.Overview.EditTag>
+	<CompositableLoadouts.Overview.RemoveTag>Remove from {0}</CompositableLoadouts.Overview.RemoveTag>
+	<CompositableLoadouts.Overview.RemoveFromSelected>Remove from the {0} selected pawns with it</CompositableLoadouts.Overview.RemoveFromSelected>
+	<CompositableLoadouts.Overview.AlreadyHas>{0} already has {1}</CompositableLoadouts.Overview.AlreadyHas>
+	<CompositableLoadouts.Overview.ChipHint>Drag to reorder, or onto another pawn to move it there. Hold ctrl while dropping to copy it instead. Right-click for more options.</CompositableLoadouts.Overview.ChipHint>
+	<CompositableLoadouts.Overview.SelectedCount>{0} selected</CompositableLoadouts.Overview.SelectedCount>
+	<CompositableLoadouts.Overview.RemoveTags>Remove Tags</CompositableLoadouts.Overview.RemoveTags>
+	<CompositableLoadouts.Overview.PasteToSelected>Paste to {0}</CompositableLoadouts.Overview.PasteToSelected>
+	<CompositableLoadouts.Overview.SearchDesc>Show only the pawns whose name, or one of whose tags, contains this</CompositableLoadouts.Overview.SearchDesc>
+	<CompositableLoadouts.Overview.ScopeCurrentMap>This map</CompositableLoadouts.Overview.ScopeCurrentMap>
+	<CompositableLoadouts.Overview.ScopeAllMaps>All maps</CompositableLoadouts.Overview.ScopeAllMaps>
+	<CompositableLoadouts.Overview.ScopeEverywhere>All maps and caravans</CompositableLoadouts.Overview.ScopeEverywhere>
+	<CompositableLoadouts.Overview.OwnState>their current state</CompositableLoadouts.Overview.OwnState>
+	<CompositableLoadouts.Overview.SortDesc>Click to sort by this, again to reverse the order</CompositableLoadouts.Overview.SortDesc>
+	<CompositableLoadouts.Overview.ShowStats>Show the selected pawn's stats</CompositableLoadouts.Overview.ShowStats>
+	<CompositableLoadouts.Overview.HideStats>Hide the pawn stats</CompositableLoadouts.Overview.HideStats>
 </LanguageData>

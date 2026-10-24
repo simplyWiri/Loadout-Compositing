@@ -248,6 +248,21 @@ namespace Inventory {
             Text.Anchor = TextAnchor.UpperLeft;
         }
 
+        // shows the drag cursor, unless custom cursors are disabled in the settings
+        public static void SetDragCursor() {
+            if (ModBase.settings.disableCustomScroll) return;
+            Cursor.SetCursor(Textures.DragCursorTex, CustomCursor.CursorHotspot, CursorMode.ForceSoftware);
+        }
+
+        public static void ResetCursor() {
+            if (ModBase.settings.disableCustomScroll) return;
+            if (Prefs.data.customCursorEnabled) {
+                Cursor.SetCursor(CustomCursor.CursorTex, CustomCursor.CursorHotspot, CursorMode.Auto);
+            } else {
+                Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
+            }
+        }
+
         public static void CenterWithWidth(this ref Rect rect, float width) {
             var c = rect.center;
             rect.x = c.x - width / 2.0f;
